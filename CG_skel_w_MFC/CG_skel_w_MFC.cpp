@@ -39,6 +39,7 @@ bool lb_down,rb_down,mb_down;
 
 void display( void )
 {
+	renderer->clear_screen();
 	scene->draw();
 }
 
@@ -97,7 +98,7 @@ void fileMenu(int id)
 			if(dlg.DoModal()==IDOK)
 			{
 				std::string s((LPCTSTR)dlg.GetPathName());
-				scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
+				scene->load_obj_model((LPCTSTR)dlg.GetPathName());
 			}
 			break;
 	}
@@ -108,7 +109,7 @@ void mainMenu(int id)
 	switch (id)
 	{
 	case MAIN_DEMO:
-		scene->drawDemo();
+		scene->draw_demo();
 		break;
 	case MAIN_ABOUT:
 		AfxMessageBox(_T("Computer Graphics"));

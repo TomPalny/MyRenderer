@@ -33,21 +33,21 @@ float* Renderer::GetBuffer()
 	return m_outBuffer;
 }
 
-int Renderer::GetWidth()
+int Renderer::get_width()
 {
 	return m_width;
 }
 
-int Renderer::GetHeight()
+int Renderer::get_height()
 {
 	return m_height;
 }
 
-void Renderer::draw_point(const vec3& vec3)
+void Renderer::draw_point(const vec2 point)
 {
-	// TODO: fix this
-	int x = vec3.x * 100 + m_width / 2;
-	int y = vec3.y * 100 + m_height / 2;
+	int x = point.x;
+	int y = point.y;
+
 	if (x < 0 || x >= m_width || y < 0 || y >= m_height)
 	{
 		return;
@@ -55,6 +55,58 @@ void Renderer::draw_point(const vec3& vec3)
 	m_outBuffer[INDEX(m_width, x, y, 0)] = 1.0f;
 	m_outBuffer[INDEX(m_width, x, y, 1)] = 1.0f;
 	m_outBuffer[INDEX(m_width, x, y, 2)] = 1.0f;
+}
+
+void Renderer::draw_line(vec2 point1, vec2 point2)
+{
+	bool flipped = false;
+	// we need a line equation - so swap x and y if necessary
+	if (fabs(point2.x - point1.x) < 1)
+	{
+		// if this is a point and not a line
+		if (fabs(point2.y - point1.y) < 1)
+		{
+			//draw_point(point1);
+			return;
+		}
+		point1 = vec2(point1.y, point1.x);
+		point2 = vec2(point2.y, point2.x);
+		flipped = true;
+	}
+
+	// we draw from left to right, so start from the leftmost point
+	if( point1.x >= point2.x)
+	{
+		swap(point1, point2);
+	}
+
+	const float m = (point2.y - point1.y) / (point2.x - point1.x);
+	const float b = point1.y - m*point1.x;
+	for (int x = point1.x; x <= point2.x; x++)
+	{
+		const int y = m*x + b;
+		if (flipped)
+		{
+			draw_point(vec2(y, x));
+		}
+		else
+		{
+			draw_point(vec2(x, y));
+		}
+	}
+}
+
+void Renderer::clear_screen()
+{
+	for (int y = 0; y< m_height; y++)
+	{
+		for(int x =0 ; x<m_width ; x++)
+		{
+			m_outBuffer[INDEX(m_width, x, y, 0)] = 0;
+			m_outBuffer[INDEX(m_width, x, y, 1)] = 0;
+			m_outBuffer[INDEX(m_width, x, y, 2)] = 0;
+		}
+	}
 }
 
 void Renderer::SetDemoBuffer()

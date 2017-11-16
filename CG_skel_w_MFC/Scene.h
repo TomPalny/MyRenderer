@@ -47,9 +47,9 @@ class Scene {
 public:
 	Scene() {};
 	Scene(Renderer *renderer) : _renderer(renderer) {};
-	void loadOBJModel(string fileName);
+	void load_obj_model(string fileName);
 	void draw();
-	void drawDemo();
+	void draw_demo();
 	
 	int activeModel;
 	int activeLight;

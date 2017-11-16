@@ -54,6 +54,13 @@ vec3 vec3fFromStream(std::istream & aStream)
 	return vec3(x, y, z);
 }
 
+vec4 vec4fFromVec3Stream(std::istream & aStream)
+{
+	float x, y, z;
+	aStream >> x >> std::ws >> y >> std::ws >> z;
+	return vec4(x, y, z, 1);
+}
+
 vec2 vec2fFromStream(std::istream & aStream)
 {
 	float x, y;
@@ -70,11 +77,31 @@ MeshModel::~MeshModel(void)
 {
 }
 
+void MeshModel::translate(float x, float y, float z)
+{
+	// default translation
+	mat4 translation;
+	translation[0][3] = x; // x
+	translation[1][3] = y; // y
+	translation[2][3] = y; // z
+	_model_to_world *= translation;
+}
+
+void MeshModel::scale(float x, float y, float z)
+{
+	// default translation
+	mat4 scale;
+	scale[0][0] = x; // x
+	scale[1][1] = y; // y
+	scale[2][2] = y; // z
+	_model_to_world *= scale;
+}
+
 void MeshModel::load_file(string fileName)
 {
 	ifstream ifile(fileName.c_str());
-	vector<FaceIdcs> faces;
-	vector<vec3> vertices;
+	vector<FaceIdcs> face_ids;
+	vector<vec4> vertices;
 	// while not end of file
 	while (!ifile.eof())
 	{
@@ -90,9 +117,9 @@ void MeshModel::load_file(string fileName)
 
 		// based on the type parse data
 		if (lineType == "v") 
-			vertices.push_back(vec3fFromStream(issLine));
+			vertices.push_back(vec4fFromVec3Stream(issLine));
 		else if (lineType == "f") 
-			faces.push_back(issLine);
+			face_ids.push_back(issLine);
 		else if (lineType == "#" || lineType == "" || lineType == "vn")
 		{
 			// comment / empty line / vn
@@ -109,15 +136,15 @@ void MeshModel::load_file(string fileName)
 	//Then vertex_positions should contain:
 	//vertex_positions={v1,v2,v3,v1,v3,v4}
 
-	_vertex_positions.clear();
+	_faces.clear();
 	// iterate through all stored faces and create triangles
-	int k=0;
-	for (auto it = faces.begin(); it != faces.end(); ++it)
+	for (const auto it : face_ids)
 	{
-		for (int i = 0; i < 3; i++)
-		{
-			_vertex_positions.push_back(vertices[it->v[i] - 1]);
-		}
+		Face face;
+		face.point1 = vertices[it.v[0] - 1];
+		face.point2 = vertices[it.v[1] - 1];
+		face.point3 = vertices[it.v[2] - 1];
+		_faces.push_back(face);
 	}
 }
 
@@ -126,10 +153,26 @@ void MeshModel::set_renderer(Renderer * renderer)
 	_renderer = renderer;
 }
 
+vec2 MeshModel::transform_point(const vec4 point) const
+{
+	const vec4 translated_point = _model_to_world * point;
+	return vec2(translated_point.x / translated_point.w, translated_point.y / translated_point.w);
+}
+
 void MeshModel::draw()
 {
-	for(auto point : _vertex_positions)
+	for(auto face : _faces)
 	{
-		_renderer->draw_point(point);
+		auto point1 = transform_point(face.point1);
+		auto point2 = transform_point(face.point2);
+		auto point3 = transform_point(face.point3);
+
+		//_renderer->draw_point(point1);
+		//_renderer->draw_point(point2);
+		//_renderer->draw_point(point3);
+		
+		_renderer->draw_line(point1, point2);
+		_renderer->draw_line(point2, point3);
+		_renderer->draw_line(point3, point1);
 	}
 }

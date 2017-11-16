@@ -4,9 +4,11 @@
 #include <string>
 
 using namespace std;
-void Scene::loadOBJModel(string fileName)
+void Scene::load_obj_model(string filename)
 {
-	MeshModel *model = new MeshModel(fileName);
+	MeshModel *model = new MeshModel(filename);
+	model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0);
+	model->scale(100, 100, 100);
 	_models.push_back(model);
 	model->set_renderer(_renderer);
 	model->draw();
@@ -24,7 +26,7 @@ void Scene::draw()
 	_renderer->SwapBuffers();
 }
 
-void Scene::drawDemo()
+void Scene::draw_demo()
 {
 	_renderer->SetDemoBuffer();
 	_renderer->SwapBuffers();

@@ -38,7 +38,9 @@ public:
 	void SetDemoBuffer();
 	void ChangeWindowSize(int width, int height);
 	float* GetBuffer();
-	int GetWidth();
-	int GetHeight();
-	void draw_point(const vec3& vec3);
+	int get_width();
+	int get_height();
+	void draw_point(vec2 point);
+	void draw_line(vec2 point1, vec2 point2);
+	void clear_screen();
 };
