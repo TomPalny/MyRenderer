@@ -4,16 +4,9 @@
 #include <vector>
 #include <string>
 #include "Renderer.h"
+#include "Model.h"
+
 using namespace std;
-
-class Model {
-protected:
-	virtual ~Model() {}
-
-public:
-	void virtual draw()=0;
-};
-
 
 class Light {
 
@@ -38,10 +31,10 @@ public:
 };
 
 class Scene {
-
+	Model* _active_model;
 	vector<Model*> _models;
-	vector<Light*> lights;
-	vector<Camera*> cameras;
+	vector<Light*> _lights;
+	vector<Camera*> _cameras;
 	Renderer *_renderer;
 
 public:
@@ -50,7 +43,9 @@ public:
 	void load_obj_model(string fileName);
 	void draw();
 	void draw_demo();
-	
+	void keyboard(unsigned char key, int x, int y);
+	void keyboard_special(int key, int x, int y);
+
 	int activeModel;
 	int activeLight;
 	int activeCamera;

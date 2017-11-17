@@ -51,11 +51,12 @@ void reshape( int width, int height )
 
 void keyboard( unsigned char key, int x, int y )
 {
-	switch ( key ) {
-	case 033:
-		exit( EXIT_SUCCESS );
-		break;
-	}
+	scene->keyboard(key, x, y);
+}
+
+void keyboard_special(int key, int x, int y)
+{
+	scene->keyboard_special(key, x, y);
 }
 
 void mouse(int button, int state, int x, int y)
@@ -162,6 +163,7 @@ int my_main( int argc, char **argv )
 
 	glutDisplayFunc( display );
 	glutKeyboardFunc( keyboard );
+	glutSpecialFunc(keyboard_special);
 	glutMouseFunc( mouse );
 	glutMotionFunc ( motion );
 	glutReshapeFunc( reshape );
