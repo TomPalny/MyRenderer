@@ -46,7 +46,7 @@ void display( void )
 void reshape( int width, int height )
 {
 	renderer->ChangeWindowSize(width, height);
-	display(); // TODO: better way
+	glutPostRedisplay();
 }
 
 void keyboard( unsigned char key, int x, int y )
