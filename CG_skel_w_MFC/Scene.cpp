@@ -68,6 +68,7 @@ void Scene::keyboard_special(int key, int x, int y)
 	}
 
 	static const float MOVE_DISTANCE = 0.02f;
+	//DialogBox(NULL, MAKEINTRESOURCE(IDD_DIALOG1), NULL, DialogBoxCallback);
 	switch (key) {
 	case GLUT_KEY_RIGHT:
 		_active_model->translate(MOVE_DISTANCE, 0, 0);
