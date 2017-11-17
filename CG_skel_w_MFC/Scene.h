@@ -38,11 +38,12 @@ class Scene {
 	Renderer *_renderer;
 
 public:
-	Scene() {};
+	Scene();
 	Scene(Renderer *renderer) : _renderer(renderer) {};
 	void load_obj_model(string fileName);
 	void draw();
 	void draw_demo();
+	void redraw_necessary();
 	void keyboard(unsigned char key, int x, int y);
 	void keyboard_special(int key, int x, int y);
 

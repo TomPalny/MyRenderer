@@ -39,14 +39,13 @@ bool lb_down,rb_down,mb_down;
 
 void display( void )
 {
-	renderer->clear_screen();
 	scene->draw();
 }
 
 void reshape( int width, int height )
 {
 	renderer->ChangeWindowSize(width, height);
-	glutPostRedisplay();
+	scene->redraw_necessary();
 }
 
 void keyboard( unsigned char key, int x, int y )
