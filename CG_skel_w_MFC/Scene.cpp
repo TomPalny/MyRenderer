@@ -98,20 +98,24 @@ void Scene::keyboard_special(int key, int x, int y)
 		return;
 	}
 
-	static const float MOVE_DISTANCE = 0.02f;
+	float move_distance = 0.04f;
+	if (glutGetModifiers() & GLUT_ACTIVE_SHIFT)
+	{
+		move_distance *= 4;
+	}
 	//DialogBox(NULL, MAKEINTRESOURCE(IDD_DIALOG1), NULL, DialogBoxCallback);
 	switch (key) {
 	case GLUT_KEY_RIGHT:
-		_active_model->translate(MOVE_DISTANCE, 0, 0);
+		_active_model->translate(move_distance, 0, 0);
 		break;
 	case GLUT_KEY_LEFT:
-		_active_model->translate(-MOVE_DISTANCE, 0, 0);
+		_active_model->translate(-move_distance, 0, 0);
 		break;
 	case GLUT_KEY_UP:
-		_active_model->translate(0, MOVE_DISTANCE, 0);
+		_active_model->translate(0, move_distance, 0);
 		break;
 	case GLUT_KEY_DOWN:
-		_active_model->translate(0, -MOVE_DISTANCE, 0);
+		_active_model->translate(0, -move_distance, 0);
 		break;
 	}
 
