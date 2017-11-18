@@ -81,3 +81,15 @@ void Model::draw_vertex_normals()
 		draw_single_normal(face.point3, face.normal3);
 	}
 }
+
+void Model::draw_face_normals()
+{
+	for (const auto face : _faces)
+	{
+		auto vector1 = face.point2 - face.point1;
+		auto vector2 = face.point3 - face.point2;
+		auto normal = normalize(cross(vector1, vector2));
+		auto center_of_triangle = (face.point1 + face.point2 + face.point3) / 3;
+		draw_single_normal(center_of_triangle, normal);
+	}
+}

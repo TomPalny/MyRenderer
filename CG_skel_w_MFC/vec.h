@@ -265,9 +265,9 @@ vec3 normalize( const vec3& v ) {
 inline
 vec3 cross(const vec3& a, const vec3& b )
 {
-    return vec3( 0,
-		 0,  /*BUG*/
-		 0 );
+	return vec3(a.y * b.z - a.z * b.y,
+		a.z * b.x - a.x * b.z,
+		a.x * b.y - a.y * b.x);
 }
 
 
@@ -382,6 +382,12 @@ struct vec4 {
 
     operator GLfloat* ()
 	{ return static_cast<GLfloat*>( &x ); }
+
+	// drop the w coordinate
+	vec3 to_vec3() const
+	{
+		return vec3(x, y, z);
+    }
 };
 
 //----------------------------------------------------------------------------

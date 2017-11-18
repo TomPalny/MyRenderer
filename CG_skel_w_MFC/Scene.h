@@ -30,13 +30,21 @@ public:
 
 };
 
+enum NormalType
+{
+	NO_NORMALS,
+	VERTEX_NORMALS,
+	FACE_NORMALS,
+	NUMBER_OF_NORMAL_TYPES
+};
+
 class Scene {
 	Model* _active_model;
 	vector<Model*> _models;
 	vector<Light*> _lights;
 	vector<Camera*> _cameras;
 	Renderer *_renderer;
-	bool _show_vertex_normals;
+	NormalType _normal_type;
 
 public:
 	explicit Scene(Renderer* renderer);;

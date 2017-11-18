@@ -7,7 +7,7 @@
 
 using namespace std;
 
-Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer), _show_vertex_normals(false)
+Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer), _normal_type(NO_NORMALS)
 {
 }
 
@@ -49,9 +49,13 @@ void Scene::draw()
 	for(auto model : _models )
 	{
 		model->draw();
-		if (_show_vertex_normals)
+		if (_normal_type == VERTEX_NORMALS)
 		{
 			model->draw_vertex_normals();
+		}
+		else if (_normal_type == FACE_NORMALS)
+		{
+			model->draw_face_normals();
 		}
 	}
 	_renderer->SwapBuffers();
@@ -74,7 +78,7 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		add_pyramid_model();
 		break;
 	case 'v':
-		_show_vertex_normals = !_show_vertex_normals;
+		_normal_type = (NormalType) ((_normal_type + 1) % NUMBER_OF_NORMAL_TYPES);
 		redraw_necessary();
 		break;
 	case '\t':

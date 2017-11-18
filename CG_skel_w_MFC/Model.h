@@ -22,4 +22,5 @@ public:
 	void scale(float x, float y, float z);
 	void set_renderer(Renderer* renderer);
 	void draw_vertex_normals();
+	void draw_face_normals();
 };
