@@ -82,6 +82,7 @@ void MeshModel::load_file(string fileName)
 	ifstream ifile(fileName.c_str());
 	vector<FaceIdcs> face_ids;
 	vector<vec4> vertices;
+	vector<vec4> normal_vertices;
 	// while not end of file
 	while (!ifile.eof())
 	{
@@ -98,9 +99,11 @@ void MeshModel::load_file(string fileName)
 		// based on the type parse data
 		if (lineType == "v") 
 			vertices.push_back(vec4fFromVec3Stream(issLine));
+		else if (lineType == "vn")
+			normal_vertices.push_back(vec4fFromVec3Stream(issLine));
 		else if (lineType == "f") 
 			face_ids.push_back(issLine);
-		else if (lineType == "#" || lineType == "" || lineType == "vn")
+		else if (lineType == "#" || lineType == "")
 		{
 			// comment / empty line / vn
 		}
@@ -118,12 +121,22 @@ void MeshModel::load_file(string fileName)
 
 	_faces.clear();
 	// iterate through all stored faces and create triangles
-	for (const auto it : face_ids)
+	for (const auto face : face_ids)
 	{
-		Face face;
-		face.point1 = vertices[it.v[0] - 1];
-		face.point2 = vertices[it.v[1] - 1];
-		face.point3 = vertices[it.v[2] - 1];
-		_faces.push_back(face);
+		auto point1 = vertices[face.v[0] - 1];
+		auto point2 = vertices[face.v[1] - 1];
+		auto point3 = vertices[face.v[2] - 1];
+		// if some of the vertices don't have a normal than disable normals for this face
+		if (face.vn[0] == 0 || face.vn[1] == 0 || face.vn[2] == 0)
+		{
+			_faces.push_back(Face(point1, point2, point3));
+		}
+		else
+		{
+			auto normal1 = normal_vertices[face.vn[0] - 1];
+			auto normal2 = normal_vertices[face.vn[1] - 1];
+			auto normal3 = normal_vertices[face.vn[2] - 1];
+			_faces.push_back(Face(point1, point2, point3, normal1, normal2, normal3));
+		}
 	}
 }

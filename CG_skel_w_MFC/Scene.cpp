@@ -7,23 +7,23 @@
 
 using namespace std;
 
-Scene::Scene() : _active_model(NULL), _renderer(nullptr)
+Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer), _show_vertex_normals(false)
 {
 }
 
 void Scene::load_obj_model(const string filename)
 {
-	auto model = new MeshModel(filename);
-	_load_model_at_center(model);
+	const auto model = new MeshModel(filename);
+	load_model_at_center(model);
 }
 
 void Scene::add_pyramid_model()
 {
-	auto model = PrimitiveModel::create_pyramid(0.0f, 0.0f, 0.0f);
-	_load_model_at_center(model);
+	const auto model = PrimitiveModel::create_pyramid(0.0f, 0.0f, 0.0f);
+	load_model_at_center(model);
 }
 
-void Scene::_load_model_at_center(Model* model)
+void Scene::load_model_at_center(Model* model)
 {
 	model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0);
 	model->scale(100, 100, 100);
@@ -31,6 +31,7 @@ void Scene::_load_model_at_center(Model* model)
 	_active_model = model;
 	_models.push_back(_active_model);
 	_active_model->set_renderer(_renderer);
+	/* we don't use redraw_necessary() because that will force a redraw of ALL models */
 	_active_model->draw();
 	_renderer->SwapBuffers();
 }
@@ -48,6 +49,10 @@ void Scene::draw()
 	for(auto model : _models )
 	{
 		model->draw();
+		if (_show_vertex_normals)
+		{
+			model->draw_vertex_normals();
+		}
 	}
 	_renderer->SwapBuffers();
 }
@@ -68,12 +73,17 @@ void Scene::keyboard(unsigned char key, int x, int y)
 	case 'p':
 		add_pyramid_model();
 		break;
+	case 'v':
+		_show_vertex_normals = !_show_vertex_normals;
+		redraw_necessary();
+		break;
 	case '\t':
 		// switch between models
 		const auto it = std::find(_models.begin(), _models.end(), _active_model);
 		const auto index = std::distance(_models.begin(), it);
 		const auto new_index = (index + 1) % _models.size();
 		_active_model = _models[new_index];
+		break;
 	}
 }
 
