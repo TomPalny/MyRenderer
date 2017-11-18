@@ -98,9 +98,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CG_skel_w_MFC.cpp" />
+    <ClCompile Include="Face.cpp" />
     <ClCompile Include="InitShader.cpp" />
     <ClCompile Include="MeshModel.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="PrimitiveModel.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -110,10 +112,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CG_skel_w_MFC.h" />
+    <ClInclude Include="Face.h" />
     <ClInclude Include="InitShader.h" />
     <ClInclude Include="mat.h" />
     <ClInclude Include="MeshModel.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="PrimitiveModel.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="resource1.h" />

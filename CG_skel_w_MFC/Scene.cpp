@@ -3,18 +3,32 @@
 #include "MeshModel.h"
 #include <string>
 #include "GL/freeglut.h"
+#include "PrimitiveModel.h"
 
 using namespace std;
 
-Scene::Scene() : _active_model(NULL)
+Scene::Scene() : _active_model(NULL), _renderer(nullptr)
 {
 }
 
-void Scene::load_obj_model(string filename)
+void Scene::load_obj_model(const string filename)
 {
-	_active_model = new MeshModel(filename);
-	_active_model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0);
-	_active_model->scale(100, 100, 100);
+	auto model = new MeshModel(filename);
+	_load_model_at_center(model);
+}
+
+void Scene::add_pyramid_model()
+{
+	auto model = PrimitiveModel::create_pyramid(0.0f, 0.0f, 0.0f);
+	_load_model_at_center(model);
+}
+
+void Scene::_load_model_at_center(Model* model)
+{
+	model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0);
+	model->scale(100, 100, 100);
+
+	_active_model = model;
 	_models.push_back(_active_model);
 	_active_model->set_renderer(_renderer);
 	_active_model->draw();
@@ -51,11 +65,14 @@ void Scene::keyboard(unsigned char key, int x, int y)
 	case 27: // escape
 		exit(EXIT_SUCCESS);
 		break;
+	case 'p':
+		add_pyramid_model();
+		break;
 	case '\t':
 		// switch between models
-		auto it = std::find(_models.begin(), _models.end(), _active_model);
-		auto index = std::distance(_models.begin(), it);
-		auto new_index = (index + 1) % _models.size();
+		const auto it = std::find(_models.begin(), _models.end(), _active_model);
+		const auto index = std::distance(_models.begin(), it);
+		const auto new_index = (index + 1) % _models.size();
 		_active_model = _models[new_index];
 	}
 }

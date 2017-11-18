@@ -8,6 +8,7 @@
 
 using namespace std;
 
+// TODO: this should really be renamed to FileModel
 class MeshModel : public Model
 {
 protected :

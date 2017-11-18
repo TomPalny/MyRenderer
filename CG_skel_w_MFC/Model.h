@@ -1,10 +1,6 @@
 #pragma once
 #include "Renderer.h"
-
-struct Face
-{
-	vec4 point1, point2, point3;
-};
+#include "Face.h"
 
 class Model {
 protected:

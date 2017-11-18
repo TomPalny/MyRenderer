@@ -41,6 +41,8 @@ public:
 	Scene();
 	Scene(Renderer *renderer) : _renderer(renderer) {};
 	void load_obj_model(string fileName);
+	void add_pyramid_model();
+	void _load_model_at_center(Model* model);
 	void draw();
 	void draw_demo();
 	void redraw_necessary();
