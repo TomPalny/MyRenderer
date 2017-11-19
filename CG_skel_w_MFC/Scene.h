@@ -36,6 +36,7 @@ class Scene {
 	vector<Light*> _lights;
 	vector<Camera*> _cameras;
 	Renderer *_renderer;
+	
 
 public:
 	Scene();
@@ -44,6 +45,7 @@ public:
 	void load_obj_model(string fileName, string objName);
 	void draw();
 	void draw_demo() const;
+	void switch_active_model(int id);
 	static void redraw_necessary();
 	void keyboard(unsigned char key, int x, int y);
 	void keyboard_special(int key, int x, int y);
@@ -51,4 +53,5 @@ public:
 	int activeModel;
 	int activeLight;
 	int activeCamera;
+	bool scale_flag = false;
 };

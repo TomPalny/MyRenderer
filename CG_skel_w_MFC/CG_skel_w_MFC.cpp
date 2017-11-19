@@ -27,12 +27,14 @@
 #define FILE_OPEN 1
 #define MAIN_DEMO 2
 #define MAIN_ABOUT 3
+#define SCALE_MODEL 4
 
 Scene *scene;
 Renderer *renderer;
 
-int last_x,last_y;
+int last_x=0,last_y=0;
 bool lb_down,rb_down,mb_down;
+
 
 
 //----------------------------------------------------------------------------
@@ -76,18 +78,18 @@ void mouse(int button, int state, int x, int y)
 			mb_down = (state==GLUT_UP)?0:1;	
 			break;
 	}
-
-	// add your code
+	
 }
 
 void motion(int x, int y)
 {
-	// calc difference in mouse movement
-	int dx=x-last_x;
-	int dy=y-last_y;
-	// update last x,y
-	last_x=x;
-	last_y=y;
+	int dx = x - last_x;
+	int dy = y - last_y;
+
+	
+	last_x = x;
+	last_y = y;
+
 }
 
 
@@ -107,6 +109,7 @@ void file_menu(int id)
 	}
 }
 
+
 void main_menu(int id)
 {
 	switch (id)
@@ -117,13 +120,17 @@ void main_menu(int id)
 	case MAIN_ABOUT:
 		AfxMessageBox(_T("Computer Graphics"));
 		break;
+	case SCALE_MODEL:
+		scene->scale_flag = !scene->scale_flag;
 	}
 }
 
-void objects_menu(int id)
+void objects_menu(const int id)
 {
-	
+	scene->switch_active_model(id);
 }
+
+
 
 void initMenu()
 {
@@ -134,6 +141,7 @@ void initMenu()
 	glutCreateMenu(main_menu);
 	glutAddSubMenu("File",menuFile);
 	glutAddSubMenu("Choose Objects Shown", menuObjects);
+	glutAddMenuEntry("Scale", SCALE_MODEL);
 	glutAddMenuEntry("Demo",MAIN_DEMO);
 	glutAddMenuEntry("About",MAIN_ABOUT);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);

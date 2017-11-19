@@ -14,9 +14,11 @@ protected:
 	Renderer* _renderer;
 	mat4 _model_to_world;
 	vector<Face> _faces;
+	vec3 _current_scale;
 	char* _name;
 
 public:
+	Model() : _current_scale(100,100,100){}
 	void draw();
 	void translate(float x, float y, float z);
 	void scale(float x, float y, float z);

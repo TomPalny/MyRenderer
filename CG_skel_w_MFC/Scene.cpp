@@ -12,9 +12,10 @@ Scene::Scene() : _active_model(NULL)
 
 void Scene::add_objects_to_menu()
 {
+	int i = 0;
 	for (auto model : _models)
 	{
-		glutAddMenuEntry(model->get_name(),0);
+		glutAddMenuEntry(model->get_name(),i++);
 	}
 }
 
@@ -23,7 +24,7 @@ void Scene::load_obj_model(const string filename, const string objName)
 	_active_model = new MeshModel(filename);
 	_active_model->set_name(objName);
 	_active_model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0);
-	_active_model->scale(100, 100, 100);
+	_active_model->scale(0,0,0);
 	_models.push_back(_active_model);
 	_active_model->set_renderer(_renderer);
 	_active_model->draw();
@@ -54,18 +55,18 @@ void Scene::draw_demo() const
 	_renderer->SwapBuffers();
 }
 
+void Scene::switch_active_model(int id)
+{
+	_active_model = _models[id];
+}
+
+
 void Scene::keyboard(unsigned char key, int x, int y)
 {
 	switch (key) {
 	case 27: // escape
 		exit(EXIT_SUCCESS);
 		break;
-	case '\t':
-		// switch between models
-		auto it = std::find(_models.begin(), _models.end(), _active_model);
-		auto index = std::distance(_models.begin(), it);
-		auto new_index = (index + 1) % _models.size();
-		_active_model = _models[new_index];
 	}
 }
 
@@ -77,19 +78,26 @@ void Scene::keyboard_special(int key, int x, int y)
 	}
 
 	static const float MOVE_DISTANCE = 0.02f;
+	static const float LARGER_SCALE_FACTOR = 1.4;
+	static const float SMALLER_SCALE_FACTOR = 0.6;
+	static const float NO_SCALE = 1;
 	//DialogBox(NULL, MAKEINTRESOURCE(IDD_DIALOG1), NULL, DialogBoxCallback);
 	switch (key) {
 	case GLUT_KEY_RIGHT:
-		_active_model->translate(MOVE_DISTANCE, 0, 0);
+		if (scale_flag) _active_model->scale(LARGER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
+		else _active_model->translate(MOVE_DISTANCE, 0, 0);
 		break;
 	case GLUT_KEY_LEFT:
-		_active_model->translate(-MOVE_DISTANCE, 0, 0);
+		if (scale_flag)  _active_model->scale(SMALLER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
+		else _active_model->translate(-MOVE_DISTANCE, 0, 0);
 		break;
 	case GLUT_KEY_UP:
-		_active_model->translate(0, MOVE_DISTANCE, 0);
+		if (scale_flag) _active_model->scale(NO_SCALE, LARGER_SCALE_FACTOR, NO_SCALE);
+		else _active_model->translate(0, MOVE_DISTANCE, 0);
 		break;
 	case GLUT_KEY_DOWN:
-		_active_model->translate(0, -MOVE_DISTANCE, 0);
+		if (scale_flag) _active_model->scale(NO_SCALE, SMALLER_SCALE_FACTOR, NO_SCALE);
+		else _active_model->translate(0, -MOVE_DISTANCE, 0);
 		break;
 	}
 
