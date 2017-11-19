@@ -34,6 +34,19 @@ vec2 Model::transform_point(const vec4 point) const
 	return vec2(translated_point.x / translated_point.w, translated_point.y / translated_point.w);
 }
 
+const char* Model::get_name()
+{
+	return _name;
+}
+
+void Model::set_name(string name)
+{
+	char *cstr = new char[name.length() + 1];
+	strcpy(cstr, name.c_str());
+	_name = cstr;
+}
+
+
 void Model::draw()
 {
 	for (auto face : _faces)

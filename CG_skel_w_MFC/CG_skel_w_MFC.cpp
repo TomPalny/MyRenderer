@@ -25,14 +25,15 @@
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
 #define FILE_OPEN 1
-#define MAIN_DEMO 1
-#define MAIN_ABOUT 2
+#define MAIN_DEMO 2
+#define MAIN_ABOUT 3
 
 Scene *scene;
 Renderer *renderer;
 
 int last_x,last_y;
 bool lb_down,rb_down,mb_down;
+
 
 //----------------------------------------------------------------------------
 // Callbacks
@@ -89,7 +90,8 @@ void motion(int x, int y)
 	last_y=y;
 }
 
-void fileMenu(int id)
+
+void file_menu(int id)
 {
 	switch (id)
 	{
@@ -97,14 +99,15 @@ void fileMenu(int id)
 			CFileDialog dlg(TRUE,_T(".obj"),NULL,NULL,_T("*.obj|*.*"));
 			if(dlg.DoModal()==IDOK)
 			{
-				std::string s((LPCTSTR)dlg.GetPathName());
-				scene->load_obj_model((LPCTSTR)dlg.GetPathName());
+				std::string s(static_cast<LPCTSTR>(dlg.GetPathName()));
+				scene->load_obj_model(static_cast<LPCTSTR>(dlg.GetPathName()), static_cast<LPCTSTR>(dlg.GetFileTitle()));
+				initMenu();
 			}
 			break;
 	}
 }
 
-void mainMenu(int id)
+void main_menu(int id)
 {
 	switch (id)
 	{
@@ -117,13 +120,20 @@ void mainMenu(int id)
 	}
 }
 
+void objects_menu(int id)
+{
+	
+}
+
 void initMenu()
 {
-
-	int menuFile = glutCreateMenu(fileMenu);
-	glutAddMenuEntry("Open..",FILE_OPEN);
-	glutCreateMenu(mainMenu);
+	const int menuFile = glutCreateMenu(file_menu);
+	glutAddMenuEntry("Choose Object File:",FILE_OPEN);
+	const int menuObjects = glutCreateMenu(objects_menu);
+	scene->add_objects_to_menu();
+	glutCreateMenu(main_menu);
 	glutAddSubMenu("File",menuFile);
+	glutAddSubMenu("Choose Objects Shown", menuObjects);
 	glutAddMenuEntry("Demo",MAIN_DEMO);
 	glutAddMenuEntry("About",MAIN_ABOUT);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);

@@ -39,11 +39,12 @@ class Scene {
 
 public:
 	Scene();
-	Scene(Renderer *renderer) : _renderer(renderer) {};
-	void load_obj_model(string fileName);
+	Scene(Renderer *renderer) : _renderer(renderer) {}
+	void add_objects_to_menu();
+	void load_obj_model(string fileName, string objName);
 	void draw();
-	void draw_demo();
-	void redraw_necessary();
+	void draw_demo() const;
+	static void redraw_necessary();
 	void keyboard(unsigned char key, int x, int y);
 	void keyboard_special(int key, int x, int y);
 
