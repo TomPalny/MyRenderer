@@ -34,6 +34,7 @@ Renderer *renderer;
 
 int last_x=0,last_y=0;
 bool lb_down,rb_down,mb_down;
+char* scale_translate = "Scale Object";
 
 
 
@@ -85,7 +86,6 @@ void motion(int x, int y)
 {
 	int dx = x - last_x;
 	int dy = y - last_y;
-
 	
 	last_x = x;
 	last_y = y;
@@ -122,6 +122,10 @@ void main_menu(int id)
 		break;
 	case SCALE_MODEL:
 		scene->scale_flag = !scene->scale_flag;
+		if(scene->scale_flag) scale_translate = "Translate Object";
+		else scale_translate = "Scale Object";
+		initMenu();
+		break;
 	}
 }
 
@@ -140,8 +144,8 @@ void initMenu()
 	scene->add_objects_to_menu();
 	glutCreateMenu(main_menu);
 	glutAddSubMenu("File",menuFile);
-	glutAddSubMenu("Choose Objects Shown", menuObjects);
-	glutAddMenuEntry("Scale", SCALE_MODEL);
+	glutAddSubMenu("Object To Control", menuObjects);
+	glutAddMenuEntry(scale_translate, SCALE_MODEL);
 	glutAddMenuEntry("Demo",MAIN_DEMO);
 	glutAddMenuEntry("About",MAIN_ABOUT);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
