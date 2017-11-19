@@ -11,12 +11,18 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer), 
 {
 }
 
+void Scene::set_normals_type(NormalType normal_type)
+{
+	_normal_type = normal_type;
+	redraw_necessary();
+}
+
 void Scene::add_objects_to_menu()
 {
 	int i = 0;
 	for (auto model : _models)
 	{
-		glutAddMenuEntry(model->get_name(),i++);
+		glutAddMenuEntry(model->get_name(), i++);
 	}
 }
 
@@ -41,7 +47,7 @@ void Scene::load_model_at_center(Model* model, const string name)
 	_models.push_back(_active_model);
 	_active_model->set_renderer(_renderer);
 	/* we don't use redraw_necessary() because that will force a redraw of ALL models */
-	_active_model->draw();
+	draw_one_model(model);
 	_renderer->SwapBuffers();
 }
 
@@ -50,6 +56,18 @@ void Scene::redraw_necessary()
 	glutPostRedisplay();
 }
 
+void Scene::draw_one_model(Model* model)
+{
+	model->draw();
+	if (_normal_type == VERTEX_NORMALS)
+	{
+		model->draw_vertex_normals();
+	}
+	else if (_normal_type == FACE_NORMALS)
+	{
+		model->draw_face_normals();
+	}
+}
 void Scene::draw()
 {
 	// 1. Send the renderer the current camera transform and the projection
@@ -57,15 +75,7 @@ void Scene::draw()
 	_renderer->clear_screen();
 	for(auto model : _models )
 	{
-		model->draw();
-		if (_normal_type == VERTEX_NORMALS)
-		{
-			model->draw_vertex_normals();
-		}
-		else if (_normal_type == FACE_NORMALS)
-		{
-			model->draw_face_normals();
-		}
+		draw_one_model(model);
 	}
 	_renderer->SwapBuffers();
 }
@@ -81,7 +91,6 @@ void Scene::switch_active_model(int id)
 {
 	_active_model = _models[id];
 }
-
 
 void Scene::keyboard(unsigned char key, int x, int y)
 {

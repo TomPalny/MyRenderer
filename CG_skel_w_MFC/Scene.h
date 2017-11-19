@@ -40,14 +40,15 @@ enum NormalType
 
 class Scene {
 	Model* _active_model;
-	vector<Model*> _models;
+	vector<Model*> _models; // TODO: we need to free these in the dtor
 	vector<Light*> _lights;
 	vector<Camera*> _cameras;
 	Renderer *_renderer;
 	NormalType _normal_type;
 
 public:
-	explicit Scene(Renderer* renderer);;
+	explicit Scene(Renderer* renderer);
+	void set_normals_type(NormalType normal_type);;
 
 	void add_pyramid_model();
 	void load_model_at_center(Model* model, const string name);
@@ -57,6 +58,7 @@ public:
 	void draw_demo() const;
 	void switch_active_model(int id);
 	static void redraw_necessary();
+	void draw_one_model(Model* model);
 	void add_objects_to_menu();
 
 	void keyboard(unsigned char key, int x, int y);

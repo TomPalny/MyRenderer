@@ -30,6 +30,7 @@
 #define TRANSLATE_MODEL 4
 #define SCALE_MODEL 5
 #define ROTATE_MODEL 6
+#define ADD_PYRAMID 7
 
 
 Scene *scene;
@@ -37,9 +38,6 @@ Renderer *renderer;
 
 int last_x=0,last_y=0;
 bool lb_down,rb_down,mb_down;
-char* scale_translate = "Scale Object";
-
-
 
 //----------------------------------------------------------------------------
 // Callbacks
@@ -92,31 +90,30 @@ void motion(int x, int y)
 	
 	last_x = x;
 	last_y = y;
-
 }
 
-
-void file_menu(int id)
+void open_file()
 {
-	switch (id)
+	CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
+	if (dlg.DoModal() == IDOK)
 	{
-		case FILE_OPEN:
-			CFileDialog dlg(TRUE,_T(".obj"),NULL,NULL,_T("*.obj|*.*"));
-			if(dlg.DoModal()==IDOK)
-			{
-				std::string s(static_cast<LPCTSTR>(dlg.GetPathName()));
-				scene->load_obj_model(static_cast<LPCTSTR>(dlg.GetPathName()), static_cast<LPCTSTR>(dlg.GetFileTitle()));
-				initMenu();
-			}
-			break;
+		std::string s(static_cast<LPCTSTR>(dlg.GetPathName()));
+		scene->load_obj_model(static_cast<LPCTSTR>(dlg.GetPathName()), static_cast<LPCTSTR>(dlg.GetFileTitle()));
+		init_menu();
 	}
 }
 
-
-void main_menu(int id)
+void menu_callback(int id)
 {
 	switch (id)
 	{
+	case FILE_OPEN:
+		open_file();
+		break;
+	case ADD_PYRAMID:
+		scene->add_pyramid_model();
+		init_menu();
+		break;
 	case MAIN_DEMO:
 		scene->draw_demo();
 		break;
@@ -138,22 +135,35 @@ void main_menu(int id)
 	}
 }
 
-void objects_menu(const int id)
+void objects_menu_callback(const int id)
 {
 	scene->switch_active_model(id);
 }
 
-
-
-void initMenu()
+void normals_menu_callback(const int normal_type)
 {
-	const int menuFile = glutCreateMenu(file_menu);
+	scene->set_normals_type((NormalType)normal_type);
+}
+
+void init_menu()
+{
+	// TODO: do we leak the old menu every time that this is called?
+	const int file_menu = glutCreateMenu(menu_callback);
 	glutAddMenuEntry("Choose Object File:",FILE_OPEN);
-	const int menuObjects = glutCreateMenu(objects_menu);
+	glutAddMenuEntry("Pyramid", ADD_PYRAMID);
+
+	const int objects_menu = glutCreateMenu(objects_menu_callback);
 	scene->add_objects_to_menu();
-	glutCreateMenu(main_menu);
-	glutAddSubMenu("File",menuFile);
-	glutAddSubMenu("Object To Control", menuObjects);
+
+	const int normals_menu = glutCreateMenu(normals_menu_callback);
+	glutAddMenuEntry("None", NO_NORMALS);
+	glutAddMenuEntry("Vertex", VERTEX_NORMALS);
+	glutAddMenuEntry("Face", FACE_NORMALS);
+
+	glutCreateMenu(menu_callback);
+	glutAddSubMenu("File",file_menu);
+	glutAddSubMenu("Object To Control", objects_menu);
+	glutAddSubMenu("Normals", normals_menu);
 	glutAddMenuEntry("Translate", TRANSLATE_MODEL);
 	glutAddMenuEntry("Scale", SCALE_MODEL);
 	glutAddMenuEntry("Rotate", ROTATE_MODEL);
@@ -161,9 +171,6 @@ void initMenu()
 	glutAddMenuEntry("About",MAIN_ABOUT);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
-//----------------------------------------------------------------------------
-
-
 
 int my_main( int argc, char **argv )
 {
@@ -185,22 +192,18 @@ int my_main( int argc, char **argv )
 		/*		...*/
 	}
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
-
-	
 	
 	renderer = new Renderer(512,512);
 	scene = new Scene(renderer);
 	//----------------------------------------------------------------------------
 	// Initialize Callbacks
-
 	glutDisplayFunc( display );
 	glutKeyboardFunc( keyboard );
 	glutSpecialFunc(keyboard_special);
 	glutMouseFunc( mouse );
 	glutMotionFunc ( motion );
 	glutReshapeFunc( reshape );
-	initMenu();
-	
+	init_menu();
 
 	glutMainLoop();
 	delete scene;
