@@ -12,15 +12,8 @@ void Model::translate(float x, float y, float z)
 	_model_to_world *= translation;
 }
 
-void Model::scale(float x, float y, float z)
+void Model::scale(const float x, const float y, const float z)
 {
-	if(x== 0 && y == 0 && z == 0)
-	{
-		x += _current_scale.x;
-		y += _current_scale.y;
-		z += _current_scale.z;
-	}
-	// default translation
 	mat4 scale;
 	scale[0][0] = x; // x
 	scale[1][1] = y; // y

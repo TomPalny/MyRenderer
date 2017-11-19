@@ -24,7 +24,7 @@ void Scene::load_obj_model(const string filename, const string objName)
 	_active_model = new MeshModel(filename);
 	_active_model->set_name(objName);
 	_active_model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0);
-	_active_model->scale(0,0,0);
+	_active_model->scale(100,100,100);
 	_models.push_back(_active_model);
 	_active_model->set_renderer(_renderer);
 	_active_model->draw();
