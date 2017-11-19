@@ -19,6 +19,7 @@ protected:
 public:
 	void draw();
 	void translate(float x, float y, float z);
+	void rotate(float theta, char axis);
 	void scale(float x, float y, float z);
 	void set_renderer(Renderer* renderer);
 	vec2 transform_point(vec4 point) const;

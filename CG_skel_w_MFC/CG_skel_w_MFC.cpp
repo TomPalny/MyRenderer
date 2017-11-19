@@ -27,7 +27,10 @@
 #define FILE_OPEN 1
 #define MAIN_DEMO 2
 #define MAIN_ABOUT 3
-#define SCALE_MODEL 4
+#define TRANSLATE_MODEL 4
+#define SCALE_MODEL 5
+#define ROTATE_MODEL 6
+
 
 Scene *scene;
 Renderer *renderer;
@@ -121,10 +124,16 @@ void main_menu(int id)
 		AfxMessageBox(_T("Computer Graphics"));
 		break;
 	case SCALE_MODEL:
-		scene->scale_flag = !scene->scale_flag;
-		if(scene->scale_flag) scale_translate = "Translate Object";
-		else scale_translate = "Scale Object";
-		initMenu();
+		scene->scale_flag = true;
+		scene->rotate_flag = false;
+		break;
+	case TRANSLATE_MODEL:
+		scene->scale_flag = false;
+		scene->rotate_flag = false;
+		break;
+	case ROTATE_MODEL:
+		scene->rotate_flag = true;
+		scene->scale_flag = false;
 		break;
 	}
 }
@@ -145,7 +154,9 @@ void initMenu()
 	glutCreateMenu(main_menu);
 	glutAddSubMenu("File",menuFile);
 	glutAddSubMenu("Object To Control", menuObjects);
-	glutAddMenuEntry(scale_translate, SCALE_MODEL);
+	glutAddMenuEntry("Translate", TRANSLATE_MODEL);
+	glutAddMenuEntry("Scale", SCALE_MODEL);
+	glutAddMenuEntry("Rotate", ROTATE_MODEL);
 	glutAddMenuEntry("Demo",MAIN_DEMO);
 	glutAddMenuEntry("About",MAIN_ABOUT);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);

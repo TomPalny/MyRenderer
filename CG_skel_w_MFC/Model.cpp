@@ -12,6 +12,42 @@ void Model::translate(float x, float y, float z)
 	_model_to_world *= translation;
 }
 
+void Model::rotate(float theta, char axis)
+{
+	mat4 rotation;
+	switch (axis)
+	{
+	case 'x':
+		rotation[0][0] = 1;
+		rotation[1][1] = cos(theta);
+		rotation[1][2] = sin(theta);
+		rotation[2][1] = -sin(theta);
+		rotation[2][2] = cos(theta);
+		rotation[3][3] = 1;
+		_model_to_world *= rotation;
+		break;
+	case 'y':
+		rotation[0][0] = cos(theta);
+		rotation[0][2] = -sin(theta);
+		rotation[1][1] = 1;
+		rotation[2][0] = sin(theta);
+		rotation[2][2] = cos(theta);
+		rotation[3][3] = 1;
+		_model_to_world *= rotation;
+		break;
+	case 'z':
+		rotation[0][0] = cos(theta);
+		rotation[0][1] = sin(theta);
+		rotation[1][0] = -sin(theta);
+		rotation[1][1] = cos(theta);
+		rotation[2][2] = 1;
+		rotation[3][3] = 1;
+		_model_to_world *= rotation;
+		break;
+	}
+}
+
+
 void Model::scale(const float x, const float y, const float z)
 {
 	mat4 scale;

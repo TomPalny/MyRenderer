@@ -81,23 +81,34 @@ void Scene::keyboard_special(int key, int x, int y)
 	static const float LARGER_SCALE_FACTOR = 1.4;
 	static const float SMALLER_SCALE_FACTOR = 0.6;
 	static const float NO_SCALE = 1;
+	static const float THETA = 0.1;
 	//DialogBox(NULL, MAKEINTRESOURCE(IDD_DIALOG1), NULL, DialogBoxCallback);
 	switch (key) {
 	case GLUT_KEY_RIGHT:
 		if (scale_flag) _active_model->scale(LARGER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
+		else if (rotate_flag) _active_model->rotate(THETA, 'x');
 		else _active_model->translate(MOVE_DISTANCE, 0, 0);
 		break;
 	case GLUT_KEY_LEFT:
 		if (scale_flag)  _active_model->scale(SMALLER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
+		else if (rotate_flag) _active_model->rotate(-THETA, 'x');
 		else _active_model->translate(-MOVE_DISTANCE, 0, 0);
 		break;
 	case GLUT_KEY_UP:
 		if (scale_flag) _active_model->scale(NO_SCALE, LARGER_SCALE_FACTOR, NO_SCALE);
+		else if(rotate_flag) _active_model->rotate(THETA, 'y');
 		else _active_model->translate(0, MOVE_DISTANCE, 0);
 		break;
 	case GLUT_KEY_DOWN:
 		if (scale_flag) _active_model->scale(NO_SCALE, SMALLER_SCALE_FACTOR, NO_SCALE);
+		else if (rotate_flag) _active_model->rotate(-THETA, 'y');
 		else _active_model->translate(0, -MOVE_DISTANCE, 0);
+		break;
+	case GLUT_KEY_PAGE_UP:
+		_active_model->rotate(THETA, 'z');
+		break;
+	case GLUT_KEY_PAGE_DOWN:
+		_active_model->rotate(-THETA, 'z');
 		break;
 	}
 

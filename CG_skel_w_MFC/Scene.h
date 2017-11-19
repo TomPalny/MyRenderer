@@ -54,4 +54,5 @@ public:
 	int activeLight;
 	int activeCamera;
 	bool scale_flag = false;
+	bool rotate_flag = false;
 };
