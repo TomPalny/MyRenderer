@@ -11,20 +11,29 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer), 
 {
 }
 
-void Scene::load_obj_model(const string filename)
+void Scene::add_objects_to_menu()
 {
-	const auto model = new MeshModel(filename);
-	load_model_at_center(model);
+	int i = 0;
+	for (auto model : _models)
+	{
+		glutAddMenuEntry(model->get_name(),i++);
+	}
 }
 
 void Scene::add_pyramid_model()
 {
 	const auto model = PrimitiveModel::create_pyramid(0.0f, 0.0f, 0.0f);
-	load_model_at_center(model);
+	load_model_at_center(model, "Pyramid");
 }
 
-void Scene::load_model_at_center(Model* model)
+void Scene::load_obj_model(const string filename, const string name)
 {
+	load_model_at_center(new MeshModel(filename), name);
+}
+
+void Scene::load_model_at_center(Model* model, const string name)
+{
+	model->set_name(name);
 	model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0);
 	model->scale(100, 100, 100);
 
@@ -61,12 +70,18 @@ void Scene::draw()
 	_renderer->SwapBuffers();
 }
 
-void Scene::draw_demo()
+void Scene::draw_demo() const
 {
 	_renderer->clear_screen();
 	_renderer->SetDemoBuffer();
 	_renderer->SwapBuffers();
 }
+
+void Scene::switch_active_model(int id)
+{
+	_active_model = _models[id];
+}
+
 
 void Scene::keyboard(unsigned char key, int x, int y)
 {
@@ -103,19 +118,37 @@ void Scene::keyboard_special(int key, int x, int y)
 	{
 		move_distance *= 4;
 	}
-	//DialogBox(NULL, MAKEINTRESOURCE(IDD_DIALOG1), NULL, DialogBoxCallback);
+	static const float LARGER_SCALE_FACTOR = 1.4;
+	static const float SMALLER_SCALE_FACTOR = 0.6;
+	static const float NO_SCALE = 1;
+	static const float THETA = 0.1;
+
 	switch (key) {
 	case GLUT_KEY_RIGHT:
-		_active_model->translate(move_distance, 0, 0);
+		if (scale_flag) _active_model->scale(LARGER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
+		else if (rotate_flag) _active_model->rotate(THETA, 'x');
+		else _active_model->translate(move_distance, 0, 0);
 		break;
 	case GLUT_KEY_LEFT:
-		_active_model->translate(-move_distance, 0, 0);
+		if (scale_flag)  _active_model->scale(SMALLER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
+		else if (rotate_flag) _active_model->rotate(-THETA, 'x');
+		else _active_model->translate(-move_distance, 0, 0);
 		break;
 	case GLUT_KEY_UP:
-		_active_model->translate(0, move_distance, 0);
+		if (scale_flag) _active_model->scale(NO_SCALE, LARGER_SCALE_FACTOR, NO_SCALE);
+		else if(rotate_flag) _active_model->rotate(THETA, 'y');
+		else _active_model->translate(0, move_distance, 0);
 		break;
 	case GLUT_KEY_DOWN:
-		_active_model->translate(0, -move_distance, 0);
+		if (scale_flag) _active_model->scale(NO_SCALE, SMALLER_SCALE_FACTOR, NO_SCALE);
+		else if (rotate_flag) _active_model->rotate(-THETA, 'y');
+		else _active_model->translate(0, -move_distance, 0);
+		break;
+	case GLUT_KEY_PAGE_UP:
+		_active_model->rotate(THETA, 'z');
+		break;
+	case GLUT_KEY_PAGE_DOWN:
+		_active_model->rotate(-THETA, 'z');
 		break;
 	}
 

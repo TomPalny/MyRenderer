@@ -25,14 +25,21 @@
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
 #define FILE_OPEN 1
-#define MAIN_DEMO 1
-#define MAIN_ABOUT 2
+#define MAIN_DEMO 2
+#define MAIN_ABOUT 3
+#define TRANSLATE_MODEL 4
+#define SCALE_MODEL 5
+#define ROTATE_MODEL 6
+
 
 Scene *scene;
 Renderer *renderer;
 
-int last_x,last_y;
+int last_x=0,last_y=0;
 bool lb_down,rb_down,mb_down;
+char* scale_translate = "Scale Object";
+
+
 
 //----------------------------------------------------------------------------
 // Callbacks
@@ -75,21 +82,21 @@ void mouse(int button, int state, int x, int y)
 			mb_down = (state==GLUT_UP)?0:1;	
 			break;
 	}
-
-	// add your code
+	
 }
 
 void motion(int x, int y)
 {
-	// calc difference in mouse movement
-	int dx=x-last_x;
-	int dy=y-last_y;
-	// update last x,y
-	last_x=x;
-	last_y=y;
+	int dx = x - last_x;
+	int dy = y - last_y;
+	
+	last_x = x;
+	last_y = y;
+
 }
 
-void fileMenu(int id)
+
+void file_menu(int id)
 {
 	switch (id)
 	{
@@ -97,14 +104,16 @@ void fileMenu(int id)
 			CFileDialog dlg(TRUE,_T(".obj"),NULL,NULL,_T("*.obj|*.*"));
 			if(dlg.DoModal()==IDOK)
 			{
-				std::string s((LPCTSTR)dlg.GetPathName());
-				scene->load_obj_model((LPCTSTR)dlg.GetPathName());
+				std::string s(static_cast<LPCTSTR>(dlg.GetPathName()));
+				scene->load_obj_model(static_cast<LPCTSTR>(dlg.GetPathName()), static_cast<LPCTSTR>(dlg.GetFileTitle()));
+				initMenu();
 			}
 			break;
 	}
 }
 
-void mainMenu(int id)
+
+void main_menu(int id)
 {
 	switch (id)
 	{
@@ -114,16 +123,40 @@ void mainMenu(int id)
 	case MAIN_ABOUT:
 		AfxMessageBox(_T("Computer Graphics"));
 		break;
+	case SCALE_MODEL:
+		scene->scale_flag = true;
+		scene->rotate_flag = false;
+		break;
+	case TRANSLATE_MODEL:
+		scene->scale_flag = false;
+		scene->rotate_flag = false;
+		break;
+	case ROTATE_MODEL:
+		scene->rotate_flag = true;
+		scene->scale_flag = false;
+		break;
 	}
 }
 
+void objects_menu(const int id)
+{
+	scene->switch_active_model(id);
+}
+
+
+
 void initMenu()
 {
-
-	int menuFile = glutCreateMenu(fileMenu);
-	glutAddMenuEntry("Open..",FILE_OPEN);
-	glutCreateMenu(mainMenu);
+	const int menuFile = glutCreateMenu(file_menu);
+	glutAddMenuEntry("Choose Object File:",FILE_OPEN);
+	const int menuObjects = glutCreateMenu(objects_menu);
+	scene->add_objects_to_menu();
+	glutCreateMenu(main_menu);
 	glutAddSubMenu("File",menuFile);
+	glutAddSubMenu("Object To Control", menuObjects);
+	glutAddMenuEntry("Translate", TRANSLATE_MODEL);
+	glutAddMenuEntry("Scale", SCALE_MODEL);
+	glutAddMenuEntry("Rotate", ROTATE_MODEL);
 	glutAddMenuEntry("Demo",MAIN_DEMO);
 	glutAddMenuEntry("About",MAIN_ABOUT);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);

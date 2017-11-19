@@ -12,17 +12,52 @@ void Model::translate(float x, float y, float z)
 	mat4 translation;
 	translation[0][3] = x; // x
 	translation[1][3] = y; // y
-	translation[2][3] = y; // z
+	translation[2][3] = z; // z
 	_model_to_world *= translation;
 }
 
-void Model::scale(float x, float y, float z)
+void Model::rotate(float theta, char axis)
 {
-	// default translation
+	mat4 rotation;
+	switch (axis)
+	{
+	case 'x':
+		rotation[0][0] = 1;
+		rotation[1][1] = cos(theta);
+		rotation[1][2] = sin(theta);
+		rotation[2][1] = -sin(theta);
+		rotation[2][2] = cos(theta);
+		rotation[3][3] = 1;
+		_model_to_world *= rotation;
+		break;
+	case 'y':
+		rotation[0][0] = cos(theta);
+		rotation[0][2] = -sin(theta);
+		rotation[1][1] = 1;
+		rotation[2][0] = sin(theta);
+		rotation[2][2] = cos(theta);
+		rotation[3][3] = 1;
+		_model_to_world *= rotation;
+		break;
+	case 'z':
+		rotation[0][0] = cos(theta);
+		rotation[0][1] = sin(theta);
+		rotation[1][0] = -sin(theta);
+		rotation[1][1] = cos(theta);
+		rotation[2][2] = 1;
+		rotation[3][3] = 1;
+		_model_to_world *= rotation;
+		break;
+	}
+}
+
+
+void Model::scale(const float x, const float y, const float z)
+{
 	mat4 scale;
 	scale[0][0] = x; // x
 	scale[1][1] = y; // y
-	scale[2][2] = y; // z
+	scale[2][2] = z; // z
 	_model_to_world *= scale;
 }
 
@@ -39,6 +74,18 @@ vec4 Model::transform_point(const vec4 point) const
 vec2 Model::vec4_to_vec2(const vec4 point)
 {
 	return vec2(point.x / point.w, point.y / point.w);
+}
+const char* Model::get_name() const
+{
+	return _name;
+}
+
+void Model::set_name(string name)
+{
+	// TODO: free this
+	char *cstr = new char[name.length() + 1];
+	strcpy(cstr, name.c_str());
+	_name = cstr;
 }
 
 void Model::draw()

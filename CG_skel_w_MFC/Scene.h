@@ -48,16 +48,23 @@ class Scene {
 
 public:
 	explicit Scene(Renderer* renderer);;
-	void load_obj_model(string filename);
+
 	void add_pyramid_model();
-	void load_model_at_center(Model* model);
+	void load_model_at_center(Model* model, const string name);
+	void load_obj_model(string filename, string name);
+
 	void draw();
-	void draw_demo();
-	void redraw_necessary();
+	void draw_demo() const;
+	void switch_active_model(int id);
+	static void redraw_necessary();
+	void add_objects_to_menu();
+
 	void keyboard(unsigned char key, int x, int y);
 	void keyboard_special(int key, int x, int y);
 
 	int activeModel;
 	int activeLight;
 	int activeCamera;
+	bool scale_flag = false;
+	bool rotate_flag = false;
 };
