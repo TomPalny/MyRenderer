@@ -112,7 +112,7 @@ void Renderer::draw_line_implementation(vec2 point1, vec2 point2, const bool inv
 	float error = dx / 2.0f;
 	int ystep = (point1.y < point2.y) ? 1 : -1;
 	
-	for (int x = point1.x; x < point2.x ; x++)
+	for (int x = point1.x; x <= point2.x ; x++)
 	{
 		if(inverted)
 		{
