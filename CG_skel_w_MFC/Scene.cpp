@@ -7,7 +7,8 @@
 
 using namespace std;
 
-Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer), _normal_type(NO_NORMALS)
+Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
+									_normal_type(NO_NORMALS), _operation_mode(TRANSLATE_MODE)
 {
 }
 
@@ -24,6 +25,11 @@ void Scene::add_objects_to_menu()
 	{
 		glutAddMenuEntry(model->get_name(), i++);
 	}
+}
+
+void Scene::set_operation_mode(OperationMode mode)
+{
+	_operation_mode = mode;
 }
 
 void Scene::add_pyramid_model()
@@ -105,6 +111,15 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		_normal_type = (NormalType) ((_normal_type + 1) % NUMBER_OF_NORMAL_TYPES);
 		redraw_necessary();
 		break;
+	case 's':
+		set_operation_mode(SCALE_MODE);
+		break;
+	case 't':
+		set_operation_mode(TRANSLATE_MODE);
+		break;
+	case 'r':
+		set_operation_mode(ROTATE_MODE);
+		break;
 	case '\t':
 		// switch between models
 		const auto it = std::find(_models.begin(), _models.end(), _active_model);
@@ -134,24 +149,36 @@ void Scene::keyboard_special(int key, int x, int y)
 
 	switch (key) {
 	case GLUT_KEY_RIGHT:
-		if (scale_flag) _active_model->scale(LARGER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
-		else if (rotate_flag) _active_model->rotate(THETA, 'x');
-		else _active_model->translate(move_distance, 0, 0);
+		if (_operation_mode == SCALE_MODE)
+			_active_model->scale(LARGER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
+		else if (_operation_mode == ROTATE_MODE)
+			_active_model->rotate(THETA, 'x');
+		else
+			_active_model->translate(move_distance, 0, 0);
 		break;
 	case GLUT_KEY_LEFT:
-		if (scale_flag)  _active_model->scale(SMALLER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
-		else if (rotate_flag) _active_model->rotate(-THETA, 'x');
-		else _active_model->translate(-move_distance, 0, 0);
+		if (_operation_mode == SCALE_MODE)
+			_active_model->scale(SMALLER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
+		else if (_operation_mode == ROTATE_MODE)
+			_active_model->rotate(-THETA, 'x');
+		else
+			_active_model->translate(-move_distance, 0, 0);
 		break;
 	case GLUT_KEY_UP:
-		if (scale_flag) _active_model->scale(NO_SCALE, LARGER_SCALE_FACTOR, NO_SCALE);
-		else if(rotate_flag) _active_model->rotate(THETA, 'y');
-		else _active_model->translate(0, move_distance, 0);
+		if (_operation_mode == SCALE_MODE)
+			_active_model->scale(NO_SCALE, LARGER_SCALE_FACTOR, NO_SCALE);
+		else if (_operation_mode == ROTATE_MODE)
+			_active_model->rotate(THETA, 'y');
+		else
+			_active_model->translate(0, move_distance, 0);
 		break;
 	case GLUT_KEY_DOWN:
-		if (scale_flag) _active_model->scale(NO_SCALE, SMALLER_SCALE_FACTOR, NO_SCALE);
-		else if (rotate_flag) _active_model->rotate(-THETA, 'y');
-		else _active_model->translate(0, -move_distance, 0);
+		if (_operation_mode == SCALE_MODE)
+			_active_model->scale(NO_SCALE, SMALLER_SCALE_FACTOR, NO_SCALE);
+		else if (_operation_mode == ROTATE_MODE)
+			_active_model->rotate(-THETA, 'y');
+		else
+			_active_model->translate(0, -move_distance, 0);
 		break;
 	case GLUT_KEY_PAGE_UP:
 		_active_model->rotate(THETA, 'z');

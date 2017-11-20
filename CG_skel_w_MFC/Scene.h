@@ -38,6 +38,13 @@ enum NormalType
 	NUMBER_OF_NORMAL_TYPES
 };
 
+enum OperationMode
+{
+	TRANSLATE_MODE,
+	ROTATE_MODE,
+	SCALE_MODE
+};
+
 class Scene {
 	Model* _active_model;
 	vector<Model*> _models; // TODO: we need to free these in the dtor
@@ -45,6 +52,7 @@ class Scene {
 	vector<Camera*> _cameras;
 	Renderer *_renderer;
 	NormalType _normal_type;
+	OperationMode _operation_mode;
 
 public:
 	explicit Scene(Renderer* renderer);
@@ -53,13 +61,14 @@ public:
 	void add_pyramid_model();
 	void load_model_at_center(Model* model, const string name);
 	void load_obj_model(string filename, string name);
-
+	
 	void draw();
 	void draw_demo() const;
 	void switch_active_model(int id);
 	static void redraw_necessary();
 	void draw_one_model(Model* model);
 	void add_objects_to_menu();
+	void set_operation_mode(OperationMode mode);
 
 	void keyboard(unsigned char key, int x, int y);
 	void keyboard_special(int key, int x, int y);
@@ -67,6 +76,4 @@ public:
 	int activeModel;
 	int activeLight;
 	int activeCamera;
-	bool scale_flag = false;
-	bool rotate_flag = false;
 };

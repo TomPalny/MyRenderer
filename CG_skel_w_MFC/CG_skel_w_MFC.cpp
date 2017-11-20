@@ -121,16 +121,13 @@ void menu_callback(int id)
 		AfxMessageBox(_T("Computer Graphics"));
 		break;
 	case SCALE_MODEL:
-		scene->scale_flag = true;
-		scene->rotate_flag = false;
+		scene->set_operation_mode(SCALE_MODE);
 		break;
 	case TRANSLATE_MODEL:
-		scene->scale_flag = false;
-		scene->rotate_flag = false;
+		scene->set_operation_mode(TRANSLATE_MODE);
 		break;
 	case ROTATE_MODEL:
-		scene->rotate_flag = true;
-		scene->scale_flag = false;
+		scene->set_operation_mode(ROTATE_MODE);
 		break;
 	}
 }
