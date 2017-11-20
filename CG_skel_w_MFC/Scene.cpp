@@ -152,7 +152,7 @@ void Scene::keyboard_special(int key, int x, int y)
 		if (_operation_mode == SCALE_MODE)
 			_active_model->scale(LARGER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
 		else if (_operation_mode == ROTATE_MODE)
-			_active_model->rotate(THETA, 'x');
+			_active_model->rotate(THETA, 'y');
 		else
 			_active_model->translate(move_distance, 0, 0);
 		break;
@@ -160,7 +160,7 @@ void Scene::keyboard_special(int key, int x, int y)
 		if (_operation_mode == SCALE_MODE)
 			_active_model->scale(SMALLER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
 		else if (_operation_mode == ROTATE_MODE)
-			_active_model->rotate(-THETA, 'x');
+			_active_model->rotate(-THETA, 'y');
 		else
 			_active_model->translate(-move_distance, 0, 0);
 		break;
@@ -168,7 +168,7 @@ void Scene::keyboard_special(int key, int x, int y)
 		if (_operation_mode == SCALE_MODE)
 			_active_model->scale(NO_SCALE, LARGER_SCALE_FACTOR, NO_SCALE);
 		else if (_operation_mode == ROTATE_MODE)
-			_active_model->rotate(THETA, 'y');
+			_active_model->rotate(THETA, 'x');
 		else
 			_active_model->translate(0, move_distance, 0);
 		break;
@@ -176,7 +176,7 @@ void Scene::keyboard_special(int key, int x, int y)
 		if (_operation_mode == SCALE_MODE)
 			_active_model->scale(NO_SCALE, SMALLER_SCALE_FACTOR, NO_SCALE);
 		else if (_operation_mode == ROTATE_MODE)
-			_active_model->rotate(-THETA, 'y');
+			_active_model->rotate(-THETA, 'x');
 		else
 			_active_model->translate(0, -move_distance, 0);
 		break;
