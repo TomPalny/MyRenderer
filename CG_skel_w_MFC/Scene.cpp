@@ -75,6 +75,12 @@ void Scene::draw_one_model(Model* model)
 	{
 		model->draw_face_normals();
 	}
+
+	if (model == _active_model)
+	{
+		// something is weird with our window height
+		_renderer->draw_string(model->get_name(), 10, _renderer->get_height()-110);
+	}
 }
 void Scene::draw()
 {
@@ -87,20 +93,11 @@ void Scene::draw()
 	}
 	if (_transform_mode == WORLD_TRANSFORM)
 	{
-		_renderer->draw_letter('W', 15, 0);
-		_renderer->draw_letter('O', 25, 0);
-		_renderer->draw_letter('R', 35, 0);
-		_renderer->draw_letter('L', 45, 0);
-		_renderer->draw_letter('D', 55, 0);
+		_renderer->draw_string("WORLD", 15, 0);
 	}
 	else
 	{
-		_renderer->draw_letter('O', 15, 0);
-		_renderer->draw_letter('B', 25, 0);
-		_renderer->draw_letter('J', 35, 0);
-		_renderer->draw_letter('E', 45, 0);
-		_renderer->draw_letter('C', 55, 0);
-		_renderer->draw_letter('T', 65, 0);
+		_renderer->draw_string("OBJECT", 15, 0);
 	}
 	_renderer->SwapBuffers();
 }

@@ -206,6 +206,16 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
+void Renderer::draw_string(const char* string, int left, int bottom)
+{
+	while (*string != '\0')
+	{
+		draw_letter(*string, left, bottom);
+		++string;
+		left += 10;
+	}
+}
+
 void Renderer::draw_letter(char letter, int left, int bottom)
 {
 	char* letter_data = font8x8_basic[letter];
