@@ -8,7 +8,8 @@
 using namespace std;
 
 Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
-									_normal_type(NO_NORMALS), _operation_mode(TRANSLATE_MODE)
+									_normal_type(NO_NORMALS), _operation_mode(TRANSLATE_MODE),
+									_transform_mode(WORLD_TRANSFORM)
 {
 }
 
@@ -46,8 +47,8 @@ void Scene::load_obj_model(const string filename, const string name)
 void Scene::load_model_at_center(Model* model, const string name)
 {
 	model->set_name(name);
-	model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0);
-	model->scale(100, 100, 100);
+	model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0, WORLD_TRANSFORM);
+	model->scale(100, 100, 100, WORLD_TRANSFORM);
 
 	_active_model = model;
 	_models.push_back(_active_model);
@@ -83,6 +84,22 @@ void Scene::draw()
 	{
 		draw_one_model(model);
 	}
+	if (_transform_mode == WORLD_TRANSFORM)
+	{
+		// draw a W
+		_renderer->draw_line(vec2(15, 25), vec2(20, 15));
+		_renderer->draw_line(vec2(20, 15), vec2(25, 25));
+		_renderer->draw_line(vec2(25, 25), vec2(30, 15));
+		_renderer->draw_line(vec2(30, 15), vec2(35, 25));
+	}
+	else
+	{
+		// draw an O
+		_renderer->draw_line(vec2(15, 25), vec2(15, 15));
+		_renderer->draw_line(vec2(25, 25), vec2(25, 15));
+		_renderer->draw_line(vec2(15, 25), vec2(25, 25));
+		_renderer->draw_line(vec2(15, 15), vec2(25, 15));
+	}
 	_renderer->SwapBuffers();
 }
 
@@ -103,6 +120,17 @@ void Scene::keyboard(unsigned char key, int x, int y)
 	switch (key) {
 	case 27: // escape
 		exit(EXIT_SUCCESS);
+		break;
+	case 32: // spacebar
+		if (_transform_mode == WORLD_TRANSFORM)
+		{
+			_transform_mode = MODEL_TRANSFORM;
+		}
+		else
+		{
+			_transform_mode = WORLD_TRANSFORM;
+		}
+		redraw_necessary();
 		break;
 	case 'p':
 		add_pyramid_model();
@@ -150,41 +178,41 @@ void Scene::keyboard_special(int key, int x, int y)
 	switch (key) {
 	case GLUT_KEY_RIGHT:
 		if (_operation_mode == SCALE_MODE)
-			_active_model->scale(LARGER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
+			_active_model->scale(LARGER_SCALE_FACTOR, NO_SCALE, NO_SCALE, _transform_mode);
 		else if (_operation_mode == ROTATE_MODE)
-			_active_model->rotate(THETA, 'y');
+			_active_model->rotate(THETA, 'y', _transform_mode);
 		else
-			_active_model->translate(move_distance, 0, 0);
+			_active_model->translate(move_distance, 0, 0, _transform_mode);
 		break;
 	case GLUT_KEY_LEFT:
 		if (_operation_mode == SCALE_MODE)
-			_active_model->scale(SMALLER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
+			_active_model->scale(SMALLER_SCALE_FACTOR, NO_SCALE, NO_SCALE, _transform_mode);
 		else if (_operation_mode == ROTATE_MODE)
-			_active_model->rotate(-THETA, 'y');
+			_active_model->rotate(-THETA, 'y', _transform_mode);
 		else
-			_active_model->translate(-move_distance, 0, 0);
+			_active_model->translate(-move_distance, 0, 0, _transform_mode);
 		break;
 	case GLUT_KEY_UP:
 		if (_operation_mode == SCALE_MODE)
-			_active_model->scale(NO_SCALE, LARGER_SCALE_FACTOR, NO_SCALE);
+			_active_model->scale(NO_SCALE, LARGER_SCALE_FACTOR, NO_SCALE, _transform_mode);
 		else if (_operation_mode == ROTATE_MODE)
-			_active_model->rotate(THETA, 'x');
+			_active_model->rotate(THETA, 'x', _transform_mode);
 		else
-			_active_model->translate(0, move_distance, 0);
+			_active_model->translate(0, move_distance, 0, _transform_mode);
 		break;
 	case GLUT_KEY_DOWN:
 		if (_operation_mode == SCALE_MODE)
-			_active_model->scale(NO_SCALE, SMALLER_SCALE_FACTOR, NO_SCALE);
+			_active_model->scale(NO_SCALE, SMALLER_SCALE_FACTOR, NO_SCALE, _transform_mode);
 		else if (_operation_mode == ROTATE_MODE)
-			_active_model->rotate(-THETA, 'x');
+			_active_model->rotate(-THETA, 'x', _transform_mode);
 		else
-			_active_model->translate(0, -move_distance, 0);
+			_active_model->translate(0, -move_distance, 0, _transform_mode);
 		break;
 	case GLUT_KEY_PAGE_UP:
-		_active_model->rotate(THETA, 'z');
+		_active_model->rotate(THETA, 'z', _transform_mode);
 		break;
 	case GLUT_KEY_PAGE_DOWN:
-		_active_model->rotate(-THETA, 'z');
+		_active_model->rotate(-THETA, 'z', _transform_mode);
 		break;
 	}
 

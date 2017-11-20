@@ -6,17 +6,24 @@ Model::Model() : _renderer(nullptr)
 {
 }
 
-void Model::translate(float x, float y, float z)
+void Model::translate(float x, float y, float z, TransformMode mode)
 {
 	// default translation
 	mat4 translation;
 	translation[0][3] = x; // x
 	translation[1][3] = y; // y
 	translation[2][3] = z; // z
-	_model_to_world *= translation;
+	if (mode == WORLD_TRANSFORM)
+	{
+		_world_transforms *= translation;
+	}
+	else
+	{
+		_model_transforms *= translation;
+	}
 }
 
-void Model::rotate(float theta, char axis)
+void Model::rotate(float theta, char axis, TransformMode mode)
 {
 	mat4 rotation;
 	switch (axis)
@@ -28,7 +35,6 @@ void Model::rotate(float theta, char axis)
 		rotation[2][1] = -sin(theta);
 		rotation[2][2] = cos(theta);
 		rotation[3][3] = 1;
-		_model_to_world *= rotation;
 		break;
 	case 'y':
 		rotation[0][0] = cos(theta);
@@ -37,7 +43,6 @@ void Model::rotate(float theta, char axis)
 		rotation[2][0] = sin(theta);
 		rotation[2][2] = cos(theta);
 		rotation[3][3] = 1;
-		_model_to_world *= rotation;
 		break;
 	case 'z':
 		rotation[0][0] = cos(theta);
@@ -46,19 +51,35 @@ void Model::rotate(float theta, char axis)
 		rotation[1][1] = cos(theta);
 		rotation[2][2] = 1;
 		rotation[3][3] = 1;
-		_model_to_world *= rotation;
 		break;
+	}
+
+	if (mode == WORLD_TRANSFORM)
+	{
+		_world_transforms *= rotation;
+	}
+	else
+	{
+		_model_transforms *= rotation;
 	}
 }
 
 
-void Model::scale(const float x, const float y, const float z)
+void Model::scale(const float x, const float y, const float z, TransformMode mode)
 {
 	mat4 scale;
 	scale[0][0] = x; // x
 	scale[1][1] = y; // y
 	scale[2][2] = z; // z
-	_model_to_world *= scale;
+
+	if (mode == WORLD_TRANSFORM)
+	{
+		_world_transforms *= scale;
+	}
+	else
+	{
+		_model_transforms *= scale;
+	}
 }
 
 void Model::set_renderer(Renderer * renderer)
@@ -68,7 +89,7 @@ void Model::set_renderer(Renderer * renderer)
 
 vec4 Model::transform_point(const vec4 point) const
 {
-	return _model_to_world * point;
+	return _world_transforms * _model_transforms * point;
 }
 
 vec2 Model::vec4_to_vec2(const vec4 point)

@@ -2,14 +2,19 @@
 #include "Renderer.h"
 #include "Face.h"
 
+enum TransformMode
+{
+	WORLD_TRANSFORM,
+	MODEL_TRANSFORM
+};
+
 class Model {
 protected:
 	Model();
 	virtual ~Model() {}
-	mat4 _world_transform;
-	mat3 _normal_transform;
 	Renderer* _renderer;
-	mat4 _model_to_world;
+	mat4 _world_transforms;
+	mat4 _model_transforms;
 	vector<Face> _faces;
 	char* _name;
 
@@ -21,9 +26,9 @@ public:
 	void draw();
 	void draw_vertex_normals();
 	void draw_face_normals();
-	void translate(float x, float y, float z);
-	void rotate(float theta, char axis);
-	void scale(float x, float y, float z);
+	void translate(float x, float y, float z, TransformMode mode);
+	void rotate(float theta, char axis, TransformMode mode);
+	void scale(float x, float y, float z, TransformMode mode);
 	void set_renderer(Renderer* renderer);
 	const char* get_name() const;
 	void set_name(string name);

@@ -53,6 +53,7 @@ class Scene {
 	Renderer *_renderer;
 	NormalType _normal_type;
 	OperationMode _operation_mode;
+	TransformMode _transform_mode;
 
 public:
 	explicit Scene(Renderer* renderer);
