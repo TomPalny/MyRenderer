@@ -23,6 +23,6 @@ PrimitiveModel* PrimitiveModel::create_pyramid(float center_x, float center_y, f
 	model->_faces.push_back(Face(point1, point2, point4));
 	model->_faces.push_back(Face(point1, point3, point4));
 	model->_faces.push_back(Face(point2, point3, point4));
-	model->rotate(0.4, 'x');
+	//model->rotate(0.4, 'x');
 	return model;
 }

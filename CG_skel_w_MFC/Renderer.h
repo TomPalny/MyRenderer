@@ -21,6 +21,7 @@ class Renderer
 	GLuint gScreenVtc;
 	void CreateOpenGLBuffer();
 	void InitOpenGLRendering();
+	void draw_line_implementation(vec2 point1, vec2 point2, bool inverted);
 	//////////////////////////////
 
 public:
@@ -41,6 +42,9 @@ public:
 	int get_width();
 	int get_height();
 	void draw_point(vec2 point);
+	void draw_point(int x, int y);
+	void draw_line_old(vec2 point1, vec2 point2);
 	void draw_line(vec2 point1, vec2 point2);
+	
 	void clear_screen();
 };

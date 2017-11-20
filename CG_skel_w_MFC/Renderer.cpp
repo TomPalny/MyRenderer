@@ -45,9 +45,11 @@ int Renderer::get_height()
 
 void Renderer::draw_point(const vec2 point)
 {
-	int x = point.x;
-	int y = point.y;
+	draw_point(point.x, point.y);
+}
 
+void Renderer::draw_point(int x, int y)
+{
 	if (x < 0 || x >= m_width || y < 0 || y >= m_height)
 	{
 		return;
@@ -57,7 +59,7 @@ void Renderer::draw_point(const vec2 point)
 	m_outBuffer[INDEX(m_width, x, y, 2)] = 1.0f;
 }
 
-void Renderer::draw_line(vec2 point1, vec2 point2)
+void Renderer::draw_line_old(vec2 point1, vec2 point2)
 {
 	bool flipped = false;
 	// we need a line equation - so swap x and y if necessary
@@ -75,7 +77,7 @@ void Renderer::draw_line(vec2 point1, vec2 point2)
 	}
 
 	// we draw from left to right, so start from the leftmost point
-	if( point1.x >= point2.x)
+	if (point1.x >= point2.x)
 	{
 		swap(point1, point2);
 	}
@@ -94,6 +96,81 @@ void Renderer::draw_line(vec2 point1, vec2 point2)
 			draw_point(vec2(x, y));
 		}
 	}
+}
+
+void Renderer::draw_line_implementation(vec2 point1, vec2 point2, const bool inverted)
+{
+	if(point1.x > point2.x)
+	{
+		swap(point1.x, point2.x);
+		swap(point1.y, point2.y);
+	}
+	
+	int y = point1.y;
+	float dx = point2.x - point1.x;
+	float dy = fabs(point2.y - point1.y);
+	float error = dx / 2.0f;
+	int ystep = (point1.y < point2.y) ? 1 : -1;
+	
+	for (int x = point1.x; x < point2.x ; x++)
+	{
+		if(inverted)
+		{
+			draw_point(y, x);
+		}
+		else
+		{
+			draw_point(x, y);
+		}
+		error -= dy;
+		if (error < 0)
+		{
+			y += ystep;
+			error += dx;
+		}
+	}
+}
+
+void Renderer::draw_line(vec2 point1, vec2 point2)
+{
+	bool inverted = false;
+	
+	// we draw from left to right, so start from the leftmost point
+	// horizontal line
+	if (fabs(point2.y - point1.y) == 0.0)
+	{
+		if (point1.x > point2.x)
+		{
+			swap(point1, point2);
+		}
+		for (int x = point1.x; x <= point2.x; x++)
+		{
+			draw_point(x, point1.y);
+		}
+		return;
+	}
+	// vertical line
+	if (fabs(point2.x - point1.x) == 0.0 )
+	{
+		if (point1.y > point2.y)
+		{
+			swap(point1, point2);
+		}
+		for( int y = point1.y ; y <= point2.y ; y++)
+		{
+			draw_point(point1.x, y);
+		}
+		return;
+	}
+	
+	if (fabs((point2.y-point1.y)/(point2.x-point1.x)) > 1)
+	{
+		point1 = vec2(point1.y, point1.x);
+		point2 = vec2(point2.y, point2.x);
+		inverted = true;	
+	}
+
+	draw_line_implementation(point1, point2, inverted);
 }
 
 void Renderer::clear_screen()
