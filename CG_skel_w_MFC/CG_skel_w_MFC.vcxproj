@@ -113,6 +113,7 @@
   <ItemGroup>
     <ClInclude Include="CG_skel_w_MFC.h" />
     <ClInclude Include="Face.h" />
+    <ClInclude Include="font8x8_basic.h" />
     <ClInclude Include="InitShader.h" />
     <ClInclude Include="mat.h" />
     <ClInclude Include="MeshModel.h" />

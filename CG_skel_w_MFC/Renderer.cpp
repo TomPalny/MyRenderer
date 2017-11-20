@@ -3,6 +3,7 @@
 #include "CG_skel_w_MFC.h"
 #include "InitShader.h"
 #include "GL\freeglut.h"
+#include "font8x8_basic.h"
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 
@@ -202,6 +203,22 @@ void Renderer::SetDemoBuffer()
 		m_outBuffer[INDEX(m_width,i, m_height/2, 0)]=1;	
 		m_outBuffer[INDEX(m_width,i, m_height/2, 1)]=0;
 		m_outBuffer[INDEX(m_width,i, m_height/2 ,2)]=1;
+	}
+}
+
+void Renderer::draw_letter(char letter, int left, int bottom)
+{
+	char* letter_data = font8x8_basic[letter];
+	int top = bottom + 40;
+	for (int y = 0; y<8; y++)
+	{
+		for (int x = 0; x<8; x++)
+		{
+			if (letter_data[y] & 1 << (x))
+			{
+				draw_point(vec2(left + x, top - y));
+			}
+		}
 	}
 }
 

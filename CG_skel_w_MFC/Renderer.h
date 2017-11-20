@@ -37,6 +37,7 @@ public:
 	void ClearColorBuffer();
 	void ClearDepthBuffer();
 	void SetDemoBuffer();
+	void draw_letter(char letteri, int left, int bottom);
 	void ChangeWindowSize(int width, int height);
 	float* GetBuffer();
 	int get_width();

@@ -87,19 +87,20 @@ void Scene::draw()
 	}
 	if (_transform_mode == WORLD_TRANSFORM)
 	{
-		// draw a W
-		_renderer->draw_line(vec2(15, 25), vec2(20, 15));
-		_renderer->draw_line(vec2(20, 15), vec2(25, 25));
-		_renderer->draw_line(vec2(25, 25), vec2(30, 15));
-		_renderer->draw_line(vec2(30, 15), vec2(35, 25));
+		_renderer->draw_letter('W', 15, 0);
+		_renderer->draw_letter('O', 25, 0);
+		_renderer->draw_letter('R', 35, 0);
+		_renderer->draw_letter('L', 45, 0);
+		_renderer->draw_letter('D', 55, 0);
 	}
 	else
 	{
-		// draw an O
-		_renderer->draw_line(vec2(15, 25), vec2(15, 15));
-		_renderer->draw_line(vec2(25, 25), vec2(25, 15));
-		_renderer->draw_line(vec2(15, 25), vec2(25, 25));
-		_renderer->draw_line(vec2(15, 15), vec2(25, 15));
+		_renderer->draw_letter('O', 15, 0);
+		_renderer->draw_letter('B', 25, 0);
+		_renderer->draw_letter('J', 35, 0);
+		_renderer->draw_letter('E', 45, 0);
+		_renderer->draw_letter('C', 55, 0);
+		_renderer->draw_letter('T', 65, 0);
 	}
 	_renderer->SwapBuffers();
 }
