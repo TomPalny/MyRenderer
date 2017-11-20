@@ -89,7 +89,7 @@ void Model::set_renderer(Renderer * renderer)
 
 vec4 Model::transform_point(const vec4 point) const
 {
-	return _world_transforms * _model_transforms * point;
+	return _cached_world_model_transform * point;
 }
 
 vec2 Model::vec4_to_vec2(const vec4 point)
@@ -134,6 +134,11 @@ void Model::draw_single_normal(vec4 start, vec4 direction)
 	end.w = 1;
 	auto transformed_end = transform_point(end);
 	_renderer->draw_line(vec4_to_vec2(transformed_start), vec4_to_vec2(transformed_end));
+}
+
+void Model::update_matrix()
+{
+	_cached_world_model_transform = _world_transforms * _model_transforms;
 }
 
 void Model::draw_vertex_normals()

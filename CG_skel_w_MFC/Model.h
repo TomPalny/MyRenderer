@@ -15,6 +15,7 @@ protected:
 	Renderer* _renderer;
 	mat4 _world_transforms;
 	mat4 _model_transforms;
+	mat4 _cached_world_model_transform;
 	vector<Face> _faces;
 	char* _name;
 
@@ -23,6 +24,7 @@ protected:
 	void draw_single_normal(vec4 start, vec4 direction);
 
 public:
+	void update_matrix();
 	void draw();
 	void draw_vertex_normals();
 	void draw_face_normals();

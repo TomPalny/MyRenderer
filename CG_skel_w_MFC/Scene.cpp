@@ -65,6 +65,7 @@ void Scene::redraw_necessary()
 
 void Scene::draw_one_model(Model* model)
 {
+	model->update_matrix();
 	model->draw();
 	if (_normal_type == VERTEX_NORMALS)
 	{
