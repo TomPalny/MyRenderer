@@ -5,7 +5,8 @@
 enum TransformMode
 {
 	WORLD_TRANSFORM,
-	MODEL_TRANSFORM
+	MODEL_TRANSFORM,
+	NUMBER_OF_TRANSFORM_MODES
 };
 
 class Model {

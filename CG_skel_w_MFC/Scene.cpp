@@ -149,14 +149,7 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		exit(EXIT_SUCCESS);
 		break;
 	case 32: // spacebar
-		if (_transform_mode == WORLD_TRANSFORM)
-		{
-			_transform_mode = MODEL_TRANSFORM;
-		}
-		else
-		{
-			_transform_mode = WORLD_TRANSFORM;
-		}
+		_transform_mode = (TransformMode)((_transform_mode + 1) % NUMBER_OF_TRANSFORM_MODES);
 		break;
 	case 'o':
 		open_file();
