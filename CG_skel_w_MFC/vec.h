@@ -122,7 +122,7 @@ struct vec2 {
 inline
 GLfloat dot( const vec2& u, const vec2& v ) {
 	assert(0);
-    return 0; /*BUG*/
+    return u.x*v.x+u.y*v.y; /*BUG*/
 }
 
 inline
@@ -133,7 +133,7 @@ GLfloat length( const vec2& v ) {
 inline
 vec2 normalize( const vec2& v ) {
 	assert(0);
-    return v / 1; /*BUG*/
+    return v / length(v); /*BUG*/
 }
 
 //////////////////////////////////////////////////////////////////////////////
