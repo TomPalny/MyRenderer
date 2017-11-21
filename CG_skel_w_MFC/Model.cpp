@@ -15,11 +15,11 @@ void Model::translate(float x, float y, float z, TransformMode mode)
 	translation[2][3] = z; // z
 	if (mode == WORLD_TRANSFORM)
 	{
-		_world_transforms *= translation;
+		_world_transforms = translation * _world_transforms;
 	}
 	else
 	{
-		_model_transforms *= translation;
+		_model_transforms = translation * _model_transforms;
 	}
 }
 
@@ -56,11 +56,11 @@ void Model::rotate(float theta, char axis, TransformMode mode)
 
 	if (mode == WORLD_TRANSFORM)
 	{
-		_world_transforms *= rotation;
+		_world_transforms = rotation * _world_transforms;
 	}
 	else
 	{
-		_model_transforms *= rotation;
+		_model_transforms = rotation * _model_transforms;
 	}
 }
 
@@ -74,11 +74,11 @@ void Model::scale(const float x, const float y, const float z, TransformMode mod
 
 	if (mode == WORLD_TRANSFORM)
 	{
-		_world_transforms *= scale;
+		_world_transforms = scale * _world_transforms;
 	}
 	else
 	{
-		_model_transforms *= scale;
+		_model_transforms = scale * _model_transforms;
 	}
 }
 
