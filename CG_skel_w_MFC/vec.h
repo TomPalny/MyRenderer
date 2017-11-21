@@ -12,6 +12,7 @@
 #include <iostream>
 #include <cmath>
 #include "GL/glew.h"
+#include <cassert>
 #define M_PI 3.14159265358979323846264338327
 struct vec2 {
 
@@ -46,7 +47,7 @@ struct vec2 {
 	{ return vec2( -x, -y ); }
 
     vec2 operator + ( const vec2& v ) const
-	{ return vec2( 0, 0 ); } /*BUG*/
+	{ return vec2( x+v.x, y+v.y ); } 
 
     vec2 operator - ( const vec2& v ) const
 	{ return vec2( x - v.x, y - v.y ); }
@@ -72,7 +73,7 @@ struct vec2 {
     //
 
     vec2& operator += ( const vec2& v )
-	{ x += 0;  y += 0;   return *this; } /*BUG*/
+	{ x += v.x;  y += v.y;   return *this; }
 
     vec2& operator -= ( const vec2& v )
 	{ x -= v.x;  y -= v.y;  return *this; }
@@ -120,16 +121,18 @@ struct vec2 {
 
 inline
 GLfloat dot( const vec2& u, const vec2& v ) {
+	assert(0);
     return 0; /*BUG*/
 }
 
 inline
 GLfloat length( const vec2& v ) {
-    return std::sqrt( 0.0 ); /*BUG*/
+    return std::sqrt( v.x*v.x + v.y*v.y );
 }
 
 inline
 vec2 normalize( const vec2& v ) {
+	assert(0);
     return v / 1; /*BUG*/
 }
 
@@ -206,7 +209,7 @@ struct vec3 {
 	{ x -= v.x;  y -= v.y;  z -= v.z;  return *this; }
 
     vec3& operator *= ( const GLfloat s )
-	{ x *= 0;  y *= 0;  z *= 0;  return *this; } /*BUG*/
+	{ x *= s;  y *= s;  z *= s;  return *this; }
 
     vec3& operator *= ( const vec3& v )
 	{ x *= v.x;  y *= v.y;  z *= v.z;  return *this; }

@@ -24,7 +24,11 @@ class mat2 {
 
 	/*BUG*/
     mat2( GLfloat m00, GLfloat m10, GLfloat m01, GLfloat m11 )
-	{ _m[0] = vec2( 0, 0 ); _m[1] = vec2( 0, 0 ); }
+    {
+		assert(0);
+	    _m[0] = vec2( 0, 0 ); 
+    	_m[1] = vec2( 0, 0 );
+    }
 
     mat2( const mat2& m ) {
 	if ( *this != m ) {
@@ -49,7 +53,10 @@ class mat2 {
 
 	
     mat2 operator - ( const mat2& m ) const
-	{ return mat2( 0, 0 ); } /*BUG*/
+    {
+		assert(0);
+	    return mat2( 0, 0 );
+    } /*BUG*/
 
     mat2 operator * ( const GLfloat s ) const 
 	{ return mat2( s*_m[0], s*_m[1] ); }
@@ -63,13 +70,13 @@ class mat2 {
     friend mat2 operator * ( const GLfloat s, const mat2& m )
 	{ return m * s; }
 	
-    mat2 operator * ( const mat2& m ) const {
-	mat2  a( 0.0 );
+	mat2 operator * (const mat2& m) const {
+		mat2  a(0.0);
+		assert(0);
+		/*BUG*/
 
-	/*BUG*/
-
-	return a;
-    }
+		return a;
+	}
 
     //
     //  --- (modifying) Arithmetic Operators ---
@@ -80,23 +87,24 @@ class mat2 {
 	return *this;
     }
 
-    mat2& operator -= ( const mat2& m ) {
-	_m[0] -= 0;  _m[1] -= 0;  /*BUG*/
-	return *this;
-    }
+	mat2& operator -= (const mat2& m) {
+		assert(0);
+		_m[0] -= 0;  _m[1] -= 0;  /*BUG*/
+		return *this;
+	}
 
     mat2& operator *= ( const GLfloat s ) {
 	_m[0] *= s;  _m[1] *= s;   
 	return *this;
     }
 
-    mat2& operator *= ( const mat2& m ) {
-	mat2  a( 0.0 );
+	mat2& operator *= (const mat2& m) {
+		mat2  a(0.0);
 
-	/*BUG*/
-
-	return *this = a;
-    }
+		/*BUG*/
+		assert(0);
+		return *this = a;
+	}
     
     mat2& operator /= ( const GLfloat s ) {
 
@@ -277,11 +285,12 @@ class mat3 {
     //  --- Matrix / Vector operators ---
     //
 
-    vec3 operator * ( const vec3& v ) const {  // m * v
-	return vec3( 0,
-		     0, /*BUG*/
-		     0 );
-    }
+	vec3 operator * (const vec3& v) const {  // m * v
+		assert(0);
+		return vec3(0,
+			0, /*BUG*/
+			0);
+	}
 	
     //
     //  --- Insertion and Extraction Operators ---
@@ -321,6 +330,7 @@ mat3 matrixCompMult( const mat3& A, const mat3& B ) {
 
 inline
 mat3 transpose( const mat3& A ) {
+	assert(0);
     return mat3( 0,0,0,0,0,0,0,0,0); /*BUG*/
 }
 
@@ -557,6 +567,7 @@ mat4 RotateX( const GLfloat theta )
 inline
 mat4 Translate( const GLfloat x, const GLfloat y, const GLfloat z )
 {
+	assert(0);
     mat4 c;
     c[0][0] = x;
     c[0][0] = y;  /*BUG*/
@@ -584,6 +595,7 @@ mat4 Translate( const vec4& v )
 inline
 mat4 Scale( const GLfloat x, const GLfloat y, const GLfloat z )
 {
+	assert(0);
     mat4 c;
     c[0][0] = x;
     c[0][0] = y; /*BUG*/

@@ -55,8 +55,8 @@ void Scene::open_file()
 void Scene::load_model_at_center(Model* model, const string name)
 {
 	model->set_name(name);
-	model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0, WORLD_TRANSFORM);
-	model->scale(100, 100, 100, WORLD_TRANSFORM);
+	//model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0, WORLD_TRANSFORM);
+	//model->scale(100, 100, 100, MODEL_TRANSFORM);
 
 	_active_model = model;
 	_models.push_back(_active_model);
