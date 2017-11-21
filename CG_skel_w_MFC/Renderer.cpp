@@ -7,41 +7,42 @@
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 
-Renderer::Renderer(int width, int height) :m_width(width), m_height(height), m_outBuffer(NULL)
+Renderer::Renderer(int width, int height) :
+	_buffer(NULL), _width(width), _height(height), _r(1.0), _g(1.0), _b(1.0)
 {
 	InitOpenGLRendering();
-	ChangeWindowSize(width,height);
+	set_window_size(width,height);
 }
 
 Renderer::~Renderer(void)
 {
 }
 
-void Renderer::ChangeWindowSize(int width, int height)
+void Renderer::set_window_size(int width, int height)
 {
-	if (m_outBuffer != NULL)
+	if (_buffer != NULL)
 	{
-		delete m_outBuffer;
+		delete _buffer;
 	}
-	m_width=width;
-	m_height=height;	
+	_width=width;
+	_height=height;	
 	CreateOpenGLBuffer(); //Do not remove this line.
-	m_outBuffer = new float[3*m_width*m_height];
+	_buffer = new float[3*_width*_height];
 }
 
-float* Renderer::GetBuffer()
+float* Renderer::get_buffer()
 {
-	return m_outBuffer;
+	return _buffer;
 }
 
 int Renderer::get_width()
 {
-	return m_width;
+	return _width;
 }
 
 int Renderer::get_height()
 {
-	return m_height;
+	return _height;
 }
 
 void Renderer::draw_point(const vec2 point)
@@ -51,13 +52,13 @@ void Renderer::draw_point(const vec2 point)
 
 void Renderer::draw_point(int x, int y)
 {
-	if (x < 0 || x >= m_width || y < 0 || y >= m_height)
+	if (x < 0 || x >= _width || y < 0 || y >= _height)
 	{
 		return;
 	}
-	m_outBuffer[INDEX(m_width, x, y, 0)] = 1.0f;
-	m_outBuffer[INDEX(m_width, x, y, 1)] = 1.0f;
-	m_outBuffer[INDEX(m_width, x, y, 2)] = 1.0f;
+	_buffer[INDEX(_width, x, y, 0)] = _r;
+	_buffer[INDEX(_width, x, y, 1)] = _g;
+	_buffer[INDEX(_width, x, y, 2)] = _b;
 }
 
 void Renderer::draw_line_old(vec2 point1, vec2 point2)
@@ -176,33 +177,40 @@ void Renderer::draw_line(vec2 point1, vec2 point2)
 
 void Renderer::clear_screen()
 {
-	for (int y = 0; y< m_height; y++)
+	for (int y = 0; y< _height; y++)
 	{
-		for(int x =0 ; x<m_width ; x++)
+		for(int x =0 ; x<_width ; x++)
 		{
-			m_outBuffer[INDEX(m_width, x, y, 0)] = 0;
-			m_outBuffer[INDEX(m_width, x, y, 1)] = 0;
-			m_outBuffer[INDEX(m_width, x, y, 2)] = 0;
+			_buffer[INDEX(_width, x, y, 0)] = 0;
+			_buffer[INDEX(_width, x, y, 1)] = 0;
+			_buffer[INDEX(_width, x, y, 2)] = 0;
 		}
 	}
 }
 
-void Renderer::SetDemoBuffer()
+void Renderer::set_color(float r, float g, float b)
+{
+	_r = r;
+	_g = g;
+	_b = b;
+}
+
+void Renderer::draw_demo()
 {
 	//vertical line
-	for(int i=0; i<m_height; i++)
+	for(int i=0; i<_height; i++)
 	{
-		m_outBuffer[INDEX(m_width,m_width/2,i,0)]=0.5f;	
-		m_outBuffer[INDEX(m_width,m_width/2,i,1)]=0.5f;	
-		m_outBuffer[INDEX(m_width,m_width/2,i,2)]=0.5f;
+		_buffer[INDEX(_width,_width/2,i,0)]=0.5f;	
+		_buffer[INDEX(_width,_width/2,i,1)]=0.5f;	
+		_buffer[INDEX(_width,_width/2,i,2)]=0.5f;
 
 	}
 	//horizontal line
-	for(int i=0; i<m_width; i++)
+	for(int i=0; i<_width; i++)
 	{
-		m_outBuffer[INDEX(m_width,i, m_height/2, 0)]=1;	
-		m_outBuffer[INDEX(m_width,i, m_height/2, 1)]=0;
-		m_outBuffer[INDEX(m_width,i, m_height/2 ,2)]=1;
+		_buffer[INDEX(_width,i, _height/2, 0)]=1;	
+		_buffer[INDEX(_width,i, _height/2, 1)]=0;
+		_buffer[INDEX(_width,i, _height/2 ,2)]=1;
 	}
 }
 
@@ -292,19 +300,18 @@ void Renderer::CreateOpenGLBuffer()
 {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gScreenTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, m_width, m_height, 0, GL_RGB, GL_FLOAT, NULL);
-	glViewport(0, 0, m_width, m_height);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, _width, _height, 0, GL_RGB, GL_FLOAT, NULL);
+	glViewport(0, 0, _width, _height);
 }
 
-void Renderer::SwapBuffers()
+void Renderer::swap_buffers()
 {
-
 	int a = glGetError();
 	glActiveTexture(GL_TEXTURE0);
 	a = glGetError();
 	glBindTexture(GL_TEXTURE_2D, gScreenTex);
 	a = glGetError();
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGB, GL_FLOAT, m_outBuffer);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_RGB, GL_FLOAT, _buffer);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	a = glGetError();
 

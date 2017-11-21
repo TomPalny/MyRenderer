@@ -107,8 +107,7 @@ void Model::set_name(string name)
 
 void Model::draw()
 {
-	vec4 origin = _world_transforms * vec4(0, 0, 0, 1);
-	_renderer->draw_letter('+', origin.x - 4, origin.y - 4);
+	_renderer->set_color(1, 1, 1);
 	for (const auto face : _faces)
 	{
 		const auto point1 = transform_point(face.point1).to_vec2();
@@ -123,19 +122,24 @@ void Model::draw()
 		_renderer->draw_line(point2, point3);
 		_renderer->draw_line(point3, point1);
 	}
+
+	vec4 origin = _world_transforms * vec4(0, 0, 0, 1);
+	_renderer->set_color(1, 0, 0);
+	_renderer->draw_letter('+', origin.x - 4, origin.y - 4);
 }
 
 void Model::draw_single_normal(vec4 start, vec4 direction)
 {
+	_renderer->set_color(0.5, 0.5, 0.5);
 	auto transformed_start = transform_point(start);
 	auto end = start.to_vec3() + normalize(direction.to_vec3()) * 0.2f;
 	auto transformed_end = transform_point(vec4(end));
 	_renderer->draw_line(transformed_start.to_vec2(), transformed_end.to_vec2());
 }
 
-void Model::update_matrix()
+void Model::update_matrix(mat4 view)
 {
-	_cached_world_model_transform = _world_transforms * _model_transforms;
+	_cached_world_model_transform = view * _world_transforms * _model_transforms;
 }
 
 void Model::draw_vertex_normals()

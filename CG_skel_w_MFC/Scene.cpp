@@ -55,9 +55,10 @@ void Scene::open_file()
 void Scene::load_model_at_center(Model* model, const string name)
 {
 	model->set_name(name);
-	model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0, WORLD_TRANSFORM);
-	model->scale(100, 100, 100, WORLD_TRANSFORM);
-
+	model->scale(100, 100, 100, MODEL_TRANSFORM);
+	//model->translate(200, 200, 0, WORLD_TRANSFORM);
+	//model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0, WORLD_TRANSFORM);
+	
 	_active_model = model;
 	_models.push_back(_active_model);
 	_active_model->set_renderer(_renderer);
@@ -95,6 +96,7 @@ void Scene::draw_status_string()
 		status += "TRANSLATE";
 	}
 
+	_renderer->set_color(0, 1, 0);
 	_renderer->draw_string(status.c_str(), 15, 15);
 }
 
@@ -105,7 +107,8 @@ void Scene::redraw_necessary()
 
 void Scene::draw_one_model(Model* model)
 {
-	model->update_matrix();
+	mat4 view;
+	model->update_matrix(view);
 	model->draw();
 	if (_normal_type == VERTEX_NORMALS)
 	{
@@ -127,14 +130,14 @@ void Scene::draw()
 	}
 
 	draw_status_string();
-	_renderer->SwapBuffers();
+	_renderer->swap_buffers();
 }
 
 void Scene::draw_demo() const
 {
 	_renderer->clear_screen();
-	_renderer->SetDemoBuffer();
-	_renderer->SwapBuffers();
+	_renderer->draw_demo();
+	_renderer->swap_buffers();
 }
 
 void Scene::switch_active_model(int id)
@@ -187,7 +190,7 @@ void Scene::keyboard_special(int key, int x, int y)
 		return;
 	}
 
-	float move_distance = 0.04f;
+	float move_distance = 1.0f;
 	if (glutGetModifiers() & GLUT_ACTIVE_SHIFT)
 	{
 		move_distance *= 4;

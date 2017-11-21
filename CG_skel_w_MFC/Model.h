@@ -24,7 +24,7 @@ protected:
 	void draw_single_normal(vec4 start, vec4 direction);
 
 public:
-	void update_matrix();
+	void update_matrix(mat4 view);
 	void draw();
 	void draw_vertex_normals();
 	void draw_face_normals();

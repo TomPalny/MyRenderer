@@ -8,45 +8,47 @@
 using namespace std;
 class Renderer
 {
-	float *m_outBuffer; // 3*width*height
-	float *m_zbuffer; // width*height
-	int m_width, m_height;
+	float *_buffer; // 3*width*height
+	float *_zbuffer; // width*height
+	int _width, _height;
+	float _r, _g, _b;
 
-	void CreateLocalBuffer();
+	void draw_line_implementation(vec2 point1, vec2 point2, bool inverted);
 
 	//////////////////////////////
 	// openGL stuff. Don't touch.
-
 	GLuint gScreenTex;
 	GLuint gScreenVtc;
 	void CreateOpenGLBuffer();
 	void InitOpenGLRendering();
-	void draw_line_implementation(vec2 point1, vec2 point2, bool inverted);
 	//////////////////////////////
 
 public:
-	Renderer();
 	Renderer(int width, int height);
 	~Renderer(void);
-	void Init();
+
+	/*void Init();
 	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals=NULL);
 	void SetCameraTransform(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
 	void SetObjectMatrices(const mat4& oTransform, const mat3& nTransform);
-	void SwapBuffers();
+	
 	void ClearColorBuffer();
-	void ClearDepthBuffer();
-	void SetDemoBuffer();
-	void draw_string(const char* string, int left, int bottom);
-	void draw_letter(char letter, int left, int bottom);
-	void ChangeWindowSize(int width, int height);
-	float* GetBuffer();
+	void ClearDepthBuffer();*/
+
+	void swap_buffers();
+	void clear_screen();
+	void set_color(float r, float g, float b);
+	void set_window_size(int width, int height);
+	float* get_buffer();
 	int get_width();
 	int get_height();
+
+	void draw_string(const char* string, int left, int bottom);
+	void draw_letter(char letter, int left, int bottom);
 	void draw_point(vec2 point);
 	void draw_point(int x, int y);
-	void draw_line_old(vec2 point1, vec2 point2);
 	void draw_line(vec2 point1, vec2 point2);
-	
-	void clear_screen();
+	void draw_line_old(vec2 point1, vec2 point2);
+	void draw_demo();
 };

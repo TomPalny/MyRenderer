@@ -49,7 +49,7 @@ void display( void )
 
 void reshape( int width, int height )
 {
-	renderer->ChangeWindowSize(width, height);
+	renderer->set_window_size(width, height);
 	scene->redraw_necessary();
 }
 
