@@ -38,7 +38,7 @@ public:
 	void ClearDepthBuffer();
 	void SetDemoBuffer();
 	void draw_string(const char* string, int left, int bottom);
-	void draw_letter(char letteri, int left, int bottom);
+	void draw_letter(char letter, int left, int bottom);
 	void ChangeWindowSize(int width, int height);
 	float* GetBuffer();
 	int get_width();

@@ -208,6 +208,14 @@ void Renderer::SetDemoBuffer()
 
 void Renderer::draw_string(const char* string, int left, int bottom)
 {
+	/*
+	bool underline = true;
+	if (underline)
+	{
+		draw_line(vec2(left, bottom-1), vec2(left + strlen(string) * 10, bottom-1));
+		draw_line(vec2(left, bottom-2), vec2(left + strlen(string) * 10, bottom-2));
+	}*/
+
 	while (*string != '\0')
 	{
 		draw_letter(*string, left, bottom);
@@ -219,14 +227,13 @@ void Renderer::draw_string(const char* string, int left, int bottom)
 void Renderer::draw_letter(char letter, int left, int bottom)
 {
 	char* letter_data = font8x8_basic[letter];
-	int top = bottom + 40;
-	for (int y = 0; y<8; y++)
+	for (int x = 0; x<8; x++)
 	{
-		for (int x = 0; x<8; x++)
+		for (int y = 0; y<8; y++)
 		{
 			if (letter_data[y] & 1 << (x))
 			{
-				draw_point(left + x, top - y);
+				draw_point(left + x, bottom + 8 - y);
 			}
 		}
 	}

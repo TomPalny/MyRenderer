@@ -95,7 +95,7 @@ void Scene::draw_status_string()
 		status += "TRANSLATE";
 	}
 
-	_renderer->draw_string(status.c_str(), 15, 0);
+	_renderer->draw_string(status.c_str(), 15, 15);
 }
 
 void Scene::redraw_necessary()
