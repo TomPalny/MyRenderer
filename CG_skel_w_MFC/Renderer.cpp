@@ -90,11 +90,11 @@ void Renderer::draw_line_old(vec2 point1, vec2 point2)
 		const int y = m*x + b;
 		if (flipped)
 		{
-			draw_point(vec2(y, x));
+			draw_point(y, x);
 		}
 		else
 		{
-			draw_point(vec2(x, y));
+			draw_point(x, y);
 		}
 	}
 }
@@ -226,7 +226,7 @@ void Renderer::draw_letter(char letter, int left, int bottom)
 		{
 			if (letter_data[y] & 1 << (x))
 			{
-				draw_point(vec2(left + x, top - y));
+				draw_point(left + x, top - y);
 			}
 		}
 	}
