@@ -107,6 +107,8 @@ void Model::set_name(string name)
 
 void Model::draw()
 {
+	vec4 origin = _world_transforms * vec4(0, 0, 0, 1);
+	_renderer->draw_letter('+', origin.x - 4, origin.y - 4);
 	for (const auto face : _faces)
 	{
 		const auto point1 = transform_point(face.point1).to_vec2();
