@@ -92,27 +92,15 @@ void motion(int x, int y)
 	last_y = y;
 }
 
-void open_file()
-{
-	CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
-	if (dlg.DoModal() == IDOK)
-	{
-		std::string s(static_cast<LPCTSTR>(dlg.GetPathName()));
-		scene->load_obj_model(static_cast<LPCTSTR>(dlg.GetPathName()), static_cast<LPCTSTR>(dlg.GetFileTitle()));
-		init_menu();
-	}
-}
-
 void menu_callback(int id)
 {
 	switch (id)
 	{
 	case FILE_OPEN:
-		open_file();
+		scene->open_file();
 		break;
 	case ADD_PYRAMID:
 		scene->add_pyramid_model();
-		init_menu();
 		break;
 	case MAIN_DEMO:
 		scene->draw_demo();

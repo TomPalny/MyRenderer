@@ -57,11 +57,11 @@ class Scene {
 
 public:
 	explicit Scene(Renderer* renderer);
-	void set_normals_type(NormalType normal_type);;
+	void set_normals_type(NormalType normal_type);
+	void open_file();;
 
 	void add_pyramid_model();
 	void load_model_at_center(Model* model, const string name);
-	void load_obj_model(string filename, string name);
 	
 	void draw();
 	void draw_demo() const;

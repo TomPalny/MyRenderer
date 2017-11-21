@@ -7,6 +7,9 @@
 
 using namespace std;
 
+// defined in CG_skel_w_MFC.cpp
+void init_menu();
+
 Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 									_normal_type(NO_NORMALS), _operation_mode(TRANSLATE_MODE),
 									_transform_mode(WORLD_TRANSFORM)
@@ -39,9 +42,14 @@ void Scene::add_pyramid_model()
 	load_model_at_center(model, "Pyramid");
 }
 
-void Scene::load_obj_model(const string filename, const string name)
+void Scene::open_file()
 {
-	load_model_at_center(new MeshModel(filename), name);
+	CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
+	if (dlg.DoModal() == IDOK)
+	{
+		std::string s(static_cast<LPCTSTR>(dlg.GetPathName()));
+		load_model_at_center(new MeshModel(static_cast<LPCTSTR>(dlg.GetPathName())), static_cast<LPCTSTR>(dlg.GetFileTitle()));
+	}
 }
 
 void Scene::load_model_at_center(Model* model, const string name)
@@ -53,9 +61,8 @@ void Scene::load_model_at_center(Model* model, const string name)
 	_active_model = model;
 	_models.push_back(_active_model);
 	_active_model->set_renderer(_renderer);
-	/* we don't use redraw_necessary() because that will force a redraw of ALL models */
-	draw_one_model(model);
-	_renderer->SwapBuffers();
+	init_menu();
+	redraw_necessary();
 }
 
 void Scene::redraw_necessary()
@@ -130,6 +137,9 @@ void Scene::keyboard(unsigned char key, int x, int y)
 			_transform_mode = WORLD_TRANSFORM;
 		}
 		redraw_necessary();
+		break;
+	case 'o':
+		open_file();
 		break;
 	case 'p':
 		add_pyramid_model();
