@@ -157,7 +157,6 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		{
 			_transform_mode = WORLD_TRANSFORM;
 		}
-		redraw_necessary();
 		break;
 	case 'o':
 		open_file();
@@ -167,7 +166,6 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		break;
 	case 'v':
 		_normal_type = (NormalType) ((_normal_type + 1) % NUMBER_OF_NORMAL_TYPES);
-		redraw_necessary();
 		break;
 	case 's':
 		set_operation_mode(SCALE_MODE);
@@ -186,6 +184,7 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		_active_model = _models[new_index];
 		break;
 	}
+	redraw_necessary();
 }
 
 void Scene::keyboard_special(int key, int x, int y)
