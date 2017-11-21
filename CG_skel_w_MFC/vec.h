@@ -14,6 +14,7 @@
 #include "GL/glew.h"
 #include <cassert>
 #define M_PI 3.14159265358979323846264338327
+
 struct vec2 {
 
     GLfloat  x;
@@ -132,8 +133,7 @@ GLfloat length( const vec2& v ) {
 
 inline
 vec2 normalize( const vec2& v ) {
-	assert(0);
-    return v / length(v); /*BUG*/
+    return v / length(v);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -174,29 +174,39 @@ struct vec3 {
     //
 
     vec3 operator - () const  // unary minus operator
-	{ return vec3( -x, -y, -z ); }
+    {
+	    return vec3( -x, -y, -z );
+    }
 
     vec3 operator + ( const vec3& v ) const
-	{ return vec3( x + v.x, y + v.y, z + v.z ); }
+    {
+	    return vec3( x + v.x, y + v.y, z + v.z );
+    }
 
     vec3 operator - ( const vec3& v ) const
-	{ return vec3( x - v.x, y - v.y, z - v.z ); }
+    {
+	    return vec3( x - v.x, y - v.y, z - v.z );
+    }
 
     vec3 operator * ( const GLfloat s ) const
-	{ return vec3( s*x, s*y, s*z ); }
+    {
+	    return vec3( s*x, s*y, s*z );
+    }
 
     vec3 operator * ( const vec3& v ) const
-	{ return vec3( x*v.x, y*v.y, z*v.z ); }
+    {
+	    return vec3( x*v.x, y*v.y, z*v.z );
+    }
 
     friend vec3 operator * ( const GLfloat s, const vec3& v )
-	{ return v * s; }
-
-    vec3 operator / ( const GLfloat s ) const {
-
-
-	GLfloat r = GLfloat(1.0) / s;
-	return *this * r;
+    {
+	    return v * s;
     }
+
+	vec3 operator / (const GLfloat s) const {
+		GLfloat r = GLfloat(1.0) / s;
+		return *this * r;
+	}
 
     //
     //  --- (modifying) Arithematic Operators ---
@@ -243,6 +253,11 @@ struct vec3 {
 
     operator GLfloat* ()
 	{ return static_cast<GLfloat*>( &x ); }
+
+	vec2 to_vec2()
+	{
+		return vec2(x, y);
+	}
 };
 
 //----------------------------------------------------------------------------
@@ -390,6 +405,11 @@ struct vec4 {
 	vec3 to_vec3() const
 	{
 		return vec3(x, y, z);
+    }
+
+	vec2 to_vec2() const
+    {
+		return vec2(x, y);
     }
 };
 

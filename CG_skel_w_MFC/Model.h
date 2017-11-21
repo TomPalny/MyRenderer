@@ -21,7 +21,6 @@ protected:
 	char* _name;
 
 	vec4 transform_point(vec4 point) const;
-	vec2 vec4_to_vec2(const vec4 point);
 	void draw_single_normal(vec4 start, vec4 direction);
 
 public:

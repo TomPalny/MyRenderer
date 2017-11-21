@@ -92,10 +92,6 @@ vec4 Model::transform_point(const vec4 point) const
 	return _cached_world_model_transform * point;
 }
 
-vec2 Model::vec4_to_vec2(const vec4 point)
-{
-	return vec2(point.x / point.w, point.y / point.w);
-}
 const char* Model::get_name() const
 {
 	return _name;
@@ -113,9 +109,9 @@ void Model::draw()
 {
 	for (const auto face : _faces)
 	{
-		const auto point1 = vec4_to_vec2(transform_point(face.point1));
-		const auto point2 = vec4_to_vec2(transform_point(face.point2));
-		const auto point3 = vec4_to_vec2(transform_point(face.point3));
+		const auto point1 = transform_point(face.point1).to_vec2();
+		const auto point2 = transform_point(face.point2).to_vec2();
+		const auto point3 = transform_point(face.point3).to_vec2();
 
 		//_renderer->draw_point(point1);
 		//_renderer->draw_point(point2);
@@ -130,10 +126,9 @@ void Model::draw()
 void Model::draw_single_normal(vec4 start, vec4 direction)
 {
 	auto transformed_start = transform_point(start);
-	auto end = start + direction;
-	end.w = 1;
-	auto transformed_end = transform_point(end);
-	_renderer->draw_line(vec4_to_vec2(transformed_start), vec4_to_vec2(transformed_end));
+	auto end = start.to_vec3() + normalize(direction.to_vec3()) * 0.2f;
+	auto transformed_end = transform_point(vec4(end));
+	_renderer->draw_line(transformed_start.to_vec2(), transformed_end.to_vec2());
 }
 
 void Model::update_matrix()
