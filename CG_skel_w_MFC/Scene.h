@@ -62,7 +62,8 @@ public:
 
 	void add_pyramid_model();
 	void load_model_at_center(Model* model, const string name);
-	
+
+	void draw_status_string();
 	void draw();
 	void draw_demo() const;
 	void switch_active_model(int id);

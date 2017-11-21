@@ -65,6 +65,39 @@ void Scene::load_model_at_center(Model* model, const string name)
 	redraw_necessary();
 }
 
+void Scene::draw_status_string()
+{
+	string status;
+	if (_active_model != NULL)
+	{
+		status += _active_model->get_name();
+	}
+
+	if (_transform_mode == WORLD_TRANSFORM)
+	{
+		status += " // WORLD  // ";
+	}
+	else
+	{
+		status += " // OBJECT  // ";
+	}
+
+	if (_operation_mode == ROTATE_MODE)
+	{
+		status += "ROTATE";
+	}
+	else if (_operation_mode == SCALE_MODE)
+	{
+		status += "SCALE";
+	}
+	else
+	{
+		status += "TRANSLATE";
+	}
+
+	_renderer->draw_string(status.c_str(), 15, 0);
+}
+
 void Scene::redraw_necessary()
 {
 	glutPostRedisplay();
@@ -82,12 +115,6 @@ void Scene::draw_one_model(Model* model)
 	{
 		model->draw_face_normals();
 	}
-
-	if (model == _active_model)
-	{
-		// something is weird with our window height
-		_renderer->draw_string(model->get_name(), 10, _renderer->get_height()-110);
-	}
 }
 void Scene::draw()
 {
@@ -98,14 +125,8 @@ void Scene::draw()
 	{
 		draw_one_model(model);
 	}
-	if (_transform_mode == WORLD_TRANSFORM)
-	{
-		_renderer->draw_string("WORLD", 15, 0);
-	}
-	else
-	{
-		_renderer->draw_string("OBJECT", 15, 0);
-	}
+
+	draw_status_string();
 	_renderer->SwapBuffers();
 }
 
