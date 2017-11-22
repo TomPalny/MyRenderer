@@ -15,6 +15,7 @@ Camera::~Camera()
 void Camera::look_at(vec4 at)
 {
 	// find our position in world coordinates
+	// TODO: is this wrong?
 	vec4 eye = get_origin_in_world_coordinates();
 
 	// these are also in world coordinates
@@ -44,9 +45,11 @@ mat4 Camera::get_view_matrix()
 	ortho[0][0] = 2 / (right - left);
 	ortho[1][1] = 2 / (top - bottom);
 	ortho[2][2] = -2 / (farz - nearz);
+	ortho[3][3] = 1;
+
 	ortho[0][3] = -(left+right)/(right-left);
 	ortho[1][3] = -(top+bottom)/(top-bottom);
-	ortho[1][3] = -(farz+nearz)/(farz-nearz);
+	ortho[2][3] = -(farz+nearz)/(farz-nearz);
 
 	return ortho * _view;
 }
