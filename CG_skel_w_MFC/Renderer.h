@@ -14,6 +14,11 @@ class Renderer
 	float _r, _g, _b;
 
 	void draw_line_implementation(vec2 point1, vec2 point2, bool inverted);
+	vec2 viewport_to_screen_coordinates(vec2 point);
+	void draw_point(vec2 point);
+	void draw_point(int x, int y);
+	void draw_line(vec2 point1, vec2 point2);
+	void draw_line_old(vec2 point1, vec2 point2);
 
 	//////////////////////////////
 	// openGL stuff. Don't touch.
@@ -46,9 +51,7 @@ public:
 
 	void draw_string(const char* string, int left, int bottom);
 	void draw_letter(char letter, int left, int bottom);
-	void draw_point(vec2 point);
-	void draw_point(int x, int y);
-	void draw_line(vec2 point1, vec2 point2);
-	void draw_line_old(vec2 point1, vec2 point2);
+	void draw_letter_v(char letter, vec2 point);
+	void draw_line_v(vec2 point1, vec2 point2);
 	void draw_demo();
 };

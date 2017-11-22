@@ -2,7 +2,7 @@
 #include "Model.h"
 #include "mat.h"
 
-Model::Model() : _renderer(nullptr)
+Model::Model() : _renderer(nullptr), _origin_sign('+')
 {
 }
 
@@ -42,14 +42,14 @@ void Model::draw()
 		//_renderer->draw_point(point2);
 		//_renderer->draw_point(point3);
 
-		_renderer->draw_line(point1, point2);
-		_renderer->draw_line(point2, point3);
-		_renderer->draw_line(point3, point1);
+		_renderer->draw_line_v(point1, point2);
+		_renderer->draw_line_v(point2, point3);
+		_renderer->draw_line_v(point3, point1);
 	}
 
 	vec4 origin = _cached_world_model_transform * vec4(0, 0, 0, 1);
 	_renderer->set_color(1, 0, 0);
-	_renderer->draw_letter('+', origin.x - 4, origin.y - 4);
+	_renderer->draw_letter_v(_origin_sign, origin.to_vec2());
 }
 
 void Model::draw_single_normal(vec4 start, vec4 direction)
@@ -58,7 +58,7 @@ void Model::draw_single_normal(vec4 start, vec4 direction)
 	auto transformed_start = transform_point(start);
 	auto end = start.to_vec3() + normalize(direction.to_vec3()) * 0.2f;
 	auto transformed_end = transform_point(vec4(end));
-	_renderer->draw_line(transformed_start.to_vec2(), transformed_end.to_vec2());
+	_renderer->draw_line_v(transformed_start.to_vec2(), transformed_end.to_vec2());
 }
 
 vec4 Model::get_origin_in_world_coordinates()

@@ -133,6 +133,20 @@ void Renderer::draw_line_implementation(vec2 point1, vec2 point2, const bool inv
 	}
 }
 
+// transforms points from the canonical view volumn to screen coordinates
+vec2 inline Renderer::viewport_to_screen_coordinates(vec2 point)
+{
+	return vec2(_width / 2.0f * (point.x + 1), _height / 2.0f * (point.y + 1));
+}
+
+// draws a line, first performing viewport transformation
+void Renderer::draw_line_v(vec2 point1, vec2 point2)
+{
+	point1 = viewport_to_screen_coordinates(point1);
+	point2 = viewport_to_screen_coordinates(point2);
+	draw_line(point1, point2);
+}
+
 void Renderer::draw_line(vec2 point1, vec2 point2)
 {
 	bool inverted = false;
@@ -245,6 +259,12 @@ void Renderer::draw_letter(char letter, int left, int bottom)
 			}
 		}
 	}
+}
+
+void Renderer::draw_letter_v(char letter, vec2 point)
+{
+	auto fixed_point = viewport_to_screen_coordinates(point);
+	draw_letter(letter, fixed_point.x - 4, fixed_point.y - 4);
 }
 
 /////////////////////////////////////////////////////

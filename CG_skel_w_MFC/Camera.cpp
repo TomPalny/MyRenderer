@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "Camera.h"
 
-Camera::Camera(vec3 transform)
+Camera::Camera(int camera_id)
 {
-	_transform = vec4(transform);
+	_origin_sign = '0' + camera_id;
 }
 
 
@@ -32,5 +32,21 @@ void Camera::look_at(vec4 at)
 
 mat4 Camera::get_view_matrix()
 {
-	return _view;
+	const float aspect_ratio = _renderer->get_width() / (float)_renderer->get_height();
+	const float bottom = -5;
+	const float top = 5;
+	const float left = -5 * aspect_ratio;	
+	const float right = 5 * aspect_ratio;
+	const float nearz = -5;
+	const float farz = 5;
+
+	mat4 ortho;
+	ortho[0][0] = 2 / (right - left);
+	ortho[1][1] = 2 / (top - bottom);
+	ortho[2][2] = -2 / (farz - nearz);
+	ortho[0][3] = -(left+right)/(right-left);
+	ortho[1][3] = -(top+bottom)/(top-bottom);
+	ortho[1][3] = -(farz+nearz)/(farz-nearz);
+
+	return ortho * _view;
 }

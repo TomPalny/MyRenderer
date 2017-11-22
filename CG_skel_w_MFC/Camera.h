@@ -2,12 +2,11 @@
 #include "Model.h"
 
 class Camera : public Model {
-	vec4 _transform;
 	mat4 _projection;
 	mat4 _view;
 
 public:
-	explicit Camera(vec3 transform);
+	Camera(int camera_id);
 	~Camera();
 	void look_at(vec4 at);
 	mat4 get_view_matrix();

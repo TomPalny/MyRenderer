@@ -19,6 +19,7 @@ protected:
 	mat4 _cached_world_model_transform;
 	vector<Face> _faces;
 	char* _name;
+	char _origin_sign;
 
 	vec4 transform_point(vec4 point) const;
 	void draw_single_normal(vec4 start, vec4 direction);

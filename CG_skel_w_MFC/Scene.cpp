@@ -18,15 +18,15 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 									_transform_mode(WORLD_TRANSFORM)
 {
 	// default view is from the front
-	auto front = new Camera(vec3(0, 0, 1));
+	auto front = new Camera(1);
 	front->perform_operation(Translate(0, 0, 1), WORLD_TRANSFORM);
 	front->set_renderer(renderer);
 	front->set_name("Camera1 (Front)");
 	_cameras.push_back(front);
 	_models.push_back(front);
 
-	auto left = new Camera(vec3(30, 30, 0));
-	left->perform_operation(Translate(30, 30, 0), WORLD_TRANSFORM);
+	auto left = new Camera(2);
+	left->perform_operation(Translate(2, 1, 0), WORLD_TRANSFORM);
 	left->set_renderer(renderer);
 	left->set_name("Camera2 (Left)");
 	_cameras.push_back(left);
@@ -80,7 +80,7 @@ void Scene::open_file()
 void Scene::load_model_at_center(Model* model, const string name)
 {
 	model->set_name(name);
-	model->perform_operation(Scale(100, 100, 100), MODEL_TRANSFORM);
+	//model->perform_operation(Scale(100, 100, 100), MODEL_TRANSFORM);
 	//model->translate(200, 200, 0, WORLD_TRANSFORM);
 	//model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0, WORLD_TRANSFORM);
 	
@@ -223,7 +223,7 @@ void Scene::keyboard_special(int key, int x, int y)
 	static const float LARGER_SCALE_FACTOR = 1.4;
 	static const float SMALLER_SCALE_FACTOR = 0.6;
 	static const float NO_SCALE = 1;
-	float move_distance = 1.0f;
+	float move_distance = 0.3f;
 	float theta = 0.1;
 
 	// use "larger" transforms when shift is held
