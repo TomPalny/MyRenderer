@@ -4,6 +4,7 @@
 #include <string>
 #include "GL/freeglut.h"
 #include "PrimitiveModel.h"
+#include "Camera.h"
 
 using namespace std;
 
@@ -14,6 +15,22 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 									_normal_type(NO_NORMALS), _operation_mode(TRANSLATE_MODE),
 									_transform_mode(WORLD_TRANSFORM)
 {
+	// default view is from the front
+	auto front = new Camera(vec3(0, 0, 1));
+	front->perform_operation(Translate(0, 0, 1), WORLD_TRANSFORM);
+	front->set_renderer(renderer);
+	front->set_name("Camera1 (Front)");
+	_cameras.push_back(front);
+	_models.push_back(front);
+
+	auto left = new Camera(vec3(30, 30, 0));
+	left->perform_operation(Translate(30, 30, 0), WORLD_TRANSFORM);
+	left->set_renderer(renderer);
+	left->set_name("Camera2 (Left)");
+	_cameras.push_back(left);
+	_models.push_back(left);
+
+	_active_camera = front;
 }
 
 void Scene::set_normals_type(NormalType normal_type)
@@ -36,6 +53,12 @@ void Scene::set_operation_mode(OperationMode mode)
 	_operation_mode = mode;
 }
 
+void Scene::switch_camera(unsigned int number)
+{
+	_active_camera = _cameras[number];
+	redraw_necessary();
+}
+
 void Scene::add_pyramid_model()
 {
 	const auto model = PrimitiveModel::create_pyramid(0.0f, 0.0f, 0.0f);
@@ -55,7 +78,7 @@ void Scene::open_file()
 void Scene::load_model_at_center(Model* model, const string name)
 {
 	model->set_name(name);
-	model->scale(100, 100, 100, MODEL_TRANSFORM);
+	model->perform_operation(Scale(100, 100, 100), MODEL_TRANSFORM);
 	//model->translate(200, 200, 0, WORLD_TRANSFORM);
 	//model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0, WORLD_TRANSFORM);
 	
@@ -107,8 +130,7 @@ void Scene::redraw_necessary()
 
 void Scene::draw_one_model(Model* model)
 {
-	mat4 view;
-	model->update_matrix(view);
+	model->update_matrix(_active_camera->get_view_matrix());
 	model->draw();
 	if (_normal_type == VERTEX_NORMALS)
 	{
@@ -127,6 +149,11 @@ void Scene::draw()
 	for(auto model : _models )
 	{
 		draw_one_model(model);
+	}
+
+	for (auto camera : _cameras)
+	{
+		draw_one_model(camera);
 	}
 
 	draw_status_string();
@@ -153,6 +180,10 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		break;
 	case 32: // spacebar
 		_transform_mode = (TransformMode)((_transform_mode + 1) % NUMBER_OF_TRANSFORM_MODES);
+		break;
+	case '1':
+	case '2':
+		switch_camera(key - '1');
 		break;
 	case 'o':
 		open_file();
@@ -190,56 +221,62 @@ void Scene::keyboard_special(int key, int x, int y)
 		return;
 	}
 
-	float move_distance = 1.0f;
-	if (glutGetModifiers() & GLUT_ACTIVE_SHIFT)
-	{
-		move_distance *= 4;
-	}
 	static const float LARGER_SCALE_FACTOR = 1.4;
 	static const float SMALLER_SCALE_FACTOR = 0.6;
 	static const float NO_SCALE = 1;
-	static const float THETA = 0.1;
+	float move_distance = 1.0f;
+	float theta = 0.1;
 
-	switch (key) {
+	// use "larger" transforms when shift is held
+	if (glutGetModifiers() & GLUT_ACTIVE_SHIFT)
+	{
+		move_distance *= 4;
+		theta *= 2;
+	}
+
+	mat4 operation;
+	switch (key)
+	{
 	case GLUT_KEY_RIGHT:
 		if (_operation_mode == SCALE_MODE)
-			_active_model->scale(LARGER_SCALE_FACTOR, NO_SCALE, NO_SCALE, _transform_mode);
+			operation = Scale(LARGER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
 		else if (_operation_mode == ROTATE_MODE)
-			_active_model->rotate(THETA, 'y', _transform_mode);
+			operation = RotateMat(theta, 'y');
 		else
-			_active_model->translate(move_distance, 0, 0, _transform_mode);
+			operation = Translate(move_distance, 0, 0);
 		break;
 	case GLUT_KEY_LEFT:
 		if (_operation_mode == SCALE_MODE)
-			_active_model->scale(SMALLER_SCALE_FACTOR, NO_SCALE, NO_SCALE, _transform_mode);
+			operation = Scale(SMALLER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
 		else if (_operation_mode == ROTATE_MODE)
-			_active_model->rotate(-THETA, 'y', _transform_mode);
+			operation = RotateMat(-theta, 'y');
 		else
-			_active_model->translate(-move_distance, 0, 0, _transform_mode);
+			operation = Translate(-move_distance, 0, 0);
 		break;
 	case GLUT_KEY_UP:
 		if (_operation_mode == SCALE_MODE)
-			_active_model->scale(NO_SCALE, LARGER_SCALE_FACTOR, NO_SCALE, _transform_mode);
+			operation = Scale(NO_SCALE, LARGER_SCALE_FACTOR, NO_SCALE);
 		else if (_operation_mode == ROTATE_MODE)
-			_active_model->rotate(THETA, 'x', _transform_mode);
+			operation = RotateMat(theta, 'x');
 		else
-			_active_model->translate(0, move_distance, 0, _transform_mode);
+			operation = Translate(0, move_distance, 0);
 		break;
 	case GLUT_KEY_DOWN:
 		if (_operation_mode == SCALE_MODE)
-			_active_model->scale(NO_SCALE, SMALLER_SCALE_FACTOR, NO_SCALE, _transform_mode);
+			operation = Scale(NO_SCALE, SMALLER_SCALE_FACTOR, NO_SCALE);
 		else if (_operation_mode == ROTATE_MODE)
-			_active_model->rotate(-THETA, 'x', _transform_mode);
+			operation = RotateMat(-theta, 'x');
 		else
-			_active_model->translate(0, -move_distance, 0, _transform_mode);
+			operation = Translate(0, -move_distance, 0);
 		break;
 	case GLUT_KEY_PAGE_UP:
-		_active_model->rotate(THETA, 'z', _transform_mode);
+		operation = RotateMat(theta, 'z');
 		break;
 	case GLUT_KEY_PAGE_DOWN:
-		_active_model->rotate(-THETA, 'z', _transform_mode);
+		operation = RotateMat(-theta, 'z');
 		break;
 	}
 
+	_active_model->perform_operation(operation, _transform_mode);
 	redraw_necessary();
 }

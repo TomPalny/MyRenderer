@@ -28,9 +28,7 @@ public:
 	void draw();
 	void draw_vertex_normals();
 	void draw_face_normals();
-	void translate(float x, float y, float z, TransformMode mode);
-	void rotate(float theta, char axis, TransformMode mode);
-	void scale(float x, float y, float z, TransformMode mode);
+	void perform_operation(mat4 operation, TransformMode mode);
 	void set_renderer(Renderer* renderer);
 	const char* get_name() const;
 	void set_name(string name);

@@ -6,82 +6,6 @@ Model::Model() : _renderer(nullptr)
 {
 }
 
-void Model::translate(float x, float y, float z, TransformMode mode)
-{
-	// default translation
-	mat4 translation;
-	translation[0][3] = x; // x
-	translation[1][3] = y; // y
-	translation[2][3] = z; // z
-	if (mode == WORLD_TRANSFORM)
-	{
-		_world_transforms = translation * _world_transforms;
-	}
-	else
-	{
-		_model_transforms = translation * _model_transforms;
-	}
-}
-
-void Model::rotate(float theta, char axis, TransformMode mode)
-{
-	mat4 rotation;
-	switch (axis)
-	{
-	case 'x':
-		rotation[0][0] = 1;
-		rotation[1][1] = cos(theta);
-		rotation[1][2] = sin(theta);
-		rotation[2][1] = -sin(theta);
-		rotation[2][2] = cos(theta);
-		rotation[3][3] = 1;
-		break;
-	case 'y':
-		rotation[0][0] = cos(theta);
-		rotation[0][2] = -sin(theta);
-		rotation[1][1] = 1;
-		rotation[2][0] = sin(theta);
-		rotation[2][2] = cos(theta);
-		rotation[3][3] = 1;
-		break;
-	case 'z':
-		rotation[0][0] = cos(theta);
-		rotation[0][1] = sin(theta);
-		rotation[1][0] = -sin(theta);
-		rotation[1][1] = cos(theta);
-		rotation[2][2] = 1;
-		rotation[3][3] = 1;
-		break;
-	}
-
-	if (mode == WORLD_TRANSFORM)
-	{
-		_world_transforms = rotation * _world_transforms;
-	}
-	else
-	{
-		_model_transforms = rotation * _model_transforms;
-	}
-}
-
-
-void Model::scale(const float x, const float y, const float z, TransformMode mode)
-{
-	mat4 scale;
-	scale[0][0] = x; // x
-	scale[1][1] = y; // y
-	scale[2][2] = z; // z
-
-	if (mode == WORLD_TRANSFORM)
-	{
-		_world_transforms = scale * _world_transforms;
-	}
-	else
-	{
-		_model_transforms = scale * _model_transforms;
-	}
-}
-
 void Model::set_renderer(Renderer * renderer)
 {
 	_renderer = renderer;
@@ -165,5 +89,17 @@ void Model::draw_face_normals()
 		auto normal = normalize(cross(vector1, vector2));
 		auto center_of_triangle = (face.point1 + face.point2 + face.point3) / 3;
 		draw_single_normal(center_of_triangle, normal);
+	}
+}
+
+void Model::perform_operation(mat4 operation, TransformMode mode)
+{
+	if (mode == WORLD_TRANSFORM)
+	{
+		_world_transforms = operation * _world_transforms;
+	}
+	else
+	{
+		_model_transforms = operation * _model_transforms;
 	}
 }

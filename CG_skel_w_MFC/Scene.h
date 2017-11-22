@@ -5,28 +5,11 @@
 #include <string>
 #include "Renderer.h"
 #include "Model.h"
+#include "Camera.h"
 
 using namespace std;
 
 class Light {
-
-};
-
-class Camera {
-	mat4 cTransform;
-	mat4 projection;
-
-public:
-	void setTransformation(const mat4& transform);
-	void LookAt(const vec4& eye, const vec4& at, const vec4& up );
-	void Ortho( const float left, const float right,
-		const float bottom, const float top,
-		const float zNear, const float zFar );
-	void Frustum( const float left, const float right,
-		const float bottom, const float top,
-		const float zNear, const float zFar );
-	mat4 Perspective( const float fovy, const float aspect,
-		const float zNear, const float zFar);
 
 };
 
@@ -47,9 +30,10 @@ enum OperationMode
 
 class Scene {
 	Model* _active_model;
+	Camera* _active_camera;
 	vector<Model*> _models; // TODO: we need to free these in the dtor
-	vector<Light*> _lights;
 	vector<Camera*> _cameras;
+	vector<Light*> _lights;
 	Renderer *_renderer;
 	NormalType _normal_type;
 	OperationMode _operation_mode;
@@ -72,10 +56,9 @@ public:
 	void add_objects_to_menu();
 	void set_operation_mode(OperationMode mode);
 
+	void switch_camera(unsigned int number);
 	void keyboard(unsigned char key, int x, int y);
 	void keyboard_special(int key, int x, int y);
 
-	int activeModel;
 	int activeLight;
-	int activeCamera;
 };

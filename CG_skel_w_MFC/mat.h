@@ -558,6 +558,41 @@ mat4 RotateX( const GLfloat theta )
     return c;
 }
 
+inline mat4 RotateMat(float theta, char axis)
+{
+	mat4 rotation;
+	switch (axis)
+	{
+	case 'x':
+		rotation[0][0] = 1;
+		rotation[1][1] = cos(theta);
+		rotation[1][2] = sin(theta);
+		rotation[2][1] = -sin(theta);
+		rotation[2][2] = cos(theta);
+		rotation[3][3] = 1;
+		break;
+	case 'y':
+		rotation[0][0] = cos(theta);
+		rotation[0][2] = -sin(theta);
+		rotation[1][1] = 1;
+		rotation[2][0] = sin(theta);
+		rotation[2][2] = cos(theta);
+		rotation[3][3] = 1;
+		break;
+	case 'z':
+		rotation[0][0] = cos(theta);
+		rotation[0][1] = sin(theta);
+		rotation[1][0] = -sin(theta);
+		rotation[1][1] = cos(theta);
+		rotation[2][2] = 1;
+		rotation[3][3] = 1;
+		break;
+	default: 
+		assert(0);
+		break;
+	}
+	return rotation;
+}
 
 //----------------------------------------------------------------------------
 //
@@ -567,11 +602,10 @@ mat4 RotateX( const GLfloat theta )
 inline
 mat4 Translate( const GLfloat x, const GLfloat y, const GLfloat z )
 {
-	assert(0);
     mat4 c;
-    c[0][0] = x;
-    c[0][0] = y;  /*BUG*/
-    c[0][0] = z;
+    c[0][3] = x;
+    c[1][3] = y;
+    c[2][3] = z;
     return c;
 }
 
@@ -595,12 +629,11 @@ mat4 Translate( const vec4& v )
 inline
 mat4 Scale( const GLfloat x, const GLfloat y, const GLfloat z )
 {
-	assert(0);
-    mat4 c;
-    c[0][0] = x;
-    c[0][0] = y; /*BUG*/
-    c[0][0] = z;
-    return c;
+	mat4 scale;
+	scale[0][0] = x; // x
+	scale[1][1] = y; // y
+	scale[2][2] = z; // z
+	return scale;
 }
 
 inline
