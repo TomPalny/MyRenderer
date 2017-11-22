@@ -15,19 +15,19 @@ Camera::~Camera()
 void Camera::look_at(vec4 at)
 {
 	// find our position in world coordinates
-	// TODO: is this wrong?
-	vec4 eye = get_origin_in_world_coordinates();
+	vec3 eye = get_origin_in_world_coordinates().to_vec3();
 
 	// these are also in world coordinates
-	vec4 up(0, 1, 0, 0);
+	vec3 up(0, 1, 0);
 
 	// create a new view matrix that corresponds to this
 	// we discard our old view matrix
-	vec4 n = normalize(eye - at);
-	vec4 u = normalize(cross(up, n));
-	vec4 v = normalize(cross(n, u));
+	vec3 n = normalize(eye - at.to_vec3());
+	vec3 u = normalize(cross(up, n));
+	vec3 v = normalize(cross(n, u));
 	vec4 t = vec4(0, 0, 0, 1);
-	mat4 c(u, v, n, t);
+	mat4 c(vec4(u, 0), vec4(v, 0), vec4(n, 0), t);
+	
 	_view =  c * Translate(-eye);
 }
 
