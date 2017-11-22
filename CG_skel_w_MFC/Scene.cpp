@@ -5,6 +5,8 @@
 #include "GL/freeglut.h"
 #include "PrimitiveModel.h"
 #include "Camera.h"
+#include <sstream>
+#include <filesystem>
 
 using namespace std;
 
@@ -91,36 +93,37 @@ void Scene::load_model_at_center(Model* model, const string name)
 
 void Scene::draw_status_string()
 {
-	string status;
+	stringstream ss;
 	if (_active_model != NULL)
 	{
-		status += _active_model->get_name();
+		auto p = _active_model->get_origin_in_world_coordinates();
+		ss << _active_model->get_name() << " [" << p.x << "," << p.y << "," << p.z << "] // ";
 	}
 
 	if (_transform_mode == WORLD_TRANSFORM)
 	{
-		status += " // WORLD  // ";
+		ss << "WORLD  // ";
 	}
 	else
 	{
-		status += " // OBJECT  // ";
+		ss << "OBJECT  // ";
 	}
 
 	if (_operation_mode == ROTATE_MODE)
 	{
-		status += "ROTATE";
+		ss << "ROTATE";
 	}
 	else if (_operation_mode == SCALE_MODE)
 	{
-		status += "SCALE";
+		ss << "SCALE";
 	}
 	else
 	{
-		status += "TRANSLATE";
+		ss << "TRANSLATE";
 	}
 
 	_renderer->set_color(0, 1, 0);
-	_renderer->draw_string(status.c_str(), 15, 15);
+	_renderer->draw_string(ss.str().c_str(), 15, 15);
 }
 
 void Scene::redraw_necessary()
@@ -130,6 +133,7 @@ void Scene::redraw_necessary()
 
 void Scene::draw_one_model(Model* model)
 {
+	_active_camera->look_at(vec4(0, 0, 0, 1));
 	model->update_matrix(_active_camera->get_view_matrix());
 	model->draw();
 	if (_normal_type == VERTEX_NORMALS)
@@ -149,11 +153,6 @@ void Scene::draw()
 	for(auto model : _models )
 	{
 		draw_one_model(model);
-	}
-
-	for (auto camera : _cameras)
-	{
-		draw_one_model(camera);
 	}
 
 	draw_status_string();
@@ -270,10 +269,16 @@ void Scene::keyboard_special(int key, int x, int y)
 			operation = Translate(0, -move_distance, 0);
 		break;
 	case GLUT_KEY_PAGE_UP:
-		operation = RotateMat(theta, 'z');
+		if (_operation_mode == ROTATE_MODE)
+			operation = RotateMat(theta, 'z');
+		else
+			operation = Translate(0, 0, move_distance);
 		break;
 	case GLUT_KEY_PAGE_DOWN:
-		operation = RotateMat(-theta, 'z');
+		if (_operation_mode == ROTATE_MODE)
+			operation = RotateMat(-theta, 'z');
+		else
+			operation = Translate(0, 0, -move_distance);
 		break;
 	}
 

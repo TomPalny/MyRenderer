@@ -24,6 +24,7 @@ protected:
 	void draw_single_normal(vec4 start, vec4 direction);
 
 public:
+	vec4 get_origin_in_world_coordinates();
 	void update_matrix(mat4 view);
 	void draw();
 	void draw_vertex_normals();

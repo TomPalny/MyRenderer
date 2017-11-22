@@ -47,7 +47,7 @@ void Model::draw()
 		_renderer->draw_line(point3, point1);
 	}
 
-	vec4 origin = _world_transforms * vec4(0, 0, 0, 1);
+	vec4 origin = _cached_world_model_transform * vec4(0, 0, 0, 1);
 	_renderer->set_color(1, 0, 0);
 	_renderer->draw_letter('+', origin.x - 4, origin.y - 4);
 }
@@ -59,6 +59,11 @@ void Model::draw_single_normal(vec4 start, vec4 direction)
 	auto end = start.to_vec3() + normalize(direction.to_vec3()) * 0.2f;
 	auto transformed_end = transform_point(vec4(end));
 	_renderer->draw_line(transformed_start.to_vec2(), transformed_end.to_vec2());
+}
+
+vec4 Model::get_origin_in_world_coordinates()
+{
+	return _world_transforms * _model_transforms * vec4(0, 0, 0, 1);
 }
 
 void Model::update_matrix(mat4 view)
