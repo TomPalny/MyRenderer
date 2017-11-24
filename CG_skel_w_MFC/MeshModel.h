@@ -13,6 +13,7 @@ class MeshModel : public Model
 {
 protected :
 	MeshModel() {}
+	
 	void load_file(string filename);
 
 public:

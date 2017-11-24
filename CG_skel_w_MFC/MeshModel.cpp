@@ -68,7 +68,7 @@ vec2 vec2fFromStream(std::istream & aStream)
 	return vec2(x, y);
 }
 
-MeshModel::MeshModel(string filename)
+MeshModel::MeshModel(const string filename)
 {
 	load_file(filename);
 }
@@ -119,13 +119,27 @@ void MeshModel::load_file(string fileName)
 	//Then vertex_positions should contain:
 	//vertex_positions={v1,v2,v3,v1,v3,v4}
 
+	_max_x = _max_y = _max_z = _min_x = _min_y = _min_z = vertices[0].x;
+	// find the max and min values of x,y,z for use later with drawing of the bounding box;
+	for (const auto vertice : vertices)
+	{
+		if (vertice.x > _max_x) _max_x = vertice.x;
+		if (vertice.y > _max_y) _max_y = vertice.y;
+		if (vertice.z > _max_z) _max_z = vertice.z;
+		if (vertice.x < _min_x) _min_x = vertice.x;
+		if (vertice.y < _min_y) _min_y = vertice.y;
+		if (vertice.z < _min_z) _min_z = vertice.z;
+	}
+
+	create_bounding_box();
 	_faces.clear();
 	// iterate through all stored faces and create triangles
 	for (const auto face : face_ids)
 	{
-		auto point1 = vertices[face.v[0] - 1];
-		auto point2 = vertices[face.v[1] - 1];
-		auto point3 = vertices[face.v[2] - 1];
+		const auto point1 = vertices[face.v[0] - 1];
+		const auto point2 = vertices[face.v[1] - 1];
+		const auto point3 = vertices[face.v[2] - 1];
+		
 		// if some of the vertices don't have a normal than disable normals for this face
 		if (face.vn[0] == 0 || face.vn[1] == 0 || face.vn[2] == 0)
 		{
@@ -133,9 +147,9 @@ void MeshModel::load_file(string fileName)
 		}
 		else
 		{
-			auto normal1 = normal_vertices[face.vn[0] - 1];
-			auto normal2 = normal_vertices[face.vn[1] - 1];
-			auto normal3 = normal_vertices[face.vn[2] - 1];
+			const auto normal1 = normal_vertices[face.vn[0] - 1];
+			const auto normal2 = normal_vertices[face.vn[1] - 1];
+			const auto normal3 = normal_vertices[face.vn[2] - 1];
 			_faces.push_back(Face(point1, point2, point3, normal1, normal2, normal3));
 		}
 	}

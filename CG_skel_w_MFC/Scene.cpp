@@ -13,7 +13,7 @@ using namespace std;
 // defined in CG_skel_w_MFC.cpp
 void init_menu();
 
-Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
+Scene::Scene(Renderer* renderer) : _active_model(nullptr), _current_bounding_box(nullptr), _renderer(renderer),
 									_normal_type(NO_NORMALS), _operation_mode(TRANSLATE_MODE),
 									_transform_mode(WORLD_TRANSFORM)
 {
@@ -64,7 +64,7 @@ void Scene::switch_camera(unsigned int number)
 void Scene::add_pyramid_model()
 {
 	const auto model = PrimitiveModel::create_pyramid(0.0f, 0.0f, 0.0f);
-	load_model_at_center(model, "Pyramid");
+	load_model_at_center(model, model, "Pyramid");
 }
 
 void Scene::open_file()
@@ -73,11 +73,13 @@ void Scene::open_file()
 	if (dlg.DoModal() == IDOK)
 	{
 		std::string s(static_cast<LPCTSTR>(dlg.GetPathName()));
-		load_model_at_center(new MeshModel(static_cast<LPCTSTR>(dlg.GetPathName())), static_cast<LPCTSTR>(dlg.GetFileTitle()));
+		Model* model = new MeshModel(static_cast<LPCTSTR>(dlg.GetPathName())); 
+		load_model_at_center(model, model->bounding_box, static_cast<LPCTSTR>(dlg.GetFileTitle()));
+		load_model_at_center(model->bounding_box, model, static_cast<LPCTSTR>(dlg.GetFileTitle()));
 	}
 }
 
-void Scene::load_model_at_center(Model* model, const string name)
+void Scene::load_model_at_center(Model* model, Model* bounding_box ,const string name)
 {
 	model->set_name(name);
 	//model->perform_operation(Scale(100, 100, 100), MODEL_TRANSFORM);
@@ -85,8 +87,12 @@ void Scene::load_model_at_center(Model* model, const string name)
 	//model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0, WORLD_TRANSFORM);
 	
 	_active_model = model;
+	_current_bounding_box = bounding_box;
 	_models.push_back(_active_model);
+	_bounding_boxes.push_back(bounding_box);
 	_active_model->set_renderer(_renderer);
+	_current_bounding_box->set_renderer(_renderer);
+	
 	init_menu();
 	redraw_necessary();
 }
@@ -169,6 +175,7 @@ void Scene::draw_demo() const
 void Scene::switch_active_model(int id)
 {
 	_active_model = _models[id];
+	_current_bounding_box = _bounding_boxes[id];
 }
 
 void Scene::keyboard(unsigned char key, int x, int y)
@@ -208,6 +215,7 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		const auto index = std::distance(_models.begin(), it);
 		const auto new_index = (index + 1) % _models.size();
 		_active_model = _models[new_index];
+		_current_bounding_box = _bounding_boxes[new_index];
 		break;
 	}
 	redraw_necessary();
@@ -283,5 +291,7 @@ void Scene::keyboard_special(int key, int x, int y)
 	}
 
 	_active_model->perform_operation(operation, _transform_mode);
+	_current_bounding_box->perform_operation(operation, _transform_mode);
+
 	redraw_necessary();
 }

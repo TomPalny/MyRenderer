@@ -30,8 +30,10 @@ enum OperationMode
 
 class Scene {
 	Model* _active_model;
+	Model* _current_bounding_box;
 	Camera* _active_camera;
 	vector<Model*> _models; // TODO: we need to free these in the dtor
+	vector<Model*> _bounding_boxes;
 	vector<Camera*> _cameras;
 	vector<Light*> _lights;
 	Renderer *_renderer;
@@ -45,7 +47,7 @@ public:
 	void open_file();;
 
 	void add_pyramid_model();
-	void load_model_at_center(Model* model, const string name);
+	void load_model_at_center(Model* model, Model* bounding_box, const string name);
 
 	void draw_status_string();
 	void draw();

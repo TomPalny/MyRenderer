@@ -20,9 +20,12 @@ protected:
 	vector<Face> _faces;
 	char* _name;
 	char _origin_sign;
+	
+	
 
 	vec4 transform_point(vec4 point) const;
 	void draw_single_normal(vec4 start, vec4 direction);
+	
 
 public:
 	vec4 get_origin_in_world_coordinates();
@@ -34,4 +37,7 @@ public:
 	void set_renderer(Renderer* renderer);
 	const char* get_name() const;
 	void set_name(string name);
+	void create_bounding_box();
+	float _min_x, _min_y, _min_z, _max_x, _max_y, _max_z;
+	Model* bounding_box;
 };
