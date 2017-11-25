@@ -30,16 +30,16 @@ enum OperationMode
 
 class Scene {
 	Model* _active_model;
-	Model* _current_bounding_box;
 	Camera* _active_camera;
 	vector<Model*> _models; // TODO: we need to free these in the dtor
-	vector<Model*> _bounding_boxes;
+	vector<bool> _bounding_boxes;
 	vector<Camera*> _cameras;
 	vector<Light*> _lights;
 	Renderer *_renderer;
 	NormalType _normal_type;
 	OperationMode _operation_mode;
 	TransformMode _transform_mode;
+	ptrdiff_t _bounding_box_index = 0;
 
 public:
 	explicit Scene(Renderer* renderer);
@@ -47,14 +47,14 @@ public:
 	void open_file();;
 
 	void add_pyramid_model();
-	void load_model_at_center(Model* model, Model* bounding_box, const string name);
+	void load_model_at_center(Model* model, const string name);
 
 	void draw_status_string();
 	void draw();
 	void draw_demo() const;
 	void switch_active_model(int id);
 	static void redraw_necessary();
-	void draw_one_model(Model* model);
+	void draw_one_model(Model* model, bool draw_bounding_box);
 	void add_objects_to_menu();
 	void set_operation_mode(OperationMode mode);
 

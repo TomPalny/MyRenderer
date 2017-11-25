@@ -39,5 +39,5 @@ public:
 	void set_name(string name);
 	void create_bounding_box();
 	float _min_x, _min_y, _min_z, _max_x, _max_y, _max_z;
-	Model* bounding_box;
+	Model* _bounding_box;
 };

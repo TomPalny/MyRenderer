@@ -13,7 +13,7 @@ using namespace std;
 // defined in CG_skel_w_MFC.cpp
 void init_menu();
 
-Scene::Scene(Renderer* renderer) : _active_model(nullptr), _current_bounding_box(nullptr), _renderer(renderer),
+Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 									_normal_type(NO_NORMALS), _operation_mode(TRANSLATE_MODE),
 									_transform_mode(WORLD_TRANSFORM)
 {
@@ -24,14 +24,18 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _current_bounding_box
 	front->set_name("Camera1 (Front)");
 	_cameras.push_back(front);
 	_models.push_back(front);
+	_bounding_boxes.push_back(false);
 
+	
 	auto left = new Camera(2);
 	left->perform_operation(Translate(2, 1, 0), WORLD_TRANSFORM);
 	left->set_renderer(renderer);
 	left->set_name("Camera2 (Left)");
 	_cameras.push_back(left);
 	_models.push_back(left);
+	_bounding_boxes.push_back(false);
 
+	
 	_active_camera = front;
 }
 
@@ -64,7 +68,7 @@ void Scene::switch_camera(unsigned int number)
 void Scene::add_pyramid_model()
 {
 	const auto model = PrimitiveModel::create_pyramid(0.0f, 0.0f, 0.0f);
-	load_model_at_center(model, model, "Pyramid");
+	load_model_at_center(model, "Pyramid");
 }
 
 void Scene::open_file()
@@ -74,24 +78,24 @@ void Scene::open_file()
 	{
 		std::string s(static_cast<LPCTSTR>(dlg.GetPathName()));
 		Model* model = new MeshModel(static_cast<LPCTSTR>(dlg.GetPathName())); 
-		load_model_at_center(model, model->bounding_box, static_cast<LPCTSTR>(dlg.GetFileTitle()));
-		load_model_at_center(model->bounding_box, model, static_cast<LPCTSTR>(dlg.GetFileTitle()));
+		load_model_at_center(model, static_cast<LPCTSTR>(dlg.GetFileTitle()));
+		//load_model_at_center(model->bounding_box, model, static_cast<LPCTSTR>(dlg.GetFileTitle()));
 	}
 }
 
-void Scene::load_model_at_center(Model* model, Model* bounding_box ,const string name)
+void Scene::load_model_at_center(Model* model, const string name)
 {
 	model->set_name(name);
+	model->_bounding_box->set_name(name);
 	//model->perform_operation(Scale(100, 100, 100), MODEL_TRANSFORM);
 	//model->translate(200, 200, 0, WORLD_TRANSFORM);
 	//model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0, WORLD_TRANSFORM);
 	
 	_active_model = model;
-	_current_bounding_box = bounding_box;
 	_models.push_back(_active_model);
-	_bounding_boxes.push_back(bounding_box);
+	_bounding_boxes.push_back(false);
 	_active_model->set_renderer(_renderer);
-	_current_bounding_box->set_renderer(_renderer);
+	_active_model->_bounding_box->set_renderer(_renderer);
 	
 	init_menu();
 	redraw_necessary();
@@ -137,11 +141,18 @@ void Scene::redraw_necessary()
 	glutPostRedisplay();
 }
 
-void Scene::draw_one_model(Model* model)
+void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 {
 	_active_camera->look_at(vec4(0, 0, 0, 1));
 	model->update_matrix(_active_camera->get_view_matrix());
 	model->draw();
+	const string name = model->get_name();
+	if (name != "Camera1 (Front)" && name != "Camera2 (Left)") 
+	{
+		model->_bounding_box->update_matrix(_active_camera->get_view_matrix());
+		if (draw_bounding_box)
+			model->_bounding_box->draw();
+	}
 	if (_normal_type == VERTEX_NORMALS)
 	{
 		model->draw_vertex_normals();
@@ -156,9 +167,10 @@ void Scene::draw()
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all _models to draw themselves
 	_renderer->clear_screen();
+	int i = 0;
 	for(auto model : _models )
 	{
-		draw_one_model(model);
+		draw_one_model(model, _bounding_boxes[i++]);
 	}
 
 	draw_status_string();
@@ -175,11 +187,15 @@ void Scene::draw_demo() const
 void Scene::switch_active_model(int id)
 {
 	_active_model = _models[id];
-	_current_bounding_box = _bounding_boxes[id];
 }
 
 void Scene::keyboard(unsigned char key, int x, int y)
 {
+	const auto it = std::find(_models.begin(), _models.end(), _active_model);
+	const auto index = std::distance(_models.begin(), it);
+	const auto new_index = (index + 1) % _models.size();
+	
+
 	switch (key) {
 	case 27: // escape
 		exit(EXIT_SUCCESS);
@@ -211,11 +227,11 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		break;
 	case '\t':
 		// switch between models
-		const auto it = std::find(_models.begin(), _models.end(), _active_model);
-		const auto index = std::distance(_models.begin(), it);
-		const auto new_index = (index + 1) % _models.size();
 		_active_model = _models[new_index];
-		_current_bounding_box = _bounding_boxes[new_index];
+		break;
+	case 'b':
+		_bounding_box_index = index;
+		_bounding_boxes[_bounding_box_index] = !_bounding_boxes[_bounding_box_index];
 		break;
 	}
 	redraw_necessary();
@@ -291,7 +307,7 @@ void Scene::keyboard_special(int key, int x, int y)
 	}
 
 	_active_model->perform_operation(operation, _transform_mode);
-	_current_bounding_box->perform_operation(operation, _transform_mode);
+	_active_model->_bounding_box->perform_operation(operation, _transform_mode);
 
 	redraw_necessary();
 }

@@ -31,7 +31,7 @@ void Model::set_name(string name)
 
 void Model::create_bounding_box()
 {
-	bounding_box = new Model();
+	_bounding_box = new Model();
 	const vec4 point1(_min_x, _min_y, _min_z, 1);
 	const vec4 point2(_min_x, _min_y, _max_z, 1);
 	const vec4 point3(_max_x, _min_y, _max_z, 1);
@@ -41,20 +41,20 @@ void Model::create_bounding_box()
 	const vec4 point7(_max_x, _max_y, _max_z, 1);
 	const vec4 point8(_max_x, _max_y, _min_z, 1);
 
-	bounding_box->_faces.push_back(Face(point1, point2, point3));
-	bounding_box->_faces.push_back(Face(point3, point4, point1));
-	bounding_box->_faces.push_back(Face(point5, point6, point7));
-	bounding_box->_faces.push_back(Face(point7, point8, point5));
+	_bounding_box->_faces.push_back(Face(point1, point2, point3));
+	_bounding_box->_faces.push_back(Face(point3, point4, point1));
+	_bounding_box->_faces.push_back(Face(point5, point6, point7));
+	_bounding_box->_faces.push_back(Face(point7, point8, point5));
 
-	bounding_box->_faces.push_back(Face(point6, point2, point3));
-	bounding_box->_faces.push_back(Face(point3, point7, point6));
-	bounding_box->_faces.push_back(Face(point7, point3, point4));
-	bounding_box->_faces.push_back(Face(point4, point8, point7));
+	_bounding_box->_faces.push_back(Face(point6, point2, point3));
+	_bounding_box->_faces.push_back(Face(point3, point7, point6));
+	_bounding_box->_faces.push_back(Face(point7, point3, point4));
+	_bounding_box->_faces.push_back(Face(point4, point8, point7));
 
-	bounding_box->_faces.push_back(Face(point8, point5, point1));
-	bounding_box->_faces.push_back(Face(point1, point4, point8));
-	bounding_box->_faces.push_back(Face(point5, point6, point2));
-	bounding_box->_faces.push_back(Face(point2, point1, point5));
+	_bounding_box->_faces.push_back(Face(point8, point5, point1));
+	_bounding_box->_faces.push_back(Face(point1, point4, point8));
+	_bounding_box->_faces.push_back(Face(point5, point6, point2));
+	_bounding_box->_faces.push_back(Face(point2, point1, point5));
 
 }
 
