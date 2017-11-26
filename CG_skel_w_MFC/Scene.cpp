@@ -19,24 +19,22 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 {
 	// default view is from the front
 	auto front = new Camera(1);
-	front->look_at(vec4(0, 0, -1, 1));
 	front->perform_operation(Translate(0, 0, 1), WORLD_TRANSFORM);
 	front->set_renderer(renderer);
 	front->set_name("Camera1 (Front)");
+	front->look_at(vec4(0, 0, 0, 1));
 	_cameras.push_back(front);
 	_models.push_back(front);
 	_bounding_boxes.push_back(false);
-	
-
 	
 	auto left = new Camera(2);
 	left->perform_operation(Translate(2, 1, 0), WORLD_TRANSFORM);
 	left->set_renderer(renderer);
 	left->set_name("Camera2 (Left)");
+	left->look_at(vec4(0, 0, 0, 1));
 	_cameras.push_back(left);
 	_models.push_back(left);
 	_bounding_boxes.push_back(false);
-
 	
 	_active_camera = front;
 }
@@ -64,7 +62,7 @@ void Scene::set_operation_mode(OperationMode mode)
 void Scene::switch_camera(unsigned int number)
 {
 	_active_camera = _cameras[number];
-	_active_camera->look_at(vec4(0, 0, -1, 1));
+	//_active_camera->look_at(vec4(0, 0, 0, 1));
 	redraw_necessary();
 }
 
@@ -145,7 +143,7 @@ void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 	model->update_matrix(_active_camera->get_view_matrix());
 	model->draw();
 	const string name = model->get_name();
-	if (name != "Camera1 (Front)" && name != "Camera2 (Left)") 
+	if(!model->is_camera()) 
 	{
 		model->_bounding_box->update_matrix(_active_camera->get_view_matrix());
 		if (draw_bounding_box)
@@ -160,6 +158,7 @@ void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 		model->draw_face_normals();
 	}
 }
+
 void Scene::draw()
 {
 	// 1. Send the renderer the current camera transform and the projection
@@ -231,17 +230,15 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		_bounding_box_index = index;
 		_bounding_boxes[_bounding_box_index] = !_bounding_boxes[_bounding_box_index];
 		break;
+	case 'l':
+		_active_camera->look_at(_active_model->get_origin_in_world_coordinates());
+		break;
 	}
 	redraw_necessary();
 }
 
-void Scene::keyboard_special(int key, int x, int y)
+mat4 Scene::get_operation_for_keyboard(int key, int x, int y)
 {
-	if (_active_model == NULL)
-	{
-		return;
-	}
-
 	static const float LARGER_SCALE_FACTOR = 1.4;
 	static const float SMALLER_SCALE_FACTOR = 0.6;
 	static const float NO_SCALE = 1;
@@ -307,11 +304,51 @@ void Scene::keyboard_special(int key, int x, int y)
 			operation = Translate(0, 0, -move_distance);
 		break;
 	}
+	return operation;
+}
 
+int Scene::get_reverse_key(int key)
+{
+	switch (key)
+	{
+	case GLUT_KEY_RIGHT:
+		return GLUT_KEY_LEFT;
+	case GLUT_KEY_LEFT:
+		return GLUT_KEY_RIGHT;
+	case GLUT_KEY_UP:
+		return GLUT_KEY_DOWN;
+	case GLUT_KEY_DOWN:
+		return GLUT_KEY_UP;
+	case GLUT_KEY_PAGE_UP:
+		return GLUT_KEY_PAGE_DOWN;
+	case GLUT_KEY_PAGE_DOWN:
+		return GLUT_KEY_PAGE_UP;
+	}
+	return 0;
+}
+
+void Scene::keyboard_special(int key, int x, int y)
+{
+	if (_active_model == NULL)
+	{
+		return;
+	}
+
+	mat4 operation = get_operation_for_keyboard(key, x, y);
 	_active_model->perform_operation(operation, _transform_mode);
-	string name = _active_model->get_name();
-	if (name != "Camera1 (Front)" && name != "Camera2 (Left)")
-	_active_model->_bounding_box->perform_operation(operation, _transform_mode);
 
+	// for the camera apply a reverse transformation to the view matrix
+	if (_active_model->is_camera())
+	{
+		key = get_reverse_key(key);
+		mat4 inverse_operation = get_operation_for_keyboard(key, x, y);
+		Camera* camera = dynamic_cast<Camera*>(_active_model);
+		camera->apply_view_transformation(inverse_operation);
+	}
+	// for models that aren't the camera, apply the transform to their bounding box
+	else
+	{
+		_active_model->_bounding_box->perform_operation(operation, _transform_mode);
+	}
 	redraw_necessary();
 }

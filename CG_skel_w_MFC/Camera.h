@@ -6,10 +6,12 @@ class Camera : public Model {
 	mat4 _view;
 
 public:
+	bool is_camera() override { return true; }
 	Camera(int camera_id);
 	~Camera();
 	void look_at(vec4 at);
 	mat4 get_view_matrix();
+	void apply_view_transformation(const mat4& inverse_operation);
 
 	/*
 	void SetTransformation(const mat4& transform);

@@ -53,3 +53,8 @@ mat4 Camera::get_view_matrix()
 
 	return ortho * _view;
 }
+
+void Camera::apply_view_transformation(const mat4& inverse_operation)
+{
+	_view = _view * inverse_operation;
+}

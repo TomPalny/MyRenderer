@@ -28,6 +28,7 @@ protected:
 	
 
 public:
+	virtual bool is_camera() { return false; }
 	vec4 get_origin_in_world_coordinates();
 	void update_matrix(mat4 view);
 	void draw();

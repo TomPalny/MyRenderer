@@ -41,6 +41,10 @@ class Scene {
 	TransformMode _transform_mode;
 	ptrdiff_t _bounding_box_index = 0;
 
+	mat4 get_operation_for_keyboard(int key, int x, int y);
+	static int get_reverse_key(int key);
+
+
 public:
 	explicit Scene(Renderer* renderer);
 	void set_normals_type(NormalType normal_type);
