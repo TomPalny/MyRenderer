@@ -407,6 +407,12 @@ struct vec4 {
 		return vec3(x, y, z);
     }
 
+	// divide by the w coordinate
+	vec3 to_vec3_divide_by_w() const
+	{
+		return vec3(x / w, y / w, z / w);
+	}
+
 	vec2 to_vec2() const
     {
 		return vec2(x / w, y / w);

@@ -67,7 +67,7 @@ mat4 Camera::get_view_matrix(CameraMode camera_mode)
 
 		mat4 N;
 		float alpha = -1 * (nearz + farz) / (nearz - farz);
-		float beta = -2 * (nearz + farz) / (nearz - farz);
+		float beta = -2 * (nearz * farz) / (nearz - farz);
 		N[2][2] = alpha;
 		N[2][3] = beta;
 		N[3][2] = -1;

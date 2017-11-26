@@ -157,11 +157,34 @@ void Renderer::draw_line_v(vec2 point1, vec2 point2)
 	// avoid drawing really long and almost infinite lines
 	// we need to find the point where an infinite line intercepts the screen 
 	// and start drawing from that point
-	if (!point_in_range(point1.x, point1.y) || !point_in_range(point2.x, point2.y))
+	/*if (!point_in_range(point1.x, point1.y) || !point_in_range(point2.x, point2.y))
+	{
+		return;
+	}*/
+	draw_line(point1, point2);
+}
+
+
+bool Renderer::canonical_point_in_range(vec3 point)
+{
+	if (fabs(point.x) > 1 || fabs(point.y) > 1 || fabs(point.z) > 1)
+	{
+		return false;
+	}
+	return true;
+}
+// draws a line, first performing clipping, w-normalization, and viewport transformation
+void Renderer::draw_line_vcw(vec3 point1, vec3 point2)
+{
+	// TODO: this isn't really correct - we just do it for performance reasons to 
+	// avoid drawing really long and almost infinite lines
+	// we need to find the point where an infinite line intercepts the screen 
+	// and start drawing from that point
+	if (!canonical_point_in_range(point1) || !canonical_point_in_range(point2))
 	{
 		return;
 	}
-	draw_line(point1, point2);
+	draw_line_v(point1.to_vec2(), point2.to_vec2());
 }
 
 void Renderer::draw_line(vec2 point1, vec2 point2)

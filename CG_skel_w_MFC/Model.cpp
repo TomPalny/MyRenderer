@@ -66,17 +66,17 @@ void Model::draw()
 		// TODO: we need to clip points that are out of range
 		// for example, if points are behind us (negative z) then we 
 		// currently draw them anyway which is totally wrong
-		const auto point1 = transform_point(face.point1).to_vec2();
-		const auto point2 = transform_point(face.point2).to_vec2();
-		const auto point3 = transform_point(face.point3).to_vec2();
+		const auto point1 = transform_point(face.point1).to_vec3_divide_by_w();
+		const auto point2 = transform_point(face.point2).to_vec3_divide_by_w();
+		const auto point3 = transform_point(face.point3).to_vec3_divide_by_w();
 
 		//_renderer->draw_point(point1);
 		//_renderer->draw_point(point2);
 		//_renderer->draw_point(point3);
 
-		_renderer->draw_line_v(point1, point2);
-		_renderer->draw_line_v(point2, point3);
-		_renderer->draw_line_v(point3, point1);
+		_renderer->draw_line_vcw(point1, point2);
+		_renderer->draw_line_vcw(point2, point3);
+		_renderer->draw_line_vcw(point3, point1);
 	}
 
 	vec4 origin = _cached_world_model_transform * vec4(0, 0, 0, 1);
@@ -90,7 +90,7 @@ void Model::draw_single_normal(vec4 start, vec4 direction)
 	auto transformed_start = transform_point(start);
 	auto end = start.to_vec3() + normalize(direction.to_vec3()) * 0.2f;
 	auto transformed_end = transform_point(vec4(end));
-	_renderer->draw_line_v(transformed_start.to_vec2(), transformed_end.to_vec2());
+	_renderer->draw_line_vcw(transformed_start.to_vec3_divide_by_w(), transformed_end.to_vec3_divide_by_w());
 }
 
 vec4 Model::get_origin_in_world_coordinates()
