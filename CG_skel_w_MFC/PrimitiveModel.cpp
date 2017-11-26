@@ -4,6 +4,7 @@
 
 PrimitiveModel::PrimitiveModel()
 {
+	_bounding_box = nullptr;
 }
 
 

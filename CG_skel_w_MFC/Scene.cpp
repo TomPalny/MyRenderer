@@ -87,12 +87,15 @@ void Scene::open_file()
 void Scene::load_model_at_center(Model* model, const string name)
 {
 	model->set_name(name);
-	model->_bounding_box->set_name(name);
+	if (model->_bounding_box != nullptr)
+	{
+		model->_bounding_box->set_name(name);
+		model->_bounding_box->set_renderer(_renderer);
+	}
 	_active_model = model;
 	_models.push_back(_active_model);
 	_bounding_boxes.push_back(false);
 	_active_model->set_renderer(_renderer);
-	_active_model->_bounding_box->set_renderer(_renderer);
 	
 	init_menu();
 	redraw_necessary();
@@ -152,7 +155,7 @@ void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 	model->update_matrix(_active_camera->get_view_matrix(_camera_mode));
 	model->draw(_camera_mode);
 	const string name = model->get_name();
-	if(!model->is_camera()) 
+	if(!model->is_camera() && model->_bounding_box != nullptr) 
 	{
 		model->_bounding_box->update_matrix(_active_camera->get_view_matrix(_camera_mode));
 		if (draw_bounding_box)
@@ -358,7 +361,7 @@ void Scene::keyboard_special(int key, int x, int y)
 		camera->apply_view_transformation(inverse_operation);
 	}
 	// for models that aren't the camera, apply the transform to their bounding box
-	else
+	else if (_active_model->_bounding_box != nullptr)
 	{
 		_active_model->_bounding_box->perform_operation(operation, _transform_mode);
 	}
