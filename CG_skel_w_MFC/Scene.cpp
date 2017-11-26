@@ -19,12 +19,14 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 {
 	// default view is from the front
 	auto front = new Camera(1);
+	front->look_at(vec4(0, 0, -1, 1));
 	front->perform_operation(Translate(0, 0, 1), WORLD_TRANSFORM);
 	front->set_renderer(renderer);
 	front->set_name("Camera1 (Front)");
 	_cameras.push_back(front);
 	_models.push_back(front);
 	_bounding_boxes.push_back(false);
+	
 
 	
 	auto left = new Camera(2);
@@ -62,6 +64,7 @@ void Scene::set_operation_mode(OperationMode mode)
 void Scene::switch_camera(unsigned int number)
 {
 	_active_camera = _cameras[number];
+	_active_camera->look_at(vec4(0, 0, -1, 1));
 	redraw_necessary();
 }
 
@@ -79,7 +82,7 @@ void Scene::open_file()
 		std::string s(static_cast<LPCTSTR>(dlg.GetPathName()));
 		Model* model = new MeshModel(static_cast<LPCTSTR>(dlg.GetPathName())); 
 		load_model_at_center(model, static_cast<LPCTSTR>(dlg.GetFileTitle()));
-		//load_model_at_center(model->bounding_box, model, static_cast<LPCTSTR>(dlg.GetFileTitle()));
+		
 	}
 }
 
@@ -87,10 +90,6 @@ void Scene::load_model_at_center(Model* model, const string name)
 {
 	model->set_name(name);
 	model->_bounding_box->set_name(name);
-	//model->perform_operation(Scale(100, 100, 100), MODEL_TRANSFORM);
-	//model->translate(200, 200, 0, WORLD_TRANSFORM);
-	//model->translate(_renderer->get_width() / 2, _renderer->get_height() / 2, 0, WORLD_TRANSFORM);
-	
 	_active_model = model;
 	_models.push_back(_active_model);
 	_bounding_boxes.push_back(false);
@@ -143,7 +142,6 @@ void Scene::redraw_necessary()
 
 void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 {
-	_active_camera->look_at(vec4(0, 0, 0, 1));
 	model->update_matrix(_active_camera->get_view_matrix());
 	model->draw();
 	const string name = model->get_name();
@@ -293,13 +291,17 @@ void Scene::keyboard_special(int key, int x, int y)
 			operation = Translate(0, -move_distance, 0);
 		break;
 	case GLUT_KEY_PAGE_UP:
-		if (_operation_mode == ROTATE_MODE)
+		if (_operation_mode == SCALE_MODE)
+			operation = Scale(NO_SCALE, NO_SCALE, LARGER_SCALE_FACTOR);
+		else if (_operation_mode == ROTATE_MODE)
 			operation = RotateMat(theta, 'z');
 		else
 			operation = Translate(0, 0, move_distance);
 		break;
 	case GLUT_KEY_PAGE_DOWN:
-		if (_operation_mode == ROTATE_MODE)
+		if (_operation_mode == SCALE_MODE)
+			operation = Scale(NO_SCALE, NO_SCALE, SMALLER_SCALE_FACTOR);
+		else if (_operation_mode == ROTATE_MODE)
 			operation = RotateMat(-theta, 'z');
 		else
 			operation = Translate(0, 0, -move_distance);
@@ -307,6 +309,8 @@ void Scene::keyboard_special(int key, int x, int y)
 	}
 
 	_active_model->perform_operation(operation, _transform_mode);
+	string name = _active_model->get_name();
+	if (name != "Camera1 (Front)" && name != "Camera2 (Left)")
 	_active_model->_bounding_box->perform_operation(operation, _transform_mode);
 
 	redraw_necessary();
