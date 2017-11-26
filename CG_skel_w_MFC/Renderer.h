@@ -4,6 +4,7 @@
 #include "vec.h"
 #include "mat.h"
 #include "GL/glew.h"
+#include "Camera.h"
 
 using namespace std;
 class Renderer
@@ -54,7 +55,7 @@ public:
 	void draw_string(const char* string, int left, int bottom);
 	void draw_letter(char letter, int left, int bottom);
 	void draw_letter_v(char letter, vec2 point);
-	bool canonical_point_in_range(vec3 point);
-	void draw_line_vcw(vec3 point1, vec3 point2);
+	bool canonical_point_in_range(vec3 point, CameraMode mode);
+	void draw_line_vcw(vec3 point1, vec3 point2, CameraMode mode);
 	void draw_demo();
 };

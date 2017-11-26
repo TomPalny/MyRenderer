@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Camera.h"
+#include "Renderer.h"
 
 Camera::Camera(int camera_id)
 {
@@ -38,11 +39,12 @@ mat4 Camera::get_view_matrix(CameraMode camera_mode)
 	const float top = 5;
 	const float left = -5 * aspect_ratio;	
 	const float right = 5 * aspect_ratio;
-	const float nearz = -5;
-	const float farz = 5;
+	const float nearz = -10;
+	float farz = 5;
 
 	if (camera_mode == ORTHOGONAL_CAMERA)
 	{
+		farz = 10;
 		mat4 ortho;
 		ortho[0][0] = 2 / (right - left);
 		ortho[1][1] = 2 / (top - bottom);

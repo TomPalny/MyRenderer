@@ -1,12 +1,6 @@
 #pragma once
 #include "Model.h"
-
-enum CameraMode
-{
-	ORTHOGONAL_CAMERA,
-	PERSPECTIVE_CAMERA,
-	NUMBER_OF_CAMERA_MODES
-};
+#include "CameraMode.h"
 
 class Camera : public Model {
 	mat4 _projection;

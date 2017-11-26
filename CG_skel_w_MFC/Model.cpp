@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Model.h"
 #include "mat.h"
+#include "Renderer.h"
 
 Model::Model() : _renderer(nullptr), _origin_sign('+')
 {
@@ -58,7 +59,7 @@ void Model::create_bounding_box()
 
 }
 
-void Model::draw()
+void Model::draw(CameraMode camera_mode)
 {
 	_renderer->set_color(1, 1, 1);
 	for (const auto face : _faces)
@@ -74,9 +75,9 @@ void Model::draw()
 		//_renderer->draw_point(point2);
 		//_renderer->draw_point(point3);
 
-		_renderer->draw_line_vcw(point1, point2);
-		_renderer->draw_line_vcw(point2, point3);
-		_renderer->draw_line_vcw(point3, point1);
+		_renderer->draw_line_vcw(point1, point2, camera_mode);
+		_renderer->draw_line_vcw(point2, point3, camera_mode);
+		_renderer->draw_line_vcw(point3, point1, camera_mode);
 	}
 
 	vec4 origin = _cached_world_model_transform * vec4(0, 0, 0, 1);
@@ -84,13 +85,13 @@ void Model::draw()
 	_renderer->draw_letter_v(_origin_sign, origin.to_vec2());
 }
 
-void Model::draw_single_normal(vec4 start, vec4 direction)
+void Model::draw_single_normal(vec4 start, vec4 direction, CameraMode camera_mode)
 {
 	_renderer->set_color(0.5, 0.5, 0.5);
 	auto transformed_start = transform_point(start);
 	auto end = start.to_vec3() + normalize(direction.to_vec3()) * 0.2f;
 	auto transformed_end = transform_point(vec4(end));
-	_renderer->draw_line_vcw(transformed_start.to_vec3_divide_by_w(), transformed_end.to_vec3_divide_by_w());
+	_renderer->draw_line_vcw(transformed_start.to_vec3_divide_by_w(), transformed_end.to_vec3_divide_by_w(), camera_mode);
 }
 
 vec4 Model::get_origin_in_world_coordinates()
@@ -103,7 +104,7 @@ void Model::update_matrix(mat4 view)
 	_cached_world_model_transform = view * _world_transforms * _model_transforms;
 }
 
-void Model::draw_vertex_normals()
+void Model::draw_vertex_normals(CameraMode camera_mode)
 {
 	for (const auto face : _faces)
 	{
@@ -111,13 +112,13 @@ void Model::draw_vertex_normals()
 		{
 			continue;
 		}
-		draw_single_normal(face.point1, face.normal1);
-		draw_single_normal(face.point2, face.normal2);
-		draw_single_normal(face.point3, face.normal3);
+		draw_single_normal(face.point1, face.normal1, camera_mode);
+		draw_single_normal(face.point2, face.normal2, camera_mode);
+		draw_single_normal(face.point3, face.normal3, camera_mode);
 	}
 }
 
-void Model::draw_face_normals()
+void Model::draw_face_normals(CameraMode camera_mode)
 {
 	for (const auto face : _faces)
 	{
@@ -125,7 +126,7 @@ void Model::draw_face_normals()
 		auto vector2 = face.point3 - face.point2;
 		auto normal = normalize(cross(vector1, vector2));
 		auto center_of_triangle = (face.point1 + face.point2 + face.point3) / 3;
-		draw_single_normal(center_of_triangle, normal);
+		draw_single_normal(center_of_triangle, normal, camera_mode);
 	}
 }
 

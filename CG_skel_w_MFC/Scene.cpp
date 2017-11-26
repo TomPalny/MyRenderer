@@ -15,11 +15,11 @@ void init_menu();
 
 Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 									_normal_type(NO_NORMALS), _operation_mode(TRANSLATE_MODE),
-									_transform_mode(WORLD_TRANSFORM), _camera_mode(ORTHOGONAL_CAMERA)
+									_transform_mode(WORLD_TRANSFORM), _camera_mode(PERSPECTIVE_CAMERA)
 {
 	// default view is from the front
 	auto front = new Camera(1);
-	front->perform_operation(Translate(0, 0, 3.3), WORLD_TRANSFORM);
+	front->perform_operation(Translate(0, 0, 8), WORLD_TRANSFORM);
 	front->set_renderer(renderer);
 	front->set_name("Camera1 (Front)");
 	front->look_at(vec4(0, 0, 0, 1));
@@ -28,7 +28,7 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 	_bounding_boxes.push_back(false);
 	
 	auto left = new Camera(2);
-	left->perform_operation(Translate(2, 1, 0), WORLD_TRANSFORM);
+	left->perform_operation(Translate(8, 1, 0), WORLD_TRANSFORM);
 	left->set_renderer(renderer);
 	left->set_name("Camera2 (Left)");
 	left->look_at(vec4(0, 0, 0, 1));
@@ -118,15 +118,24 @@ void Scene::draw_status_string()
 
 	if (_operation_mode == ROTATE_MODE)
 	{
-		ss << "ROTATE";
+		ss << "ROTATE // ";
 	}
 	else if (_operation_mode == SCALE_MODE)
 	{
-		ss << "SCALE";
+		ss << "SCALE // ";
 	}
 	else
 	{
-		ss << "TRANSLATE";
+		ss << "TRANSLATE // ";
+	}
+
+	if (_camera_mode == PERSPECTIVE_CAMERA)
+	{
+		ss << "PERSPECTIVE";
+	}
+	else
+	{
+		ss << "ORTHOGRAPHIC";
 	}
 
 	_renderer->set_color(0, 1, 0);
@@ -141,21 +150,21 @@ void Scene::redraw_necessary()
 void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 {
 	model->update_matrix(_active_camera->get_view_matrix(_camera_mode));
-	model->draw();
+	model->draw(_camera_mode);
 	const string name = model->get_name();
 	if(!model->is_camera()) 
 	{
 		model->_bounding_box->update_matrix(_active_camera->get_view_matrix(_camera_mode));
 		if (draw_bounding_box)
-			model->_bounding_box->draw();
+			model->_bounding_box->draw(_camera_mode);
 	}
 	if (_normal_type == VERTEX_NORMALS)
 	{
-		model->draw_vertex_normals();
+		model->draw_vertex_normals(_camera_mode);
 	}
 	else if (_normal_type == FACE_NORMALS)
 	{
-		model->draw_face_normals();
+		model->draw_face_normals(_camera_mode);
 	}
 }
 

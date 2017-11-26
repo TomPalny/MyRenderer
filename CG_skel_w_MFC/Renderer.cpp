@@ -4,6 +4,7 @@
 #include "InitShader.h"
 #include "GL\freeglut.h"
 #include "font8x8_basic.h"
+#include "Camera.h"
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 
@@ -165,22 +166,26 @@ void Renderer::draw_line_v(vec2 point1, vec2 point2)
 }
 
 
-bool Renderer::canonical_point_in_range(vec3 point)
+bool Renderer::canonical_point_in_range(vec3 point, CameraMode mode)
 {
-	if (fabs(point.x) > 1 || fabs(point.y) > 1 || fabs(point.z) > 1)
+	if (mode == PERSPECTIVE_CAMERA && (fabs(point.x) > 1 || fabs(point.y) > 1 || point.z > 0))
+	{
+		return false;
+	}
+	else if (mode == ORTHOGONAL_CAMERA && (fabs(point.x) > 1 || fabs(point.y) > 1 || fabs(point.z) > 1))
 	{
 		return false;
 	}
 	return true;
 }
 // draws a line, first performing clipping, w-normalization, and viewport transformation
-void Renderer::draw_line_vcw(vec3 point1, vec3 point2)
+void Renderer::draw_line_vcw(vec3 point1, vec3 point2, CameraMode mode)
 {
 	// TODO: this isn't really correct - we just do it for performance reasons to 
 	// avoid drawing really long and almost infinite lines
 	// we need to find the point where an infinite line intercepts the screen 
 	// and start drawing from that point
-	if (!canonical_point_in_range(point1) || !canonical_point_in_range(point2))
+	if (!canonical_point_in_range(point1, mode) || !canonical_point_in_range(point2, mode))
 	{
 		return;
 	}
