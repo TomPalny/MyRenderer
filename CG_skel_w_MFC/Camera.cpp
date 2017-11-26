@@ -31,7 +31,7 @@ void Camera::look_at(vec4 at)
 	_view =  c * Translate(-eye);
 }
 
-mat4 Camera::get_view_matrix()
+mat4 Camera::get_view_matrix(CameraMode camera_mode)
 {
 	const float aspect_ratio = _renderer->get_width() / (float)_renderer->get_height();
 	const float bottom = -5;
@@ -41,17 +41,39 @@ mat4 Camera::get_view_matrix()
 	const float nearz = -5;
 	const float farz = 5;
 
-	mat4 ortho;
-	ortho[0][0] = 2 / (right - left);
-	ortho[1][1] = 2 / (top - bottom);
-	ortho[2][2] = -2 / (farz - nearz);
-	ortho[3][3] = 1;
+	if (camera_mode == ORTHOGONAL_CAMERA)
+	{
+		mat4 ortho;
+		ortho[0][0] = 2 / (right - left);
+		ortho[1][1] = 2 / (top - bottom);
+		ortho[2][2] = -2 / (farz - nearz);
+		ortho[3][3] = 1;
 
-	ortho[0][3] = -(left+right)/(right-left);
-	ortho[1][3] = -(top+bottom)/(top-bottom);
-	ortho[2][3] = -(farz+nearz)/(farz-nearz);
+		ortho[0][3] = -(left + right) / (right - left);
+		ortho[1][3] = -(top + bottom) / (top - bottom);
+		ortho[2][3] = -(farz + nearz) / (farz - nearz);
 
-	return ortho * _view;
+		return ortho * _view;
+	}
+	else
+	{
+		mat4 H;
+		H[0][2] = (left + right) / (-2 * nearz);
+		H[1][2] = (top + bottom) / (-2 * nearz);
+
+		mat4 S;
+		S[0][0] = (-2 * nearz) / (right - left);
+		S[1][1] = (-2 * nearz) / (top - bottom);
+
+		mat4 N;
+		float alpha = -1 * (nearz + farz) / (nearz - farz);
+		float beta = -2 * (nearz + farz) / (nearz - farz);
+		N[2][2] = alpha;
+		N[2][3] = beta;
+		N[3][2] = -1;
+
+		return N * S * H * _view;
+	}
 }
 
 void Camera::apply_view_transformation(const mat4& inverse_operation)

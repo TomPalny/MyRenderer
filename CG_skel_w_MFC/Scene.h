@@ -39,6 +39,7 @@ class Scene {
 	NormalType _normal_type;
 	OperationMode _operation_mode;
 	TransformMode _transform_mode;
+	CameraMode _camera_mode;
 	ptrdiff_t _bounding_box_index = 0;
 
 	mat4 get_operation_for_keyboard(int key, int x, int y);

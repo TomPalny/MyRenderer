@@ -1,6 +1,13 @@
 #pragma once
 #include "Model.h"
 
+enum CameraMode
+{
+	ORTHOGONAL_CAMERA,
+	PERSPECTIVE_CAMERA,
+	NUMBER_OF_CAMERA_MODES
+};
+
 class Camera : public Model {
 	mat4 _projection;
 	mat4 _view;
@@ -10,7 +17,7 @@ public:
 	Camera(int camera_id);
 	~Camera();
 	void look_at(vec4 at);
-	mat4 get_view_matrix();
+	mat4 get_view_matrix(CameraMode camera_mode);
 	void apply_view_transformation(const mat4& inverse_operation);
 
 	/*

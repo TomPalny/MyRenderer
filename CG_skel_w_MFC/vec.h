@@ -409,7 +409,7 @@ struct vec4 {
 
 	vec2 to_vec2() const
     {
-		return vec2(x, y);
+		return vec2(x / w, y / w);
     }
 };
 

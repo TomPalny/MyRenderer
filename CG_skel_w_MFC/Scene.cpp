@@ -15,7 +15,7 @@ void init_menu();
 
 Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 									_normal_type(NO_NORMALS), _operation_mode(TRANSLATE_MODE),
-									_transform_mode(WORLD_TRANSFORM)
+									_transform_mode(WORLD_TRANSFORM), _camera_mode(ORTHOGONAL_CAMERA)
 {
 	// default view is from the front
 	auto front = new Camera(1);
@@ -140,12 +140,12 @@ void Scene::redraw_necessary()
 
 void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 {
-	model->update_matrix(_active_camera->get_view_matrix());
+	model->update_matrix(_active_camera->get_view_matrix(_camera_mode));
 	model->draw();
 	const string name = model->get_name();
 	if(!model->is_camera()) 
 	{
-		model->_bounding_box->update_matrix(_active_camera->get_view_matrix());
+		model->_bounding_box->update_matrix(_active_camera->get_view_matrix(_camera_mode));
 		if (draw_bounding_box)
 			model->_bounding_box->draw();
 	}
@@ -229,6 +229,9 @@ void Scene::keyboard(unsigned char key, int x, int y)
 	case 'b':
 		_bounding_box_index = index;
 		_bounding_boxes[_bounding_box_index] = !_bounding_boxes[_bounding_box_index];
+		break;
+	case '`':
+		_camera_mode = (CameraMode)((_camera_mode + 1) % NUMBER_OF_CAMERA_MODES);
 		break;
 	case 'l':
 		_active_camera->look_at(_active_model->get_origin_in_world_coordinates());
