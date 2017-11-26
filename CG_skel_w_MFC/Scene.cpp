@@ -19,7 +19,7 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 {
 	// default view is from the front
 	auto front = new Camera(1);
-	front->perform_operation(Translate(0, 0, 1), WORLD_TRANSFORM);
+	front->perform_operation(Translate(0, 0, 3.3), WORLD_TRANSFORM);
 	front->set_renderer(renderer);
 	front->set_name("Camera1 (Front)");
 	front->look_at(vec4(0, 0, 0, 1));

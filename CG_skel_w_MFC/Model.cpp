@@ -63,6 +63,9 @@ void Model::draw()
 	_renderer->set_color(1, 1, 1);
 	for (const auto face : _faces)
 	{
+		// TODO: we need to clip points that are out of range
+		// for example, if points are behind us (negative z) then we 
+		// currently draw them anyway which is totally wrong
 		const auto point1 = transform_point(face.point1).to_vec2();
 		const auto point2 = transform_point(face.point2).to_vec2();
 		const auto point3 = transform_point(face.point3).to_vec2();

@@ -50,9 +50,18 @@ void Renderer::draw_point(const vec2 point)
 	draw_point(point.x, point.y);
 }
 
-void Renderer::draw_point(int x, int y)
+bool Renderer::point_in_range(int x, int y)
 {
 	if (x < 0 || x >= _width || y < 0 || y >= _height)
+	{
+		return false;
+	}
+	return true;
+}
+
+void Renderer::draw_point(int x, int y)
+{
+	if (!point_in_range(x, y))
 	{
 		return;
 	}
@@ -144,6 +153,14 @@ void Renderer::draw_line_v(vec2 point1, vec2 point2)
 {
 	point1 = viewport_to_screen_coordinates(point1);
 	point2 = viewport_to_screen_coordinates(point2);
+	// TODO: this isn't really correct - we just do it for performance reasons to 
+	// avoid drawing really long and almost infinite lines
+	// we need to find the point where an infinite line intercepts the screen 
+	// and start drawing from that point
+	if (!point_in_range(point1.x, point1.y) || !point_in_range(point2.x, point2.y))
+	{
+		return;
+	}
 	draw_line(point1, point2);
 }
 

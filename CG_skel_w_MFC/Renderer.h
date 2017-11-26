@@ -16,6 +16,7 @@ class Renderer
 	void draw_line_implementation(vec2 point1, vec2 point2, bool inverted);
 	vec2 viewport_to_screen_coordinates(vec2 point);
 	void draw_point(vec2 point);
+	bool point_in_range(int x, int y);
 	void draw_point(int x, int y);
 	void draw_line(vec2 point1, vec2 point2);
 	void draw_line_old(vec2 point1, vec2 point2);
