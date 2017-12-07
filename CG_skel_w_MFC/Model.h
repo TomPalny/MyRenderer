@@ -42,5 +42,6 @@ public:
 	void set_name(std::string name);
 	void create_bounding_box();
 	float _min_x, _min_y, _min_z, _max_x, _max_y, _max_z;
+	float _current_scale_x = 1, _current_scale_y = 1, _current_scale_z = 1;
 	Model* _bounding_box;
 };
