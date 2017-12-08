@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+glew/lib/glew.lib
+freeglut/lib/freeglut_static.lib
+
 # User-specific files
 *.suo
 *.user
