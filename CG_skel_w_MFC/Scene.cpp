@@ -299,7 +299,7 @@ mat4 Scene::get_operation_for_keyboard(int key, int x, int y)
 			_active_model->_current_scale_y *= LARGER_SCALE_FACTOR;
 		}
 		else if (_operation_mode == ROTATE_MODE)
-			operation = RotateMat(theta, 'x');
+			operation = RotateMat(-theta, 'x');
 		else
 			operation = Translate(0, move_distance, 0);
 		break;
@@ -310,7 +310,7 @@ mat4 Scene::get_operation_for_keyboard(int key, int x, int y)
 			_active_model->_current_scale_y *= SMALLER_SCALE_FACTOR;
 		}
 		else if (_operation_mode == ROTATE_MODE)
-			operation = RotateMat(-theta, 'x');
+			operation = RotateMat(theta, 'x');
 		else
 			operation = Translate(0, -move_distance, 0);
 		break;
@@ -373,9 +373,16 @@ void Scene::keyboard_special(int key, int x, int y)
 	// for the camera apply a reverse transformation to the view matrix
 	if (_active_model->is_camera())
 	{
+		Camera* camera = dynamic_cast<Camera*>(_active_model);
 		key = get_reverse_key(key);
 		mat4 inverse_operation = get_operation_for_keyboard(key, x, y);
-		Camera* camera = dynamic_cast<Camera*>(_active_model);
+		if (_transform_mode == MODEL_TRANSFORM && _operation_mode == ROTATE_MODE)
+		{
+			vec3 camera_origin = camera->get_origin_in_world_coordinates().to_vec3_divide_by_w();
+			mat4 move = Translate(camera_origin.x, camera_origin.y, camera_origin.z);
+			mat4 move_back = Translate(-camera_origin.x, -camera_origin.y, -camera_origin.z);
+			inverse_operation = move * inverse_operation * move_back;
+		}
 		camera->apply_view_transformation(inverse_operation);
 	}
 	// for models that aren't the camera, apply the transform to their bounding box
