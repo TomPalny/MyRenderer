@@ -124,8 +124,6 @@ void Model::draw_face_normals(CameraMode camera_mode)
 	{
 		auto vector1 = face.point2 - face.point1;
 		auto vector2 = face.point3 - face.point2;
-		vector1 *= vec4(_current_scale_x, _current_scale_y, _current_scale_z, 1);
-		vector2 *= vec4(_current_scale_x, _current_scale_y, _current_scale_z, 1);
 		auto normal = normalize(cross(vector1, vector2));
 		auto center_of_triangle = (face.point1 + face.point2 + face.point3) / 3;
 		draw_single_normal(center_of_triangle, normal, camera_mode);

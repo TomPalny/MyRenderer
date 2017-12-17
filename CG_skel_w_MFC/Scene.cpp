@@ -272,10 +272,7 @@ mat4 Scene::get_operation_for_keyboard(int key, int x, int y)
 	{
 	case GLUT_KEY_RIGHT:
 		if (_operation_mode == SCALE_MODE)
-		{
 			operation = Scale(LARGER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
-			_active_model->_current_scale_x *= LARGER_SCALE_FACTOR;
-		}
 		else if (_operation_mode == ROTATE_MODE)
 			operation = RotateMat(theta, 'y');
 		else
@@ -283,10 +280,7 @@ mat4 Scene::get_operation_for_keyboard(int key, int x, int y)
 		break;
 	case GLUT_KEY_LEFT:
 		if (_operation_mode == SCALE_MODE)
-		{
 			operation = Scale(SMALLER_SCALE_FACTOR, NO_SCALE, NO_SCALE);
-			_active_model->_current_scale_x *= SMALLER_SCALE_FACTOR;
-		}
 		else if (_operation_mode == ROTATE_MODE)
 			operation = RotateMat(-theta, 'y');
 		else
@@ -294,10 +288,7 @@ mat4 Scene::get_operation_for_keyboard(int key, int x, int y)
 		break;
 	case GLUT_KEY_UP:
 		if (_operation_mode == SCALE_MODE)
-		{
 			operation = Scale(NO_SCALE, LARGER_SCALE_FACTOR, NO_SCALE);
-			_active_model->_current_scale_y *= LARGER_SCALE_FACTOR;
-		}
 		else if (_operation_mode == ROTATE_MODE)
 			operation = RotateMat(-theta, 'x');
 		else
@@ -305,10 +296,7 @@ mat4 Scene::get_operation_for_keyboard(int key, int x, int y)
 		break;
 	case GLUT_KEY_DOWN:
 		if (_operation_mode == SCALE_MODE)
-		{
 			operation = Scale(NO_SCALE, SMALLER_SCALE_FACTOR, NO_SCALE);
-			_active_model->_current_scale_y *= SMALLER_SCALE_FACTOR;
-		}
 		else if (_operation_mode == ROTATE_MODE)
 			operation = RotateMat(theta, 'x');
 		else
@@ -316,10 +304,7 @@ mat4 Scene::get_operation_for_keyboard(int key, int x, int y)
 		break;
 	case GLUT_KEY_PAGE_UP:
 		if (_operation_mode == SCALE_MODE)
-		{
 			operation = Scale(NO_SCALE, NO_SCALE, LARGER_SCALE_FACTOR);
-			_active_model->_current_scale_z *= LARGER_SCALE_FACTOR;
-		}
 		else if (_operation_mode == ROTATE_MODE)
 			operation = RotateMat(theta, 'z');
 		else
@@ -327,10 +312,7 @@ mat4 Scene::get_operation_for_keyboard(int key, int x, int y)
 		break;
 	case GLUT_KEY_PAGE_DOWN:
 		if (_operation_mode == SCALE_MODE)
-		{
 			operation = Scale(NO_SCALE, NO_SCALE, SMALLER_SCALE_FACTOR);
-			_active_model->_current_scale_z *= SMALLER_SCALE_FACTOR;
-		}
 		else if (_operation_mode == ROTATE_MODE)
 			operation = RotateMat(-theta, 'z');
 		else
