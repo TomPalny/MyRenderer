@@ -3,6 +3,7 @@
 #include "mat.h"
 #include <vector>
 #include "CameraMode.h"
+#include <memory>
 
 class Renderer;
 
@@ -21,7 +22,8 @@ protected:
 	mat4 _world_transforms;
 	mat4 _model_transforms;
 	mat4 _cached_world_model_transform;
-	std::vector<Face> _faces;
+	mat4 _view;
+	std::shared_ptr<std::vector<Face> > _faces;
 	char* _name;
 	char _origin_sign;
 	

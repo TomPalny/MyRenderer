@@ -56,7 +56,6 @@ public:
 
 	void draw_status_string();
 	void draw();
-	void draw_demo() const;
 	void switch_active_model(int id);
 	static void redraw_necessary();
 	void draw_one_model(Model* model, bool draw_bounding_box);

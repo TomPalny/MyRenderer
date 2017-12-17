@@ -71,45 +71,6 @@ void Renderer::draw_point(int x, int y)
 	_buffer[INDEX(_width, x, y, 2)] = _b;
 }
 
-void Renderer::draw_line_old(vec2 point1, vec2 point2)
-{
-	bool flipped = false;
-	// we need a line equation - so swap x and y if necessary
-	if (fabs(point2.x - point1.x) < 1)
-	{
-		// if this is a point and not a line
-		if (fabs(point2.y - point1.y) < 1)
-		{
-			//draw_point(point1);
-			return;
-		}
-		point1 = vec2(point1.y, point1.x);
-		point2 = vec2(point2.y, point2.x);
-		flipped = true;
-	}
-
-	// we draw from left to right, so start from the leftmost point
-	if (point1.x >= point2.x)
-	{
-		swap(point1, point2);
-	}
-
-	const float m = (point2.y - point1.y) / (point2.x - point1.x);
-	const float b = point1.y - m*point1.x;
-	for (int x = point1.x; x <= point2.x; x++)
-	{
-		const int y = m*x + b;
-		if (flipped)
-		{
-			draw_point(y, x);
-		}
-		else
-		{
-			draw_point(x, y);
-		}
-	}
-}
-
 void Renderer::draw_line_implementation(vec2 point1, vec2 point2, const bool inverted)
 {
 	if(point1.x > point2.x)
@@ -168,24 +129,22 @@ void Renderer::draw_line_v(vec2 point1, vec2 point2)
 
 bool Renderer::canonical_point_in_range(vec3 point, CameraMode mode)
 {
-	if (mode == PERSPECTIVE_CAMERA && (fabs(point.x) > 1 || fabs(point.y) > 1 || point.z > 0))
-	{
-		return false;
-	}
-	else if (mode == ORTHOGONAL_CAMERA && (fabs(point.x) > 1 || fabs(point.y) > 1 || fabs(point.z) > 1))
+	if (fabs(point.x) > 1 || fabs(point.y) > 1 || fabs(point.z) > 1)
 	{
 		return false;
 	}
 	return true;
 }
+
 // draws a line, first performing clipping, w-normalization, and viewport transformation
-void Renderer::draw_line_vcw(vec3 point1, vec3 point2, CameraMode mode)
+void Renderer::draw_line_vcw(vec4 point1, vec4 point2, CameraMode mode)
 {
 	// TODO: this isn't really correct - we just do it for performance reasons to 
 	// avoid drawing really long and almost infinite lines
 	// we need to find the point where an infinite line intercepts the screen 
 	// and start drawing from that point
-	if (!canonical_point_in_range(point1, mode) || !canonical_point_in_range(point2, mode))
+	if (!canonical_point_in_range(point1.to_vec3_divide_by_w(), mode)
+		|| !canonical_point_in_range(point2.to_vec3_divide_by_w(), mode))
 	{
 		return;
 	}
@@ -247,6 +206,11 @@ void Renderer::clear_screen()
 	}
 }
 
+void Renderer::set_camera(Camera* camera)
+{
+	_camera = camera;
+}
+
 void Renderer::set_color(float r, float g, float b)
 {
 	_r = r;
@@ -254,35 +218,8 @@ void Renderer::set_color(float r, float g, float b)
 	_b = b;
 }
 
-void Renderer::draw_demo()
-{
-	//vertical line
-	for(int i=0; i<_height; i++)
-	{
-		_buffer[INDEX(_width,_width/2,i,0)]=0.5f;	
-		_buffer[INDEX(_width,_width/2,i,1)]=0.5f;	
-		_buffer[INDEX(_width,_width/2,i,2)]=0.5f;
-
-	}
-	//horizontal line
-	for(int i=0; i<_width; i++)
-	{
-		_buffer[INDEX(_width,i, _height/2, 0)]=1;	
-		_buffer[INDEX(_width,i, _height/2, 1)]=0;
-		_buffer[INDEX(_width,i, _height/2 ,2)]=1;
-	}
-}
-
 void Renderer::draw_string(const char* string, int left, int bottom)
 {
-	/*
-	bool underline = true;
-	if (underline)
-	{
-		draw_line(vec2(left, bottom-1), vec2(left + strlen(string) * 10, bottom-1));
-		draw_line(vec2(left, bottom-2), vec2(left + strlen(string) * 10, bottom-2));
-	}*/
-
 	while (*string != '\0')
 	{
 		draw_letter(*string, left, bottom);

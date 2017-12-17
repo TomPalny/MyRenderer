@@ -13,6 +13,7 @@ class Renderer
 	float *_zbuffer; // width*height
 	int _width, _height;
 	float _r, _g, _b;
+	Camera* _camera;
 
 	void draw_line_implementation(vec2 point1, vec2 point2, bool inverted);
 	vec2 viewport_to_screen_coordinates(vec2 point);
@@ -20,7 +21,6 @@ class Renderer
 	bool point_in_range(int x, int y);
 	void draw_point(int x, int y);
 	void draw_line(vec2 point1, vec2 point2);
-	void draw_line_old(vec2 point1, vec2 point2);
 	void draw_line_v(vec2 point1, vec2 point2);
 
 	//////////////////////////////
@@ -46,6 +46,7 @@ public:
 
 	void swap_buffers();
 	void clear_screen();
+	void set_camera(Camera* camera);
 	void set_color(float r, float g, float b);
 	void set_window_size(int width, int height);
 	float* get_buffer();
@@ -56,6 +57,5 @@ public:
 	void draw_letter(char letter, int left, int bottom);
 	void draw_letter_v(char letter, vec2 point);
 	bool canonical_point_in_range(vec3 point, CameraMode mode);
-	void draw_line_vcw(vec3 point1, vec3 point2, CameraMode mode);
-	void draw_demo();
+	void draw_line_vcw(vec4 point1, vec4 point2, CameraMode mode);
 };

@@ -19,10 +19,10 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 {
 	// default view is from the front
 	auto front = new Camera(1);
-	front->perform_operation(Translate(0, 0, 8), WORLD_TRANSFORM);
+	front->perform_operation(Translate(0, 0, 5), WORLD_TRANSFORM);
 	front->set_renderer(renderer);
 	front->set_name("Camera1 (Front)");
-	front->look_at(vec4(0, 0, 0, 1));
+	front->look_at2(vec3(0,0,5), vec3(0, 0, 0));
 	_cameras.push_back(front);
 	_models.push_back(front);
 	_bounding_boxes.push_back(false);
@@ -31,7 +31,7 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 	left->perform_operation(Translate(8, 1, 0), WORLD_TRANSFORM);
 	left->set_renderer(renderer);
 	left->set_name("Camera2 (Left)");
-	left->look_at(vec4(0, 0, 0, 1));
+	left->look_at(vec3(0, 0, 0));
 	_cameras.push_back(left);
 	_models.push_back(left);
 	_bounding_boxes.push_back(false);
@@ -186,13 +186,6 @@ void Scene::draw()
 	_renderer->swap_buffers();
 }
 
-void Scene::draw_demo() const
-{
-	_renderer->clear_screen();
-	_renderer->draw_demo();
-	_renderer->swap_buffers();
-}
-
 void Scene::switch_active_model(int id)
 {
 	_active_model = _models[id];
@@ -246,7 +239,7 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		_camera_mode = (CameraMode)((_camera_mode + 1) % NUMBER_OF_CAMERA_MODES);
 		break;
 	case 'l':
-		_active_camera->look_at(_active_model->get_origin_in_world_coordinates());
+		_active_camera->look_at(_active_model->get_origin_in_world_coordinates().to_vec3_divide_by_w());
 		break;
 	}
 	redraw_necessary();

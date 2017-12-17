@@ -3,7 +3,7 @@
 #include "mat.h"
 #include "Renderer.h"
 
-Model::Model() : _renderer(nullptr), _origin_sign('+')
+Model::Model() : _renderer(nullptr), _origin_sign('+'), _faces(new std::vector<Face>())
 {
 }
 
@@ -42,47 +42,45 @@ void Model::create_bounding_box()
 	const vec4 point7(_max_x, _max_y, _max_z, 1);
 	const vec4 point8(_max_x, _max_y, _min_z, 1);
 
-	_bounding_box->_faces.push_back(Face(point1, point2, point3));
-	_bounding_box->_faces.push_back(Face(point3, point4, point1));
-	_bounding_box->_faces.push_back(Face(point5, point6, point7));
-	_bounding_box->_faces.push_back(Face(point7, point8, point5));
+	_bounding_box->_faces->push_back(Face(point1, point2, point3));
+	_bounding_box->_faces->push_back(Face(point3, point4, point1));
+	_bounding_box->_faces->push_back(Face(point5, point6, point7));
+	_bounding_box->_faces->push_back(Face(point7, point8, point5));
 
-	_bounding_box->_faces.push_back(Face(point6, point2, point3));
-	_bounding_box->_faces.push_back(Face(point3, point7, point6));
-	_bounding_box->_faces.push_back(Face(point7, point3, point4));
-	_bounding_box->_faces.push_back(Face(point4, point8, point7));
+	_bounding_box->_faces->push_back(Face(point6, point2, point3));
+	_bounding_box->_faces->push_back(Face(point3, point7, point6));
+	_bounding_box->_faces->push_back(Face(point7, point3, point4));
+	_bounding_box->_faces->push_back(Face(point4, point8, point7));
 
-	_bounding_box->_faces.push_back(Face(point8, point5, point1));
-	_bounding_box->_faces.push_back(Face(point1, point4, point8));
-	_bounding_box->_faces.push_back(Face(point5, point6, point2));
-	_bounding_box->_faces.push_back(Face(point2, point1, point5));
+	_bounding_box->_faces->push_back(Face(point8, point5, point1));
+	_bounding_box->_faces->push_back(Face(point1, point4, point8));
+	_bounding_box->_faces->push_back(Face(point5, point6, point2));
+	_bounding_box->_faces->push_back(Face(point2, point1, point5));
 
 }
 
 void Model::draw(CameraMode camera_mode)
 {
 	_renderer->set_color(1, 1, 1);
-	for (const auto face : _faces)
+	for (const auto& face : *_faces)
 	{
-		// TODO: we need to clip points that are out of range
-		// for example, if points are behind us (negative z) then we 
-		// currently draw them anyway which is totally wrong
-		const auto point1 = transform_point(face.point1).to_vec3_divide_by_w();
-		const auto point2 = transform_point(face.point2).to_vec3_divide_by_w();
-		const auto point3 = transform_point(face.point3).to_vec3_divide_by_w();
-
-		//_renderer->draw_point(point1);
-		//_renderer->draw_point(point2);
-		//_renderer->draw_point(point3);
+		const auto point1 = transform_point(face.point1);
+		const auto point2 = transform_point(face.point2);
+		const auto point3 = transform_point(face.point3);
 
 		_renderer->draw_line_vcw(point1, point2, camera_mode);
 		_renderer->draw_line_vcw(point2, point3, camera_mode);
 		_renderer->draw_line_vcw(point3, point1, camera_mode);
 	}
 
+	// TOOD: don't apply model transforms and clip using clipping function
 	vec4 origin = _cached_world_model_transform * vec4(0, 0, 0, 1);
-	_renderer->set_color(1, 0, 0);
-	_renderer->draw_letter_v(_origin_sign, origin.to_vec2());
+	vec3 origin3 = origin.to_vec3_divide_by_w();
+	if (fabs(origin3.x) <= 1 && fabs(origin3.y) <= 1 && fabs(origin3.z) <= 1)
+	{
+		_renderer->set_color(1, 0, 0);
+		_renderer->draw_letter_v(_origin_sign, origin.to_vec2());
+	}
 }
 
 void Model::draw_single_normal(vec4 start, vec4 direction, CameraMode camera_mode)
@@ -101,12 +99,13 @@ vec4 Model::get_origin_in_world_coordinates()
 
 void Model::update_matrix(mat4 view)
 {
+	_view = view;
 	_cached_world_model_transform = view * _world_transforms * _model_transforms;
 }
 
 void Model::draw_vertex_normals(CameraMode camera_mode)
 {
-	for (const auto face : _faces)
+	for (const auto& face : *_faces)
 	{
 		if (!face.has_vertex_normals)
 		{
@@ -120,7 +119,7 @@ void Model::draw_vertex_normals(CameraMode camera_mode)
 
 void Model::draw_face_normals(CameraMode camera_mode)
 {
-	for (const auto face : _faces)
+	for (const auto& face : *_faces)
 	{
 		auto vector1 = face.point2 - face.point1;
 		auto vector2 = face.point3 - face.point2;

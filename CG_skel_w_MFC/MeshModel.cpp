@@ -132,7 +132,7 @@ void MeshModel::load_file(string fileName)
 	}
 
 	create_bounding_box();
-	_faces.clear();
+	_faces->clear();
 	// iterate through all stored faces and create triangles
 	for (const auto face : face_ids)
 	{
@@ -143,14 +143,14 @@ void MeshModel::load_file(string fileName)
 		// if some of the vertices don't have a normal than disable normals for this face
 		if (face.vn[0] == 0 || face.vn[1] == 0 || face.vn[2] == 0)
 		{
-			_faces.push_back(Face(point1, point2, point3));
+			_faces->push_back(Face(point1, point2, point3));
 		}
 		else
 		{
 			const auto normal1 = normal_vertices[face.vn[0] - 1];
 			const auto normal2 = normal_vertices[face.vn[1] - 1];
 			const auto normal3 = normal_vertices[face.vn[2] - 1];
-			_faces.push_back(Face(point1, point2, point3, normal1, normal2, normal3));
+			_faces->push_back(Face(point1, point2, point3, normal1, normal2, normal3));
 		}
 	}
 }

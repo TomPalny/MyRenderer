@@ -102,9 +102,6 @@ void menu_callback(int id)
 	case ADD_PYRAMID:
 		scene->add_pyramid_model();
 		break;
-	case MAIN_DEMO:
-		scene->draw_demo();
-		break;
 	case MAIN_ABOUT:
 		AfxMessageBox(_T("Computer Graphics"));
 		break;
@@ -152,7 +149,6 @@ void init_menu()
 	glutAddMenuEntry("Translate", TRANSLATE_MODEL);
 	glutAddMenuEntry("Scale", SCALE_MODEL);
 	glutAddMenuEntry("Rotate", ROTATE_MODEL);
-	glutAddMenuEntry("Demo",MAIN_DEMO);
 	glutAddMenuEntry("About",MAIN_ABOUT);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
