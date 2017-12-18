@@ -413,7 +413,7 @@ struct vec4 {
 		return vec3(x / w, y / w, z / w);
 	}
 
-	vec2 to_vec2() const
+	vec2 to_vec2_divide_by_w() const
     {
 		return vec2(x / w, y / w);
     }

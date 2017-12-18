@@ -20,7 +20,6 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 	// default view is from the front
 	auto front = new Camera(1);
 	front->perform_operation(Translate(0, 0, 5), WORLD_TRANSFORM);
-	front->set_renderer(renderer);
 	front->set_name("Camera1 (Front)");
 	front->look_at2(vec3(0,0,5), vec3(0, 0, 0));
 	_cameras.push_back(front);
@@ -29,7 +28,6 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 	
 	auto left = new Camera(2);
 	left->perform_operation(Translate(8, 1, 0), WORLD_TRANSFORM);
-	left->set_renderer(renderer);
 	left->set_name("Camera2 (Left)");
 	left->look_at(vec3(0, 0, 0));
 	_cameras.push_back(left);
@@ -62,7 +60,6 @@ void Scene::set_operation_mode(OperationMode mode)
 void Scene::switch_camera(unsigned int number)
 {
 	_active_camera = _cameras[number];
-	//_active_camera->look_at(vec4(0, 0, 0, 1));
 	redraw_necessary();
 }
 
@@ -90,12 +87,10 @@ void Scene::load_model_at_center(Model* model, const string name)
 	if (model->_bounding_box != nullptr)
 	{
 		model->_bounding_box->set_name(name);
-		model->_bounding_box->set_renderer(_renderer);
 	}
 	_active_model = model;
 	_models.push_back(_active_model);
 	_bounding_boxes.push_back(false);
-	_active_model->set_renderer(_renderer);
 	
 	init_menu();
 	redraw_necessary();
@@ -152,15 +147,13 @@ void Scene::redraw_necessary()
 
 void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 {
-	model->update_matrix(_active_camera->get_view_matrix(_camera_mode));
-	model->draw(_camera_mode);
-	const string name = model->get_name();
+	_renderer->draw_model(model, _active_camera, _camera_mode);
 	if(!model->is_camera() && model->_bounding_box != nullptr) 
 	{
-		model->_bounding_box->update_matrix(_active_camera->get_view_matrix(_camera_mode));
 		if (draw_bounding_box)
-			model->_bounding_box->draw(_camera_mode);
+			_renderer->draw_model(model->_bounding_box, _active_camera, _camera_mode);
 	}
+	/*
 	if (_normal_type == VERTEX_NORMALS)
 	{
 		model->draw_vertex_normals(_camera_mode);
@@ -168,7 +161,7 @@ void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 	else if (_normal_type == FACE_NORMALS)
 	{
 		model->draw_face_normals(_camera_mode);
-	}
+	}*/
 }
 
 void Scene::draw()

@@ -111,44 +111,58 @@ vec2 inline Renderer::viewport_to_screen_coordinates(vec2 point)
 }
 
 // draws a line, first performing viewport transformation
-void Renderer::draw_line_v(vec2 point1, vec2 point2)
+void Renderer::draw_line_vcw(vec4 point1, vec4 point2)
 {
-	point1 = viewport_to_screen_coordinates(point1);
-	point2 = viewport_to_screen_coordinates(point2);
 	// TODO: this isn't really correct - we just do it for performance reasons to 
 	// avoid drawing really long and almost infinite lines
 	// we need to find the point where an infinite line intercepts the screen 
 	// and start drawing from that point
-	/*if (!point_in_range(point1.x, point1.y) || !point_in_range(point2.x, point2.y))
+	if (!homogenous_point_in_range(point1) || !homogenous_point_in_range(point2))
 	{
 		return;
-	}*/
-	draw_line(point1, point2);
+	}
+
+	// TODO: here we lose the depth information
+	// I think we need to switch to NDC w/ Z so we still have z coordinates for the z-buffer
+	auto p1 = viewport_to_screen_coordinates(point1.to_vec2_divide_by_w());
+	auto p2 = viewport_to_screen_coordinates(point2.to_vec2_divide_by_w());
+	draw_line(p1, p2);
 }
 
 
-bool Renderer::canonical_point_in_range(vec3 point, CameraMode mode)
+bool Renderer::homogenous_point_in_range(vec4 point)
 {
-	if (fabs(point.x) > 1 || fabs(point.y) > 1 || fabs(point.z) > 1)
+	if (fabs(point.x) > fabs(point.w) || 
+		fabs(point.y) > fabs(point.w) || 
+		fabs(point.z) > fabs(point.w))
 	{
 		return false;
 	}
 	return true;
 }
 
-// draws a line, first performing clipping, w-normalization, and viewport transformation
-void Renderer::draw_line_vcw(vec4 point1, vec4 point2, CameraMode mode)
+// TODO: move this back to the Model class
+void Renderer::draw_model(Model* model, Camera* camera, CameraMode camera_mode)
 {
-	// TODO: this isn't really correct - we just do it for performance reasons to 
-	// avoid drawing really long and almost infinite lines
-	// we need to find the point where an infinite line intercepts the screen 
-	// and start drawing from that point
-	if (!canonical_point_in_range(point1.to_vec3_divide_by_w(), mode)
-		|| !canonical_point_in_range(point2.to_vec3_divide_by_w(), mode))
+	set_color(1, 1, 1);
+	mat4 projection = camera->get_projection_matrix(camera_mode, _width / (float) _height);
+	mat4 modelview = camera->get_view_matrix() * model->get_transforms();
+	mat4 total_transform = projection * modelview;
+	for (const auto& face : *model->get_faces())
 	{
-		return;
+		const auto point1 = total_transform * face.point1;
+		const auto point2 = total_transform * face.point2;
+		const auto point3 = total_transform * face.point3;
+
+		draw_line_vcw(point1, point2);
+		draw_line_vcw(point2, point3);
+		draw_line_vcw(point3, point1);
 	}
-	draw_line_v(point1.to_vec2(), point2.to_vec2());
+
+	// this is different than total_transform because it excludes transforms in the model frame
+	vec4 origin = projection * camera->get_view_matrix() * model->get_origin_in_world_coordinates();
+	set_color(1, 0, 0);
+	draw_letter(model->get_origin_sign(), origin);
 }
 
 void Renderer::draw_line(vec2 point1, vec2 point2)
@@ -206,11 +220,6 @@ void Renderer::clear_screen()
 	}
 }
 
-void Renderer::set_camera(Camera* camera)
-{
-	_camera = camera;
-}
-
 void Renderer::set_color(float r, float g, float b)
 {
 	_r = r;
@@ -243,9 +252,13 @@ void Renderer::draw_letter(char letter, int left, int bottom)
 	}
 }
 
-void Renderer::draw_letter_v(char letter, vec2 point)
+void Renderer::draw_letter(char letter, vec4 point)
 {
-	auto fixed_point = viewport_to_screen_coordinates(point);
+	if (!homogenous_point_in_range(point))
+	{
+		return;
+	}
+	auto fixed_point = viewport_to_screen_coordinates(point.to_vec2_divide_by_w());
 	draw_letter(letter, fixed_point.x - 4, fixed_point.y - 4);
 }
 

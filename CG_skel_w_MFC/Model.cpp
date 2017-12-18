@@ -3,18 +3,8 @@
 #include "mat.h"
 #include "Renderer.h"
 
-Model::Model() : _renderer(nullptr), _origin_sign('+'), _faces(new std::vector<Face>())
+Model::Model() :  _faces(new std::vector<Face>()), _origin_sign('+')
 {
-}
-
-void Model::set_renderer(Renderer * renderer)
-{
-	_renderer = renderer;
-}
-
-vec4 Model::transform_point(const vec4 point) const
-{
-	return _cached_world_model_transform * point;
 }
 
 const char* Model::get_name() const
@@ -59,74 +49,28 @@ void Model::create_bounding_box()
 
 }
 
-void Model::draw(CameraMode camera_mode)
+std::shared_ptr<std::vector<Face> > Model::get_faces()
 {
-	_renderer->set_color(1, 1, 1);
-	for (const auto& face : *_faces)
-	{
-		const auto point1 = transform_point(face.point1);
-		const auto point2 = transform_point(face.point2);
-		const auto point3 = transform_point(face.point3);
-
-		_renderer->draw_line_vcw(point1, point2, camera_mode);
-		_renderer->draw_line_vcw(point2, point3, camera_mode);
-		_renderer->draw_line_vcw(point3, point1, camera_mode);
-	}
-
-	// TOOD: don't apply model transforms and clip using clipping function
-	vec4 origin = _cached_world_model_transform * vec4(0, 0, 0, 1);
-	vec3 origin3 = origin.to_vec3_divide_by_w();
-	if (fabs(origin3.x) <= 1 && fabs(origin3.y) <= 1 && fabs(origin3.z) <= 1)
-	{
-		_renderer->set_color(1, 0, 0);
-		_renderer->draw_letter_v(_origin_sign, origin.to_vec2());
-	}
+	return _faces;
 }
 
-void Model::draw_single_normal(vec4 start, vec4 direction, CameraMode camera_mode)
+char Model::get_origin_sign()
 {
-	_renderer->set_color(0.5, 0.5, 0.5);
-	auto transformed_start = transform_point(start);
-	auto end = start.to_vec3() + normalize(direction.to_vec3()) * 0.2f;
-	auto transformed_end = transform_point(vec4(end));
-	_renderer->draw_line_vcw(transformed_start.to_vec3_divide_by_w(), transformed_end.to_vec3_divide_by_w(), camera_mode);
+	return _origin_sign;
 }
 
 vec4 Model::get_origin_in_world_coordinates()
 {
-	return _world_transforms * _model_transforms * vec4(0, 0, 0, 1);
+	// we exclude _model_transforms
+	// the origin is always at (0,0,0) in the model frame
+	// when you move a point in the model frame you are moving it 
+	// relative to the origin which stays at (0,0,0)
+	return _world_transforms * vec4(0, 0, 0, 1);
 }
 
-void Model::update_matrix(mat4 view)
+mat4 Model::get_transforms()
 {
-	_view = view;
-	_cached_world_model_transform = view * _world_transforms * _model_transforms;
-}
-
-void Model::draw_vertex_normals(CameraMode camera_mode)
-{
-	for (const auto& face : *_faces)
-	{
-		if (!face.has_vertex_normals)
-		{
-			continue;
-		}
-		draw_single_normal(face.point1, face.normal1, camera_mode);
-		draw_single_normal(face.point2, face.normal2, camera_mode);
-		draw_single_normal(face.point3, face.normal3, camera_mode);
-	}
-}
-
-void Model::draw_face_normals(CameraMode camera_mode)
-{
-	for (const auto& face : *_faces)
-	{
-		auto vector1 = face.point2 - face.point1;
-		auto vector2 = face.point3 - face.point2;
-		auto normal = normalize(cross(vector1, vector2));
-		auto center_of_triangle = (face.point1 + face.point2 + face.point3) / 3;
-		draw_single_normal(center_of_triangle, normal, camera_mode);
-	}
+	return _world_transforms * _model_transforms;
 }
 
 void Model::perform_operation(mat4 operation, TransformMode mode)
