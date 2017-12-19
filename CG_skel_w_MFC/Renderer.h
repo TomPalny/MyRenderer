@@ -16,11 +16,13 @@ class Renderer
 
 	void draw_line_implementation(vec2 point1, vec2 point2, bool inverted);
 	vec2 viewport_to_screen_coordinates(vec2 point);
-	void draw_point(vec2 point);
+
 	bool point_in_range(int x, int y);
+	bool point_in_range(vec4 point);
+
 	void draw_point(int x, int y);
 	void draw_line(vec2 point1, vec2 point2);
-	bool homogenous_point_in_range(vec4 point);
+	void draw_line(vec4 point1, vec4 point2);
 
 	//////////////////////////////
 	// openGL stuff. Don't touch.
@@ -47,13 +49,11 @@ public:
 	void clear_screen();
 	void set_color(float r, float g, float b);
 	void set_window_size(int width, int height);
-	float* get_buffer();
 	int get_width();
 	int get_height();
 
 	void draw_string(const char* string, int left, int bottom);
 	void draw_letter(char letter, int left, int bottom);
 	void draw_letter(char letter, vec4 point);
-	void draw_line_vcw(vec4 point1, vec4 point2);
 	void draw_model(Model* model, Camera* camera, CameraMode camera_mode);
 };

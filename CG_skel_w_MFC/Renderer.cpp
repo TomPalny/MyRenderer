@@ -31,11 +31,6 @@ void Renderer::set_window_size(int width, int height)
 	_buffer = new float[3*_width*_height];
 }
 
-float* Renderer::get_buffer()
-{
-	return _buffer;
-}
-
 int Renderer::get_width()
 {
 	return _width;
@@ -44,11 +39,6 @@ int Renderer::get_width()
 int Renderer::get_height()
 {
 	return _height;
-}
-
-void Renderer::draw_point(const vec2 point)
-{
-	draw_point(point.x, point.y);
 }
 
 bool Renderer::point_in_range(int x, int y)
@@ -110,27 +100,7 @@ vec2 inline Renderer::viewport_to_screen_coordinates(vec2 point)
 	return vec2(_width / 2.0f * (point.x + 1), _height / 2.0f * (point.y + 1));
 }
 
-// draws a line, first performing viewport transformation
-void Renderer::draw_line_vcw(vec4 point1, vec4 point2)
-{
-	// TODO: this isn't really correct - we just do it for performance reasons to 
-	// avoid drawing really long and almost infinite lines
-	// we need to find the point where an infinite line intercepts the screen 
-	// and start drawing from that point
-	if (!homogenous_point_in_range(point1) || !homogenous_point_in_range(point2))
-	{
-		return;
-	}
-
-	// TODO: here we lose the depth information
-	// I think we need to switch to NDC w/ Z so we still have z coordinates for the z-buffer
-	auto p1 = viewport_to_screen_coordinates(point1.to_vec2_divide_by_w());
-	auto p2 = viewport_to_screen_coordinates(point2.to_vec2_divide_by_w());
-	draw_line(p1, p2);
-}
-
-
-bool Renderer::homogenous_point_in_range(vec4 point)
+bool Renderer::point_in_range(vec4 point)
 {
 	if (fabs(point.x) > fabs(point.w) || 
 		fabs(point.y) > fabs(point.w) || 
@@ -139,6 +109,23 @@ bool Renderer::homogenous_point_in_range(vec4 point)
 		return false;
 	}
 	return true;
+}
+
+int min3(int x, int y, int z)
+{
+	return min(x, min(y, z));
+}
+
+int max3(int x, int y, int z)
+{
+	return max(x, max(y, z));
+}
+
+// see https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage
+bool edge_func(vec2 v0, vec2 v1, vec2 p)
+{
+	int val = (p.x - v0.x) * (v1.y - v0.y) - (p.y - v0.y) * (v1.x - v0.x);
+	return val >= 0;
 }
 
 // TODO: move this back to the Model class
@@ -154,15 +141,58 @@ void Renderer::draw_model(Model* model, Camera* camera, CameraMode camera_mode)
 		const auto point2 = total_transform * face.point2;
 		const auto point3 = total_transform * face.point3;
 
-		draw_line_vcw(point1, point2);
-		draw_line_vcw(point2, point3);
-		draw_line_vcw(point3, point1);
+		draw_line(point1, point2);
+		draw_line(point2, point3);
+		draw_line(point3, point1);
+
+		auto p1 = viewport_to_screen_coordinates(point1.to_vec2_divide_by_w());
+		auto p2 = viewport_to_screen_coordinates(point2.to_vec2_divide_by_w());
+		auto p3 = viewport_to_screen_coordinates(point3.to_vec2_divide_by_w());
+
+		set_color(0, 1, 0);
+		int min_x = min3(p1.x, p2.x, p3.x);
+		int max_x = max3(p1.x, p2.x, p3.x);
+
+		int min_y = min3(p1.y, p2.y, p3.y);
+		int max_y = max3(p1.y, p2.y, p3.y);
+
+		for (int y=min_y; y <= max_y; ++y)
+		{
+			for (int x=min_x; x <= max_x; ++x)
+			{
+				if (edge_func(p1, p2, vec2(x, y)) &&
+					edge_func(p2, p3, vec2(x, y)) &&
+					edge_func(p3, p1, vec2(x, y)))
+				{
+					draw_point(x, y);
+				}
+			}
+		}
 	}
 
 	// this is different than total_transform because it excludes transforms in the model frame
 	vec4 origin = projection * camera->get_view_matrix() * model->get_origin_in_world_coordinates();
 	set_color(1, 0, 0);
 	draw_letter(model->get_origin_sign(), origin);
+}
+
+// draws a line, first performing viewport transformation
+void Renderer::draw_line(vec4 point1, vec4 point2)
+{
+	// TODO: this isn't really correct - we just do it for performance reasons to 
+	// avoid drawing really long and almost infinite lines
+	// we need to find the point where an infinite line intercepts the screen 
+	// and start drawing from that point
+	if (!point_in_range(point1) || !point_in_range(point2))
+	{
+		return;
+	}
+
+	// TODO: here we lose the depth information
+	// I think we need to switch to NDC w/ Z so we still have z coordinates for the z-buffer
+	auto p1 = viewport_to_screen_coordinates(point1.to_vec2_divide_by_w());
+	auto p2 = viewport_to_screen_coordinates(point2.to_vec2_divide_by_w());
+	draw_line(p1, p2);
 }
 
 void Renderer::draw_line(vec2 point1, vec2 point2)
@@ -254,7 +284,7 @@ void Renderer::draw_letter(char letter, int left, int bottom)
 
 void Renderer::draw_letter(char letter, vec4 point)
 {
-	if (!homogenous_point_in_range(point))
+	if (!point_in_range(point))
 	{
 		return;
 	}
