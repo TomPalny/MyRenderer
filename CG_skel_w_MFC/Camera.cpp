@@ -66,10 +66,10 @@ mat4 Camera::get_projection_matrix()
 {
 	if (_projection_type == ORTHOGONAL_PROJECTION)
 	{
-		const float bottom = -5;
-		const float top = 5;
-		const float left = -5 * _aspect_ratio;
-		const float right = 5 * _aspect_ratio;
+		const float bottom = -2;
+		const float top = 2;
+		const float left = -2 * _aspect_ratio;
+		const float right = 2 * _aspect_ratio;
 		const float nearz = 0.1;
 		float farz = 10;
 		
