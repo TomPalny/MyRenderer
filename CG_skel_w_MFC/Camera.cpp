@@ -80,12 +80,12 @@ mat4 Camera::get_projection_matrix(CameraMode camera_mode, float aspect_ratio, f
 	else
 	{
 		// this is from Interactive Computer Graphics version 6
-		// there is a mistake in the book for gl_style[2][2]
+		// there is a mistake in the book for persp[2][2]
 		// we use the correct version here
 		mat4 persp;
-		float nearz = 0.5;
-		float farz = 10;
-		float top = nearz * tan(0.785398); // 45 degrees in radians
+		float nearz = 1;
+		float farz = 5;
+		float top = nearz * tan(fovy * M_PI / 180.0f); // convert degrees to radians
 		float right = top * aspect_ratio;
 		persp[0][0] = nearz / right;
 		persp[1][1] = nearz / top;
