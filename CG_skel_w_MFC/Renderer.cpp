@@ -9,6 +9,10 @@
 #define INDEX(width,x,y,c) ((x+y*width)*3+c)
 #define ZINDEX(width,x,y) (x+y*width)
 
+float clamp(float x, float lower, float upper) {
+	return min(upper, max(x, lower));
+}
+
 Renderer::Renderer(int width, int height) :
 	_buffer(NULL), _width(width), _height(height), _r(1.0), _g(1.0), _b(1.0), _fovy(45), _rotating_color(1)
 {
@@ -141,7 +145,6 @@ float double_area(vec2 v0, vec2 v1, vec2 p)
 // TODO: move this back to the Model class
 void Renderer::draw_model(Model* model, Camera* camera, CameraMode camera_mode)
 {
-
 	_rotating_color = 1;
 	set_color(1, 1, 1);
 	mat4 projection = camera->get_projection_matrix(camera_mode, _width / (float) _height, _fovy);
@@ -150,20 +153,21 @@ void Renderer::draw_model(Model* model, Camera* camera, CameraMode camera_mode)
 
 	for (int i=0; i< model->get_faces()->size(); i++)
 	{
+		assign_rotating_color();
+
 		const auto& face = model->get_faces()->at(i);
 		const auto point1 = total_transform * face.point1;
 		const auto point2 = total_transform * face.point2;
 		const auto point3 = total_transform * face.point3;
 
+		// TODO: do we need to bother with this?
+		// min_x, max_x, min_y, max_y and the z-range check accomplish this later...
+		if (!point_in_range(point1) && !point_in_range(point2) && !point_in_range(point3))
+			continue;
+
 		auto p1 = viewport_to_screen_coordinates(point1.to_vec2_divide_by_w());
 		auto p2 = viewport_to_screen_coordinates(point2.to_vec2_divide_by_w());
 		auto p3 = viewport_to_screen_coordinates(point3.to_vec2_divide_by_w());
-
-		// TODO: remove me
-		if (model->get_name() == string("cow"))
-			set_color(0, 1, 0);
-		else
-			set_color(0, 0, 1);
 
 		int min_x = max(0, min3(p1.x, p2.x, p3.x));
 		int max_x = min(_width - 1, max3(p1.x, p2.x, p3.x));
@@ -174,7 +178,6 @@ void Renderer::draw_model(Model* model, Camera* camera, CameraMode camera_mode)
 		// TODO: can we pass the points in after total_transform?
 		// we should probably calculate lighting before perspective...
 		//setup_lighting(face, total_transform);
-		assign_rotating_color();
 
 		for (int y = min_y; y <= max_y; ++y)
 		{
@@ -213,9 +216,15 @@ void Renderer::draw_model(Model* model, Camera* camera, CameraMode camera_mode)
 					continue;
 				}	
 
+				// TODO: I think this is correct
+				// This can happen if one point of the triangle is outside of the camera's range... I think
+				if (z < -1 || z > 1)
+					continue;
+
 				_zbuffer[ZINDEX(_width, x, y)] = z;
 				// try to visualize z-buffer
-				set_color(max(0, min(1,z)), max(0, min(1,z)), max(0, min(1,z)));
+				//clamp(z, -1, 1);
+				//set_color(1-z, 1-z, 1-z);
 				draw_point(x, y);
 			}
 		}
@@ -267,8 +276,6 @@ void Renderer::draw_line(vec4 point1, vec4 point2)
 		return;
 	}
 
-	// TODO: here we lose the depth information
-	// I think we need to switch to NDC w/ Z so we still have z coordinates for the z-buffer
 	auto p1 = viewport_to_screen_coordinates(point1.to_vec2_divide_by_w());
 	auto p2 = viewport_to_screen_coordinates(point2.to_vec2_divide_by_w());
 	draw_line(p1, p2);
