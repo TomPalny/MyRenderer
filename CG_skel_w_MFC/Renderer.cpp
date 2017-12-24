@@ -222,16 +222,15 @@ void Renderer::draw_model_filled(Model* model)
 
 void Renderer::draw_model_wireframe(Model* model)
 {
-	//set_color(1, 1, 1);
 	_rotating_color = 1;
 	mat4 projection = _camera->get_projection_matrix();
 	mat4 modelview = _camera->get_view_matrix() * model->get_transforms();
-	//mat4 modelview = model->get_transforms();
 	mat4 total_transform = projection * modelview;
-
+	set_color(1, 1, 1);
 	for (int i = 0; i < model->get_faces()->size(); i++)
 	{
-		assign_rotating_color();
+		if (_fill_type == FILL_RANDOM_COLORS)
+			assign_rotating_color();
 		const auto& face = model->get_faces()->at(i);
 		const auto point1 = total_transform * face.point1;
 		const auto point2 = total_transform * face.point2;
