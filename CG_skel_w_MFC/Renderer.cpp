@@ -6,10 +6,11 @@
 #include "font8x8_basic.h"
 #include "Camera.h"
 
-#define INDEX(width,x,y,c) (x+y*width)*3+c
+#define INDEX(width,x,y,c) ((x+y*width)*3+c)
+#define ZINDEX(width,x,y) (x+y*width)
 
 Renderer::Renderer(int width, int height) :
-	_buffer(NULL), _width(width), _height(height), _r(1.0), _g(1.0), _b(1.0)
+	_buffer(NULL), _width(width), _height(height), _r(1.0), _g(1.0), _b(1.0), _fovy(45), _rotating_color(1)
 {
 	InitOpenGLRendering();
 	set_window_size(width,height);
@@ -24,11 +25,14 @@ void Renderer::set_window_size(int width, int height)
 	if (_buffer != NULL)
 	{
 		delete _buffer;
+		delete _zbuffer;
 	}
+
 	_width=width;
 	_height=height;	
 	CreateOpenGLBuffer(); //Do not remove this line.
-	_buffer = new float[3*_width*_height];
+	_buffer = new float[3 * _width * _height];
+	_zbuffer = new float[_width * _height];
 }
 
 int Renderer::get_width()
@@ -97,7 +101,10 @@ void Renderer::draw_line_implementation(vec2 point1, vec2 point2, const bool inv
 // transforms points from the canonical view volumn to screen coordinates
 vec2 inline Renderer::viewport_to_screen_coordinates(vec2 point)
 {
-	return vec2(_width / 2.0f * (point.x + 1), _height / 2.0f * (point.y + 1));
+	// TODO: we should probably round these
+	float x = _width / 2.0f * (point.x + 1);
+	float y = _height / 2.0f * (point.y + 1);
+	return vec2(x, y);
 }
 
 bool Renderer::point_in_range(vec4 point)
@@ -122,21 +129,117 @@ int max3(int x, int y, int z)
 }
 
 // see https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage
-bool edge_func(vec2 v0, vec2 v1, vec2 p)
+// there seems to be a mistake in that post with the edge function for counter clockwise points so that is 
+// fixed here
+float double_area(vec2 v0, vec2 v1, vec2 p)
 {
-	int val = (p.x - v0.x) * (v1.y - v0.y) - (p.y - v0.y) * (v1.x - v0.x);
-	return val >= 0;
+	return (v1.x - v0.x) * (p.y - v0.y) - (v1.y - v0.y) * (p.x - v0.x);
+	// TODO: why do we need to multiply by negative one?
+	//return ((p.x - v0.x) * (v1.y - v0.y) - (p.y - v0.y) * (v1.x - v0.x)) * -1;
 }
 
 // TODO: move this back to the Model class
 void Renderer::draw_model(Model* model, Camera* camera, CameraMode camera_mode)
 {
+
+	_rotating_color = 1;
 	set_color(1, 1, 1);
-	mat4 projection = camera->get_projection_matrix(camera_mode, _width / (float) _height);
+	mat4 projection = camera->get_projection_matrix(camera_mode, _width / (float) _height, _fovy);
 	mat4 modelview = camera->get_view_matrix() * model->get_transforms();
 	mat4 total_transform = projection * modelview;
-	for (const auto& face : *model->get_faces())
+
+	for (int i=0; i< model->get_faces()->size(); i++)
 	{
+		const auto& face = model->get_faces()->at(i);
+		const auto point1 = total_transform * face.point1;
+		const auto point2 = total_transform * face.point2;
+		const auto point3 = total_transform * face.point3;
+
+		auto p1 = viewport_to_screen_coordinates(point1.to_vec2_divide_by_w());
+		auto p2 = viewport_to_screen_coordinates(point2.to_vec2_divide_by_w());
+		auto p3 = viewport_to_screen_coordinates(point3.to_vec2_divide_by_w());
+
+		// TODO: remove me
+		if (model->get_name() == string("cow"))
+			set_color(0, 1, 0);
+		else
+			set_color(0, 0, 1);
+
+		int min_x = max(0, min3(p1.x, p2.x, p3.x));
+		int max_x = min(_width - 1, max3(p1.x, p2.x, p3.x));
+
+		int min_y = max(0, min3(p1.y, p2.y, p3.y));
+		int max_y = min(_height - 1, max3(p1.y, p2.y, p3.y));
+
+		// TODO: can we pass the points in after total_transform?
+		// we should probably calculate lighting before perspective...
+		//setup_lighting(face, total_transform);
+		assign_rotating_color();
+
+		for (int y = min_y; y <= max_y; ++y)
+		{
+			for (int x = min_x; x <= max_x; ++x)
+			{
+				// for performance reasons we calculate these only if necessary
+				const vec2 p(x, y);
+				float alpha1 = double_area(p1, p2, p);
+				if (alpha1 < 0)
+					continue;
+				
+				float alpha2 = double_area(p2, p3, p);
+				if (alpha2 < 0)
+					continue;
+
+				float alpha3 = double_area(p3, p1, p);
+				if (alpha3 < 0)
+					continue;
+
+				float total_double_area = double_area(p1, p2, p3);
+				alpha1 /= total_double_area;
+				alpha2 /= total_double_area;
+				alpha3 /= total_double_area;
+
+				assert(alpha1 >= 0);
+				assert(alpha2 >= 0);
+				assert(alpha3 >= 0);
+
+				float z = alpha1 / (point1.z / point1.w) + 
+						  alpha2 / (point2.z / point2.w) +
+						  alpha3 / (point3.z / point3.w);
+				z = 1 / z;
+
+				if (_zbuffer[ZINDEX(_width, x,y)] < z)
+				{
+					continue;
+				}	
+
+				_zbuffer[ZINDEX(_width, x, y)] = z;
+				// try to visualize z-buffer
+				set_color(max(0, min(1,z)), max(0, min(1,z)), max(0, min(1,z)));
+				draw_point(x, y);
+			}
+		}
+	}
+
+	// this is different than total_transform because it excludes transforms in the model frame
+	vec4 origin = projection * camera->get_view_matrix() * model->get_origin_in_world_coordinates();
+	set_color(1, 0, 0);
+	draw_letter(model->get_origin_sign(), origin);
+}
+
+void Renderer::draw_model_wireframe(Model* model, Camera* camera, CameraMode camera_mode)
+{
+	//set_color(1, 1, 1);
+	_rotating_color = 1;
+	mat4 projection = camera->get_projection_matrix(camera_mode, _width / (float)_height, _fovy);
+	mat4 modelview = camera->get_view_matrix() * model->get_transforms();
+	//mat4 modelview = model->get_transforms();
+	mat4 total_transform = projection * modelview;
+
+	for (int i = 0; i < model->get_faces()->size(); i++)
+	{
+		assign_rotating_color();
+		const auto& face = model->get_faces()->at(i);
 		const auto point1 = total_transform * face.point1;
 		const auto point2 = total_transform * face.point2;
 		const auto point3 = total_transform * face.point3;
@@ -144,30 +247,6 @@ void Renderer::draw_model(Model* model, Camera* camera, CameraMode camera_mode)
 		draw_line(point1, point2);
 		draw_line(point2, point3);
 		draw_line(point3, point1);
-
-		auto p1 = viewport_to_screen_coordinates(point1.to_vec2_divide_by_w());
-		auto p2 = viewport_to_screen_coordinates(point2.to_vec2_divide_by_w());
-		auto p3 = viewport_to_screen_coordinates(point3.to_vec2_divide_by_w());
-
-		set_color(0, 1, 0);
-		int min_x = min3(p1.x, p2.x, p3.x);
-		int max_x = max3(p1.x, p2.x, p3.x);
-
-		int min_y = min3(p1.y, p2.y, p3.y);
-		int max_y = max3(p1.y, p2.y, p3.y);
-
-		for (int y=min_y; y <= max_y; ++y)
-		{
-			for (int x=min_x; x <= max_x; ++x)
-			{
-				if (edge_func(p1, p2, vec2(x, y)) &&
-					edge_func(p2, p3, vec2(x, y)) &&
-					edge_func(p3, p1, vec2(x, y)))
-				{
-					draw_point(x, y);
-				}
-			}
-		}
 	}
 
 	// this is different than total_transform because it excludes transforms in the model frame
@@ -246,6 +325,7 @@ void Renderer::clear_screen()
 			_buffer[INDEX(_width, x, y, 0)] = 0;
 			_buffer[INDEX(_width, x, y, 1)] = 0;
 			_buffer[INDEX(_width, x, y, 2)] = 0;
+			_zbuffer[ZINDEX(_width, x, y)] = FLT_MAX;
 		}
 	}
 }
@@ -290,6 +370,50 @@ void Renderer::draw_letter(char letter, vec4 point)
 	}
 	auto fixed_point = viewport_to_screen_coordinates(point.to_vec2_divide_by_w());
 	draw_letter(letter, fixed_point.x - 4, fixed_point.y - 4);
+}
+
+void Renderer::assign_rotating_color()
+{
+	float r = 0.1 * (_rotating_color % 10);
+	float g = 0.1 * ((_rotating_color / 10) % 10);
+	float b = 0.1 * ((_rotating_color / 100) % 10);
+	++_rotating_color;
+
+	set_color(r, g, b);
+	return;
+}
+
+// TODO: apply transforms!!!!!!
+void Renderer::setup_lighting(const Face& face, const mat4 transform)
+{
+	vec4 light(1, -2, 1, 1);
+
+	vec4 vector1 = face.point2 - face.point1;
+	vec4 vector2 = face.point3 - face.point2;
+	vec4 center_of_triangle = (face.point1 + face.point2 + face.point3) / 3;
+
+	vec3 N = normalize(cross(vector1, vector2));
+	vec3 L = normalize((light - center_of_triangle).to_vec3());
+	vec3 V = normalize(center_of_triangle.to_vec3()); // TODO: is this correct? Should we try to draw it?
+	
+	float k_a = 0.2; // ambient light for this material
+	float k_d = 0.3; // diffuse light for this material
+
+	float L_a = 3; // overall ambient light
+	float L_d = 3; // overall diffuse light
+
+	// TODO: specular
+
+	float I_a = k_a * L_a;
+	float I_d = k_d * (dot(L, N)) * L_d;
+
+	// TODO: we get weird spots from diffuse light on the teapot where the handle meets the pot. why?
+	// I think that must be from z-fighting, but why doesn't changing NEAR/FAR help?
+	// see if finding barycentric coordinates before projection helps
+	// also try backface culling
+	float final = I_d + I_a;
+	final = min(1, final);
+	set_color(final, final, final);
 }
 
 /////////////////////////////////////////////////////

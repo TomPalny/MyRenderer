@@ -54,7 +54,7 @@ mat4 Camera::get_view_matrix()
 	return _view;
 }
 
-mat4 Camera::get_projection_matrix(CameraMode camera_mode, float aspect_ratio)
+mat4 Camera::get_projection_matrix(CameraMode camera_mode, float aspect_ratio, float fovy)
 {
 	if (camera_mode == ORTHOGONAL_CAMERA)
 	{

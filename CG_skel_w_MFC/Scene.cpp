@@ -14,18 +14,19 @@ using namespace std;
 void init_menu();
 
 Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
-									_normal_type(NO_NORMALS), _operation_mode(TRANSLATE_MODE),
-									_transform_mode(WORLD_TRANSFORM), _camera_mode(PERSPECTIVE_CAMERA)
+                                   _normal_type(NO_NORMALS), _operation_mode(TRANSLATE_MODE),
+                                   _transform_mode(WORLD_TRANSFORM), _camera_mode(PERSPECTIVE_CAMERA),
+                                   _wireframe_mode(true)
 {
 	// default view is from the front
 	auto front = new Camera(1);
 	front->perform_operation(Translate(0, 0, 5), WORLD_TRANSFORM);
 	front->set_name("Camera1 (Front)");
-	front->look_at2(vec3(0,0,5), vec3(0, 0, 0));
+	front->look_at2(vec3(0, 0, 5), vec3(0, 0, 0));
 	_cameras.push_back(front);
 	_models.push_back(front);
 	_bounding_boxes.push_back(false);
-	
+
 	auto left = new Camera(2);
 	left->perform_operation(Translate(8, 1, 0), WORLD_TRANSFORM);
 	left->set_name("Camera2 (Left)");
@@ -33,7 +34,7 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 	_cameras.push_back(left);
 	_models.push_back(left);
 	_bounding_boxes.push_back(false);
-	
+
 	_active_camera = front;
 }
 
@@ -136,6 +137,8 @@ void Scene::draw_status_string()
 		ss << "ORTHOGRAPHIC";
 	}
 
+	ss << " // FOVY=" << (int) _renderer->_fovy;
+
 	_renderer->set_color(0, 1, 0);
 	_renderer->draw_string(ss.str().c_str(), 15, 15);
 }
@@ -147,11 +150,15 @@ void Scene::redraw_necessary()
 
 void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 {
-	_renderer->draw_model(model, _active_camera, _camera_mode);
+	if (_wireframe_mode)
+		_renderer->draw_model_wireframe(model, _active_camera, _camera_mode);
+	else
+		_renderer->draw_model(model, _active_camera, _camera_mode);
+
 	if(!model->is_camera() && model->_bounding_box != nullptr) 
 	{
 		if (draw_bounding_box)
-			_renderer->draw_model(model->_bounding_box, _active_camera, _camera_mode);
+			_renderer->draw_model_wireframe(model->_bounding_box, _active_camera, _camera_mode);
 	}
 	/*
 	if (_normal_type == VERTEX_NORMALS)
@@ -211,11 +218,20 @@ void Scene::keyboard(unsigned char key, int x, int y)
 	case 'v':
 		_normal_type = (NormalType) ((_normal_type + 1) % NUMBER_OF_NORMAL_TYPES);
 		break;
+	case 'w':
+		_wireframe_mode = !_wireframe_mode;
+		break;
 	case 's':
 		set_operation_mode(SCALE_MODE);
 		break;
 	case 't':
 		set_operation_mode(TRANSLATE_MODE);
+		break;
+	case '+':
+		_renderer->_fovy += 3.0f;
+		break;
+	case '-':
+		_renderer->_fovy -= 3.0f;
 		break;
 	case 'r':
 		set_operation_mode(ROTATE_MODE);

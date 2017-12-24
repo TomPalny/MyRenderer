@@ -13,7 +13,7 @@ public:
 	void look_at(vec3 at);
 	void look_at2(vec3 eye, vec3 at);
 	mat4 get_view_matrix();
-	mat4 get_projection_matrix(CameraMode camera_mode, float aspect_ratio);
+	mat4 get_projection_matrix(CameraMode camera_mode, float aspect_ratio, float fovy);
 	void apply_view_transformation(const mat4& inverse_operation);
 
 	/*

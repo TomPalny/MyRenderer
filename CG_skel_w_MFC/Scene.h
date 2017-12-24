@@ -41,6 +41,7 @@ class Scene {
 	TransformMode _transform_mode;
 	CameraMode _camera_mode;
 	ptrdiff_t _bounding_box_index = 0;
+	bool _wireframe_mode;
 
 	mat4 get_operation_for_keyboard(int key, int x, int y);
 	static int get_reverse_key(int key);
