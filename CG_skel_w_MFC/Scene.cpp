@@ -75,8 +75,11 @@ void Scene::open_file()
 	CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
 	if (dlg.DoModal() == IDOK)
 	{
-		std::string s(static_cast<LPCTSTR>(dlg.GetPathName()));
-		Model* model = new MeshModel(static_cast<LPCTSTR>(dlg.GetPathName())); 
+		std::string path(static_cast<LPCTSTR>(dlg.GetPathName()));
+		if (!experimental::filesystem::exists(path))
+			return;
+
+		Model* model = new MeshModel(path); 
 		load_model_at_center(model, static_cast<LPCTSTR>(dlg.GetFileTitle()));
 		
 	}
