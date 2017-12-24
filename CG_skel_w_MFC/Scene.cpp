@@ -215,8 +215,12 @@ void Scene::switch_active_model(int id)
 void Scene::keyboard(unsigned char key, int x, int y)
 {
 	const auto it = std::find(_models.begin(), _models.end(), _active_model);
-	const auto index = std::distance(_models.begin(), it);
-	const auto new_index = (index + 1) % _models.size();
+	auto index = std::distance(_models.begin(), it);
+	if (glutGetModifiers() & GLUT_ACTIVE_SHIFT)
+		index--;
+	else
+		index++;
+	index = index % _models.size();
 	
 
 	switch (key) {
@@ -259,7 +263,7 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		break;
 	case '\t':
 		// switch between models
-		_active_model = _models[new_index];
+		_active_model = _models[index];
 		break;
 	case 'b':
 		_bounding_box_index = index;
