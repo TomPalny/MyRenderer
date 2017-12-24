@@ -184,11 +184,11 @@ void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 	if (_normal_type == VERTEX_NORMALS)
 	{
 		model->draw_vertex_normals(_camera_mode);
-	}
-	else if (_normal_type == FACE_NORMALS)
-	{
-		model->draw_face_normals(_camera_mode);
 	}*/
+	if (_normal_type == FACE_NORMALS)
+	{
+		_renderer->draw_face_normals(model);
+	}
 }
 
 void Scene::draw()

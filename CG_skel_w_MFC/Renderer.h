@@ -63,5 +63,6 @@ public:
 	void draw(Model* model);
 	void draw_model_filled(Model* model);
 	void draw_model_wireframe(Model* model);
+	void draw_face_normals(Model* model);
 	float get_aspect_ratio();
 };

@@ -243,6 +243,24 @@ void Renderer::draw_model_wireframe(Model* model)
 	}
 }
 
+void Renderer::draw_face_normals(Model* model)
+{
+	mat4 total_transform = _camera->get_projection_matrix() * _camera->get_view_matrix() * model->get_transforms();
+
+	for (const auto& face : *model->get_faces())
+	{
+		auto vector1 = face.point2 - face.point1;
+		auto vector2 = face.point3 - face.point2;
+		auto normal = vec4(normalize(cross(vector1, vector2)), 0);
+		auto center_of_triangle = (face.point1 + face.point2 + face.point3) / 3;
+		auto start = total_transform * center_of_triangle;
+		auto end = total_transform * (center_of_triangle + normal * 0.2f);
+		draw_line(start, end);
+		//auto s = viewport_to_screen_coordinates(start.to_vec2_divide_by_w());
+		//draw_point(s.x, s.y);
+	}
+}
+
 float Renderer::get_aspect_ratio()
 {
 	return (float) _width / _height;
