@@ -1,19 +1,25 @@
 #pragma once
 #include "Model.h"
-#include "CameraMode.h"
+#include "RenderParameters.h"
 
 class Camera : public Model {
-	mat4 _projection;
 	mat4 _view;
+	ProjectionType _projection_type;
+	float _fovy;
+	float _aspect_ratio;
 
 public:
 	bool is_camera() override { return true; }
+
 	Camera(int camera_id);
 	~Camera();
+
+	mat4 get_view_matrix();
+	mat4 get_projection_matrix();
+
 	void look_at(vec3 at);
 	void look_at2(vec3 eye, vec3 at);
-	mat4 get_view_matrix();
-	mat4 get_projection_matrix(CameraMode camera_mode, float aspect_ratio, float fovy);
+	void set_camera_parameters(ProjectionType projection_type, float aspect_ratio, float fovy);
 	void apply_view_transformation(const mat4& inverse_operation);
 
 	/*

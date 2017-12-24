@@ -15,8 +15,8 @@ void init_menu();
 
 Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
                                    _normal_type(NO_NORMALS), _operation_mode(TRANSLATE_MODE),
-                                   _transform_mode(WORLD_TRANSFORM), _camera_mode(PERSPECTIVE_CAMERA),
-                                   _wireframe_mode(true)
+                                   _transform_mode(WORLD_TRANSFORM), _projection_type(PERSPECTIVE_PROJECTION),
+                                   _fill_type((FillType)0)
 {
 	// default view is from the front
 	auto front = new Camera(1);
@@ -131,16 +131,33 @@ void Scene::draw_status_string()
 		ss << "TRANSLATE // ";
 	}
 
-	if (_camera_mode == PERSPECTIVE_CAMERA)
+	if (_projection_type == PERSPECTIVE_PROJECTION)
 	{
-		ss << "PERSPECTIVE";
+		ss << "PERSPECTIVE // ";
 	}
 	else
 	{
-		ss << "ORTHOGRAPHIC";
+		ss << "ORTHOGRAPHIC // ";
 	}
 
-	ss << " // FOVY=" << (int) _renderer->_fovy;
+	if (_fill_type == FILL_WIREFRAME)
+	{
+		ss << "WIREFRAME // ";
+	}
+	else if (_fill_type == FILL_ZBUFFER)
+	{
+		ss << "ZBUFFER // ";
+	}
+	else if (_fill_type == FILL_RANDOM_COLORS)
+	{
+		ss << "RANDOM // ";
+	}
+	else if (_fill_type == FILL_FLAT)
+	{
+		ss << "FLAT // ";
+	}
+	
+	ss << "FOVY=" << (int) _fovy;
 
 	_renderer->set_color(0, 1, 0);
 	_renderer->draw_string(ss.str().c_str(), 15, 15);
@@ -153,16 +170,16 @@ void Scene::redraw_necessary()
 
 void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 {
-	if (_wireframe_mode)
-		_renderer->draw_model_wireframe(model, _active_camera, _camera_mode);
-	else
-		_renderer->draw_model(model, _active_camera, _camera_mode);
-
-	if(!model->is_camera() && model->_bounding_box != nullptr) 
+	_renderer->draw(model);
+	if(draw_bounding_box && !model->is_camera() && model->_bounding_box != nullptr) 
 	{
-		if (draw_bounding_box)
-			_renderer->draw_model_wireframe(model->_bounding_box, _active_camera, _camera_mode);
+		_renderer->draw_model_wireframe(model->_bounding_box);
 	}
+
+	vec4 origin = _active_camera->get_projection_matrix() * _active_camera->get_view_matrix() * model->get_origin_in_world_coordinates();
+	_renderer->set_color(1, 0, 0);
+	_renderer->draw_letter(model->get_origin_sign(), origin);
+
 	/*
 	if (_normal_type == VERTEX_NORMALS)
 	{
@@ -176,9 +193,10 @@ void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 
 void Scene::draw()
 {
-	// 1. Send the renderer the current camera transform and the projection
-	// 2. Tell all _models to draw themselves
+	_active_camera->set_camera_parameters(_projection_type, _renderer->get_aspect_ratio(), _fovy);
 	_renderer->clear_screen();
+	_renderer->set_parameters(_active_camera, _fill_type);
+
 	int i = 0;
 	for(auto model : _models )
 	{
@@ -221,8 +239,11 @@ void Scene::keyboard(unsigned char key, int x, int y)
 	case 'v':
 		_normal_type = (NormalType) ((_normal_type + 1) % NUMBER_OF_NORMAL_TYPES);
 		break;
-	case 'w':
-		_wireframe_mode = !_wireframe_mode;
+	case 'f':
+		_fill_type = (FillType) ((_fill_type + 1) % NUMBER_OF_FILL_TYPES);
+		break;
+	case 'r':
+		set_operation_mode(ROTATE_MODE);
 		break;
 	case 's':
 		set_operation_mode(SCALE_MODE);
@@ -231,13 +252,10 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		set_operation_mode(TRANSLATE_MODE);
 		break;
 	case '+':
-		_renderer->_fovy += 3.0f;
+		_fovy += 3;
 		break;
 	case '-':
-		_renderer->_fovy -= 3.0f;
-		break;
-	case 'r':
-		set_operation_mode(ROTATE_MODE);
+		_fovy -= 3;
 		break;
 	case '\t':
 		// switch between models
@@ -248,7 +266,7 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		_bounding_boxes[_bounding_box_index] = !_bounding_boxes[_bounding_box_index];
 		break;
 	case '`':
-		_camera_mode = (CameraMode)((_camera_mode + 1) % NUMBER_OF_CAMERA_MODES);
+		_projection_type = (ProjectionType)((_projection_type + 1) % NUMBER_OF_PROJECTION_TYPES);
 		break;
 	case 'l':
 		_active_camera->look_at(_active_model->get_origin_in_world_coordinates().to_vec3_divide_by_w());

@@ -1,9 +1,0 @@
-#pragma once
-
-
-enum CameraMode
-{
-	ORTHOGONAL_CAMERA,
-	PERSPECTIVE_CAMERA,
-	NUMBER_OF_CAMERA_MODES
-};

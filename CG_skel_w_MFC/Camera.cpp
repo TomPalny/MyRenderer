@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Camera.h"
 #include "Renderer.h"
+#include "RenderParameters.h"
 
 Camera::Camera(int camera_id)
 {
@@ -49,19 +50,26 @@ void Camera::look_at2(vec3 eye, vec3 at)
 	_view = c * Translate(-eye);
 }
 
+void Camera::set_camera_parameters(ProjectionType projection_type, float aspect_ratio, float fovy)
+{
+	_projection_type = projection_type;
+	_aspect_ratio = aspect_ratio;
+	_fovy = fovy;
+}
+
 mat4 Camera::get_view_matrix()
 {
 	return _view;
 }
 
-mat4 Camera::get_projection_matrix(CameraMode camera_mode, float aspect_ratio, float fovy)
+mat4 Camera::get_projection_matrix()
 {
-	if (camera_mode == ORTHOGONAL_CAMERA)
+	if (_projection_type == ORTHOGONAL_PROJECTION)
 	{
 		const float bottom = -5;
 		const float top = 5;
-		const float left = -5 * aspect_ratio;
-		const float right = 5 * aspect_ratio;
+		const float left = -5 * _aspect_ratio;
+		const float right = 5 * _aspect_ratio;
 		const float nearz = 0.1;
 		float farz = 10;
 		
@@ -85,8 +93,8 @@ mat4 Camera::get_projection_matrix(CameraMode camera_mode, float aspect_ratio, f
 		mat4 persp;
 		float nearz = 1;
 		float farz = 5;
-		float top = nearz * tan(fovy * M_PI / 180.0f); // convert degrees to radians
-		float right = top * aspect_ratio;
+		float top = nearz * tan(_fovy * M_PI / 180.0f); // convert degrees to radians
+		float right = top * _aspect_ratio;
 		persp[0][0] = nearz / right;
 		persp[1][1] = nearz / top;
 		persp[2][2] = -1 * (farz + nearz) / (farz - nearz);

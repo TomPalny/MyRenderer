@@ -17,6 +17,6 @@ protected :
 	void load_file(string filename);
 
 public:
-	MeshModel(string fileName);
+	MeshModel(string filename);
 	~MeshModel(void);
 };

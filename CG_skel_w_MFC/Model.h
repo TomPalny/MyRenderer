@@ -2,7 +2,7 @@
 #include "Face.h"
 #include "mat.h"
 #include <vector>
-#include "CameraMode.h"
+#include "RenderParameters.h"
 #include <memory>
 #include <string>
 
@@ -30,9 +30,9 @@ protected:
 	// that might let us leave some higher level logic (e.g. about normals) outside of the renderer
 	// I think that makes sense... All transformations are done outside of the renderer and in the model?
 	// I'm not going to do it that way now but I can refactor it later
-	void draw_single_normal(::vec4 start, ::vec4 direction, CameraMode camera_mode);
-	void draw_vertex_normals(CameraMode camera_mode);
-	void draw_face_normals(CameraMode camera_mode);
+	//void draw_single_normal(::vec4 start, ::vec4 direction, CameraMode camera_mode);
+	//void draw_vertex_normals(CameraMode camera_mode);
+	//void draw_face_normals(CameraMode camera_mode);
 
 public:
 	virtual bool is_camera() { return false; }

@@ -5,16 +5,13 @@
 #include "GL\freeglut.h"
 #include "font8x8_basic.h"
 #include "Camera.h"
+#include "Utils.h"
 
 #define INDEX(width,x,y,c) ((x+y*width)*3+c)
 #define ZINDEX(width,x,y) (x+y*width)
 
-float clamp(float x, float lower, float upper) {
-	return min(upper, max(x, lower));
-}
-
 Renderer::Renderer(int width, int height) :
-	_buffer(NULL), _width(width), _height(height), _r(1.0), _g(1.0), _b(1.0), _fovy(45), _rotating_color(1)
+	_buffer(NULL), _width(width), _height(height), _r(1.0), _g(1.0), _b(1.0), _rotating_color(1)
 {
 	InitOpenGLRendering();
 	set_window_size(width,height);
@@ -37,16 +34,6 @@ void Renderer::set_window_size(int width, int height)
 	CreateOpenGLBuffer(); //Do not remove this line.
 	_buffer = new float[3 * _width * _height];
 	_zbuffer = new float[_width * _height];
-}
-
-int Renderer::get_width()
-{
-	return _width;
-}
-
-int Renderer::get_height()
-{
-	return _height;
 }
 
 bool Renderer::point_in_range(int x, int y)
@@ -122,16 +109,6 @@ bool Renderer::point_in_range(vec4 point)
 	return true;
 }
 
-int min3(int x, int y, int z)
-{
-	return min(x, min(y, z));
-}
-
-int max3(int x, int y, int z)
-{
-	return max(x, max(y, z));
-}
-
 // see https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage
 // there seems to be a mistake in that post with the edge function for counter clockwise points so that is 
 // fixed here
@@ -142,24 +119,33 @@ float double_area(vec2 v0, vec2 v1, vec2 p)
 	//return ((p.x - v0.x) * (v1.y - v0.y) - (p.y - v0.y) * (v1.x - v0.x)) * -1;
 }
 
-// TODO: move this back to the Model class
-void Renderer::draw_model(Model* model, Camera* camera, CameraMode camera_mode)
+void Renderer::draw(Model* model)
+{
+	if (_fill_type == FILL_WIREFRAME)
+		draw_model_wireframe(model);
+	else
+		draw_model_filled(model);
+}
+
+void Renderer::draw_model_filled(Model* model)
 {
 	_rotating_color = 1;
 	set_color(1, 1, 1);
-	mat4 projection = camera->get_projection_matrix(camera_mode, _width / (float) _height, _fovy);
-	mat4 modelview = camera->get_view_matrix() * model->get_transforms();
+	mat4 projection = _camera->get_projection_matrix();
+	mat4 modelview = _camera->get_view_matrix() * model->get_transforms();
 	mat4 total_transform = projection * modelview;
 
-	for (int i=0; i< model->get_faces()->size(); i++)
+	for (int i = 0; i < model->get_faces()->size(); i++)
 	{
-		assign_rotating_color();
-
 		const auto& face = model->get_faces()->at(i);
 		const auto point1 = total_transform * face.point1;
 		const auto point2 = total_transform * face.point2;
 		const auto point3 = total_transform * face.point3;
 
+		// we have to do this now before we skip faces that wont be displayed
+		if (_fill_type == FILL_RANDOM_COLORS)
+			assign_rotating_color();
+		
 		// TODO: do we need to bother with this?
 		// min_x, max_x, min_y, max_y and the z-range check accomplish this later...
 		if (!point_in_range(point1) && !point_in_range(point2) && !point_in_range(point3))
@@ -175,10 +161,12 @@ void Renderer::draw_model(Model* model, Camera* camera, CameraMode camera_mode)
 		int min_y = max(0, min3(p1.y, p2.y, p3.y));
 		int max_y = min(_height - 1, max3(p1.y, p2.y, p3.y));
 
+		// we do this now once per face
+		if (_fill_type == FILL_FLAT)
+			setup_lighting(face, total_transform);
+
 		// TODO: can we pass the points in after total_transform?
 		// we should probably calculate lighting before perspective...
-		//setup_lighting(face, total_transform);
-
 		for (int y = min_y; y <= max_y; ++y)
 		{
 			for (int x = min_x; x <= max_x; ++x)
@@ -188,7 +176,7 @@ void Renderer::draw_model(Model* model, Camera* camera, CameraMode camera_mode)
 				float alpha1 = double_area(p1, p2, p);
 				if (alpha1 < 0)
 					continue;
-				
+
 				float alpha2 = double_area(p2, p3, p);
 				if (alpha2 < 0)
 					continue;
@@ -206,15 +194,15 @@ void Renderer::draw_model(Model* model, Camera* camera, CameraMode camera_mode)
 				assert(alpha2 >= 0);
 				assert(alpha3 >= 0);
 
-				float z = alpha1 / (point1.z / point1.w) + 
-						  alpha2 / (point2.z / point2.w) +
-						  alpha3 / (point3.z / point3.w);
+				float z = alpha1 / (point1.z / point1.w) +
+					alpha2 / (point2.z / point2.w) +
+					alpha3 / (point3.z / point3.w);
 				z = 1 / z;
 
-				if (_zbuffer[ZINDEX(_width, x,y)] < z)
+				if (_zbuffer[ZINDEX(_width, x, y)] < z)
 				{
 					continue;
-				}	
+				}
 
 				// TODO: I think this is correct
 				// This can happen if one point of the triangle is outside of the camera's range... I think
@@ -224,24 +212,20 @@ void Renderer::draw_model(Model* model, Camera* camera, CameraMode camera_mode)
 				_zbuffer[ZINDEX(_width, x, y)] = z;
 				// try to visualize z-buffer
 				//clamp(z, -1, 1);
-				//set_color(1-z, 1-z, 1-z);
+				if (_fill_type == FILL_ZBUFFER)
+					set_color(1-z, 1-z, 1-z);
 				draw_point(x, y);
 			}
 		}
 	}
-
-	// this is different than total_transform because it excludes transforms in the model frame
-	vec4 origin = projection * camera->get_view_matrix() * model->get_origin_in_world_coordinates();
-	set_color(1, 0, 0);
-	draw_letter(model->get_origin_sign(), origin);
 }
 
-void Renderer::draw_model_wireframe(Model* model, Camera* camera, CameraMode camera_mode)
+void Renderer::draw_model_wireframe(Model* model)
 {
 	//set_color(1, 1, 1);
 	_rotating_color = 1;
-	mat4 projection = camera->get_projection_matrix(camera_mode, _width / (float)_height, _fovy);
-	mat4 modelview = camera->get_view_matrix() * model->get_transforms();
+	mat4 projection = _camera->get_projection_matrix();
+	mat4 modelview = _camera->get_view_matrix() * model->get_transforms();
 	//mat4 modelview = model->get_transforms();
 	mat4 total_transform = projection * modelview;
 
@@ -257,11 +241,11 @@ void Renderer::draw_model_wireframe(Model* model, Camera* camera, CameraMode cam
 		draw_line(point2, point3);
 		draw_line(point3, point1);
 	}
+}
 
-	// this is different than total_transform because it excludes transforms in the model frame
-	vec4 origin = projection * camera->get_view_matrix() * model->get_origin_in_world_coordinates();
-	set_color(1, 0, 0);
-	draw_letter(model->get_origin_sign(), origin);
+float Renderer::get_aspect_ratio()
+{
+	return (float) _width / _height;
 }
 
 // draws a line, first performing viewport transformation
@@ -342,6 +326,12 @@ void Renderer::set_color(float r, float g, float b)
 	_r = r;
 	_g = g;
 	_b = b;
+}
+
+void Renderer::set_parameters(Camera* camera, FillType fill_type)
+{
+	_camera = camera;
+	_fill_type = fill_type;
 }
 
 void Renderer::draw_string(const char* string, int left, int bottom)

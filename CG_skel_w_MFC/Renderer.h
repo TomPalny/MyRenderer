@@ -8,15 +8,6 @@
 
 using namespace std;
 
-
-enum FillMode
-{
-	FILL_ZBUFFER,
-	FILL_RANDOM_COLORS,
-	FILL_WIREFRAME,
-	NUM_FILL_MODES
-};
-
 class Renderer
 {
 	float *_buffer; // 3*width*height
@@ -24,6 +15,8 @@ class Renderer
 	int _width, _height;
 	float _r, _g, _b;
 	int _rotating_color; // used to assigned static colors to faces
+	Camera* _camera;
+	FillType _fill_type;
 
 	void draw_line_implementation(vec2 point1, vec2 point2, bool inverted);
 	vec2 viewport_to_screen_coordinates(vec2 point);
@@ -44,7 +37,6 @@ class Renderer
 	//////////////////////////////
 
 public:
-	float _fovy; // TODO: shouldn't be public - shouldn't be in this class even...
 	Renderer(int width, int height);
 	~Renderer(void);
 
@@ -60,15 +52,16 @@ public:
 	void swap_buffers();
 	void clear_screen();
 	void set_color(float r, float g, float b);
+	void set_parameters(Camera* camera, FillType fill_type);
 	void set_window_size(int width, int height);
-	int get_width();
-	int get_height();
 
 	void draw_string(const char* string, int left, int bottom);
 	void draw_letter(char letter, int left, int bottom);
 	void draw_letter(char letter, vec4 point);
 	void assign_rotating_color();
 	void setup_lighting(const Face& face, const mat4 transform);
-	void draw_model(Model* model, Camera* camera, CameraMode camera_mode);
-	void draw_model_wireframe(Model* model, Camera* camera, CameraMode camera_mode);
+	void draw(Model* model);
+	void draw_model_filled(Model* model);
+	void draw_model_wireframe(Model* model);
+	float get_aspect_ratio();
 };
