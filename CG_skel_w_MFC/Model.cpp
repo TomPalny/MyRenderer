@@ -7,17 +7,14 @@ Model::Model() :  _faces(new std::vector<Face>()), _origin_sign('+')
 {
 }
 
-const char* Model::get_name() const
+std::string Model::get_name() const
 {
 	return _name;
 }
 
 void Model::set_name(string name)
 {
-	// TODO: free this
-	char *cstr = new char[name.length() + 1];
-	strcpy(cstr, name.c_str());
-	_name = cstr;
+	_name = name;
 }
 
 void Model::create_bounding_box()

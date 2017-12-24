@@ -49,7 +49,7 @@ void Scene::add_objects_to_menu()
 	int i = 0;
 	for (auto model : _models)
 	{
-		glutAddMenuEntry(model->get_name(), i++);
+		glutAddMenuEntry(model->get_name().c_str(), i++);
 	}
 }
 

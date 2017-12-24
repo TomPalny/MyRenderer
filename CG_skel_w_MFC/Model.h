@@ -4,6 +4,7 @@
 #include <vector>
 #include "CameraMode.h"
 #include <memory>
+#include <string>
 
 class Renderer;
 
@@ -21,7 +22,7 @@ protected:
 	mat4 _world_transforms;
 	mat4 _model_transforms;
 	std::shared_ptr<std::vector<Face> > _faces;
-	char* _name;
+	std::string _name;
 	char _origin_sign;
 
 	// TODO: what should we do with these?
@@ -39,7 +40,7 @@ public:
 	mat4 get_transforms();
 
 	void perform_operation(mat4 operation, TransformMode mode);
-	const char* get_name() const;
+	std::string get_name() const;
 	void set_name(std::string name);
 	void create_bounding_box();
 	std::shared_ptr<std::vector<Face> > get_faces();
