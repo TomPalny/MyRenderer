@@ -115,8 +115,6 @@ bool Renderer::point_in_range(vec4 point)
 float double_area(vec2 v0, vec2 v1, vec2 p)
 {
 	return (v1.x - v0.x) * (p.y - v0.y) - (v1.y - v0.y) * (p.x - v0.x);
-	// TODO: why do we need to multiply by negative one?
-	//return ((p.x - v0.x) * (v1.y - v0.y) - (p.y - v0.y) * (v1.x - v0.x)) * -1;
 }
 
 void Renderer::draw(Model* model)
@@ -421,13 +419,12 @@ void Renderer::setup_lighting(const Face& face, const mat4 transform)
 	float k_a = 0.2; // ambient light for this material
 	float k_d = 0.3; // diffuse light for this material
 
-	float L_a = 3; // overall ambient light
-	float L_d = 3; // overall diffuse light
+	float L_a = 1; // overall ambient light
+	float L_d = 1; // overall diffuse light
 
 	// TODO: specular
-
-	float I_a = k_a * L_a;
-	float I_d = k_d * (dot(L, N)) * L_d;
+	float I_a = max(0, k_a * L_a);
+	float I_d = max(0, k_d * (dot(L, N)) * L_d);
 
 	// TODO: we get weird spots from diffuse light on the teapot where the handle meets the pot. why?
 	// I think that must be from z-fighting, but why doesn't changing NEAR/FAR help?
@@ -435,6 +432,7 @@ void Renderer::setup_lighting(const Face& face, const mat4 transform)
 	// also try backface culling
 	float final = I_d + I_a;
 	final = min(1, final);
+	final = max(0, final);
 	set_color(final, final, final);
 }
 
