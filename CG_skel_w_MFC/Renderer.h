@@ -5,6 +5,7 @@
 #include "mat.h"
 #include "GL/glew.h"
 #include "Camera.h"
+#include "Light.h"
 
 using namespace std;
 
@@ -17,6 +18,7 @@ class Renderer
 	int _rotating_color; // used to assigned static colors to faces
 	Camera* _camera;
 	FillType _fill_type;
+	vector<Light*> _lights;
 
 	void draw_line_implementation(vec2 point1, vec2 point2, bool inverted);
 	vec2 viewport_to_screen_coordinates(vec2 point);
@@ -52,14 +54,14 @@ public:
 	void swap_buffers();
 	void clear_screen();
 	void set_color(float r, float g, float b);
-	void set_parameters(Camera* camera, FillType fill_type);
+	void set_parameters(::Camera* camera, ::FillType fill_type, std::vector<Light*> lights);
 	void set_window_size(int width, int height);
 
 	void draw_string(const char* string, int left, int bottom);
 	void draw_letter(char letter, int left, int bottom);
 	void draw_letter(char letter, vec4 point);
 	void assign_rotating_color();
-	void setup_lighting(const Face& face, const mat4 transform);
+	void setup_lighting(const Face& face, const mat4& model, const mat4& view);
 	void draw(Model* model);
 	void draw_model_filled(Model* model);
 	void draw_model_wireframe(Model* model);

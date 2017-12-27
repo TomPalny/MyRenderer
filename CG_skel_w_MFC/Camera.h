@@ -2,14 +2,15 @@
 #include "Model.h"
 #include "RenderParameters.h"
 
-class Camera : public Model {
+class Camera : public Model
+{
 	mat4 _view;
 	ProjectionType _projection_type;
 	float _fovy;
 	float _aspect_ratio;
 
 public:
-	bool is_camera() override { return true; }
+	ModelType get_type() override { return CAMERA_MODEL; }
 
 	Camera(int camera_id);
 	~Camera();
@@ -33,5 +34,4 @@ public:
 		const float zNear, const float zFar);
 	mat4 Perspective(const float fovy, const float aspect,
 		const float zNear, const float zFar);*/
-
 };

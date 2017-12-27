@@ -7,12 +7,9 @@
 #include "Model.h"
 #include "Camera.h"
 #include "RenderParameters.h"
+#include "Light.h"
 
 using namespace std;
-
-class Light {
-
-};
 
 class Scene {
 	Renderer *_renderer;
@@ -49,6 +46,7 @@ public:
 
 	// right-click menu
 	void add_pyramid_model();
+	void add_light();
 	void switch_active_model(int id);
 	void set_normals_type(NormalType normal_type);
 	void open_file();

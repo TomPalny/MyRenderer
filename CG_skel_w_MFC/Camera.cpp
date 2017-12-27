@@ -92,7 +92,7 @@ mat4 Camera::get_projection_matrix()
 		// we use the correct version here
 		mat4 persp;
 		float nearz = 1;
-		float farz = 5;
+		float farz = 10;
 		float top = nearz * tan(_fovy * M_PI / 180.0f); // convert degrees to radians
 		float right = top * _aspect_ratio;
 		persp[0][0] = nearz / right;

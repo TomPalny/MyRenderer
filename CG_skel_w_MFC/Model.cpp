@@ -3,7 +3,7 @@
 #include "mat.h"
 #include "Renderer.h"
 
-Model::Model() :  _faces(new std::vector<Face>()), _origin_sign('+')
+Model::Model() :  _faces(new std::vector<Face>()), _origin_sign('+'), _bounding_box(nullptr)
 {
 }
 

@@ -36,6 +36,12 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 	_bounding_boxes.push_back(false);
 
 	_active_camera = front;
+
+	auto light1 = new Light(1);
+	light1->set_name("Light1");
+	light1->perform_operation(Translate(2, 1.5, 2), WORLD_TRANSFORM);
+	_models.push_back(light1);
+	_bounding_boxes.push_back(false);
 }
 
 void Scene::set_normals_type(NormalType normal_type)
@@ -68,6 +74,12 @@ void Scene::add_pyramid_model()
 {
 	const auto model = PrimitiveModel::create_pyramid(0.0f, 0.0f, 0.0f);
 	load_model_at_center(model, "Pyramid");
+}
+
+void Scene::add_light()
+{
+	const auto light = new Light(1);
+	load_model_at_center(light, "Light1");
 }
 
 void Scene::open_file()
@@ -171,7 +183,7 @@ void Scene::redraw_necessary()
 void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 {
 	_renderer->draw(model);
-	if(draw_bounding_box && !model->is_camera() && model->_bounding_box != nullptr) 
+	if(draw_bounding_box && model->get_type() == REGULAR_MODEL && model->_bounding_box != nullptr) 
 	{
 		_renderer->draw_model_wireframe(model->_bounding_box);
 	}
@@ -193,9 +205,18 @@ void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 
 void Scene::draw()
 {
+	std::vector<Light*> lights;
+	for(Model* model : _models)
+	{
+		if (model->get_type() == LIGHT_MODEL)
+		{
+			lights.push_back(dynamic_cast<Light*>(model));
+		}
+	}
+	
 	_active_camera->set_camera_parameters(_projection_type, _renderer->get_aspect_ratio(), _fovy);
 	_renderer->clear_screen();
-	_renderer->set_parameters(_active_camera, _fill_type);
+	_renderer->set_parameters(_active_camera, _fill_type, lights); // TODO: should we pass references here?
 
 	int i = 0;
 	for(auto model : _models )
@@ -240,6 +261,9 @@ void Scene::keyboard(unsigned char key, int x, int y)
 	case 'p':
 		add_pyramid_model();
 		break;
+	case '+':
+		add_light();
+		break;
 	case 'v':
 		_normal_type = (NormalType) ((_normal_type + 1) % NUMBER_OF_NORMAL_TYPES);
 		break;
@@ -255,7 +279,7 @@ void Scene::keyboard(unsigned char key, int x, int y)
 	case 't':
 		set_operation_mode(TRANSLATE_MODE);
 		break;
-	case '+':
+	case '=':
 		_fovy += 3;
 		break;
 	case '-':
@@ -380,7 +404,7 @@ void Scene::keyboard_special(int key, int x, int y)
 	_active_model->perform_operation(operation, _transform_mode);
 
 	// for the camera apply a reverse transformation to the view matrix
-	if (_active_model->is_camera())
+	if (_active_model->get_type() == CAMERA_MODEL)
 	{
 		Camera* camera = dynamic_cast<Camera*>(_active_model);
 		key = get_reverse_key(key);

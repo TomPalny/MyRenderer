@@ -15,6 +15,13 @@ enum TransformMode
 	NUMBER_OF_TRANSFORM_MODES
 };
 
+enum ModelType
+{
+	CAMERA_MODEL,
+	LIGHT_MODEL,
+	REGULAR_MODEL
+};
+
 class Model {
 protected:
 	Model();
@@ -35,7 +42,7 @@ protected:
 	//void draw_face_normals(CameraMode camera_mode);
 
 public:
-	virtual bool is_camera() { return false; }
+	virtual ModelType get_type() { return REGULAR_MODEL; }
 	vec4 get_origin_in_world_coordinates();
 	mat4 get_transforms();
 

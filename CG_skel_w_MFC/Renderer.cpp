@@ -6,6 +6,7 @@
 #include "font8x8_basic.h"
 #include "Camera.h"
 #include "Utils.h"
+#include "Light.h"
 
 #define INDEX(width,x,y,c) ((x+y*width)*3+c)
 #define ZINDEX(width,x,y) (x+y*width)
@@ -130,7 +131,9 @@ void Renderer::draw_model_filled(Model* model)
 	_rotating_color = 1;
 	set_color(1, 1, 1);
 	mat4 projection = _camera->get_projection_matrix();
-	mat4 modelview = _camera->get_view_matrix() * model->get_transforms();
+	mat4 view = _camera->get_view_matrix();
+	mat4 modelm = model->get_transforms();
+	mat4 modelview = view * modelm;
 	mat4 total_transform = projection * modelview;
 
 	for (int i = 0; i < model->get_faces()->size(); i++)
@@ -161,10 +164,8 @@ void Renderer::draw_model_filled(Model* model)
 
 		// we do this now once per face
 		if (_fill_type == FILL_FLAT)
-			setup_lighting(face, total_transform);
+			setup_lighting(face, modelm, view);
 
-		// TODO: can we pass the points in after total_transform?
-		// we should probably calculate lighting before perspective...
 		float total_double_area = double_area(p1, p2, p3);
 		for (int y = min_y; y <= max_y; ++y)
 		{
@@ -184,7 +185,6 @@ void Renderer::draw_model_filled(Model* model)
 				if (alpha2 < 0)
 					continue;
 
-				//std::cout << alpha1 + alpha2 + alpha3 << " " << total_double_area << std::endl;
 				alpha1 /= total_double_area;
 				alpha2 /= total_double_area;
 				alpha3 /= total_double_area;
@@ -193,13 +193,6 @@ void Renderer::draw_model_filled(Model* model)
 				assert(alpha1 >= 0);
 				assert(alpha2 >= 0);
 				assert(alpha3 >= 0);
-				//float total = alpha1 + alpha2 + alpha3;
-				//assert(total >= 0.99 && total <= 1.01);
-
-				/*float z = alpha1 / (point1.z / point1.w) +
-					alpha2 / (point2.z / point2.w) +
-					alpha3 / (point3.z / point3.w);
-				z = 1 / z;*/
 
 				float z =  alpha1 * (point1.z / point1.w) +
 						   alpha2 * (point2.z / point2.w) +
@@ -212,12 +205,12 @@ void Renderer::draw_model_filled(Model* model)
 
 				// TODO: I think this is correct
 				// This can happen if one point of the triangle is outside of the camera's range... I think
-				//if (z < -1 || z > 1)
-				//	continue;
+				if (z < -1 || z > 1)
+					continue;
 
 				_zbuffer[ZINDEX(_width, x, y)] = z;
 				// try to visualize z-buffer
-				clamp(z, -1, 1);
+				z = clamp(z, -1, 1);
 				if (_fill_type == FILL_ZBUFFER)
 					set_color(1-z, 1-z, 1-z);
 				draw_point(x, y);
@@ -351,10 +344,11 @@ void Renderer::set_color(float r, float g, float b)
 	_b = b;
 }
 
-void Renderer::set_parameters(Camera* camera, FillType fill_type)
+void Renderer::set_parameters(Camera* camera, FillType fill_type, std::vector<Light*> lights)
 {
 	_camera = camera;
 	_fill_type = fill_type;
+	_lights = lights;
 }
 
 void Renderer::draw_string(const char* string, int left, int bottom)
@@ -403,36 +397,41 @@ void Renderer::assign_rotating_color()
 	return;
 }
 
-// TODO: apply transforms!!!!!!
-void Renderer::setup_lighting(const Face& face, const mat4 transform)
+// TODO: we can optimize away a lot of these matrix calculations
+// TODO: add gui for changing light parameters
+// TODO: add gui for changing material parameters
+// TODO: add rgb vector
+// TODO: emissive colors
+void Renderer::setup_lighting(const Face& face, const mat4& model, const mat4& view)
 {
-	vec4 light(1, -2, 1, 1);
+	if (_lights.size() == 0)
+	{
+		set_color(0, 0, 0);
+		return;
+	}
 
-	vec4 vector1 = face.point2 - face.point1;
-	vec4 vector2 = face.point3 - face.point2;
-	vec4 center_of_triangle = (face.point1 + face.point2 + face.point3) / 3;
+	vec4 light = view * _lights[0]->get_origin_in_world_coordinates();
+
+	vec4 vector1 = (view * model) * (face.point2 - face.point1);
+	vec4 vector2 = (view * model) * (face.point3 - face.point2);
+	vec4 center_of_triangle =  view * model * ((face.point1 + face.point2 + face.point3) / 3);
 
 	vec3 N = normalize(cross(vector1, vector2));
 	vec3 L = normalize((light - center_of_triangle).to_vec3());
 	vec3 V = normalize(center_of_triangle.to_vec3()); // TODO: is this correct? Should we try to draw it?
 	
 	float k_a = 0.2; // ambient light for this material
-	float k_d = 0.3; // diffuse light for this material
+	float k_d = 0.6; // diffuse light for this material
 
-	float L_a = 1; // overall ambient light
+	float L_a = 0.2; // overall ambient light
 	float L_d = 1; // overall diffuse light
 
 	// TODO: specular
 	float I_a = max(0, k_a * L_a);
 	float I_d = max(0, k_d * (dot(L, N)) * L_d);
 
-	// TODO: we get weird spots from diffuse light on the teapot where the handle meets the pot. why?
-	// I think that must be from z-fighting, but why doesn't changing NEAR/FAR help?
-	// see if finding barycentric coordinates before projection helps
-	// also try backface culling
 	float final = I_d + I_a;
-	final = min(1, final);
-	final = max(0, final);
+	final = max(0, min(1, final));
 	set_color(final, final, final);
 }
 
