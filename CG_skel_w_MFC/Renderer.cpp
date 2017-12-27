@@ -167,51 +167,59 @@ void Renderer::draw_model_filled(Model* model)
 
 		// TODO: can we pass the points in after total_transform?
 		// we should probably calculate lighting before perspective...
+		float total_double_area = double_area(p1, p2, p3);
 		for (int y = min_y; y <= max_y; ++y)
 		{
 			for (int x = min_x; x <= max_x; ++x)
 			{
 				// for performance reasons we calculate these only if necessary
 				const vec2 p(x, y);
-				float alpha1 = double_area(p1, p2, p);
-				if (alpha1 < 0)
-					continue;
-
-				float alpha2 = double_area(p2, p3, p);
-				if (alpha2 < 0)
-					continue;
-
-				float alpha3 = double_area(p3, p1, p);
+				float alpha3 = double_area(p1, p2, p);
 				if (alpha3 < 0)
 					continue;
 
-				float total_double_area = double_area(p1, p2, p3);
+				float alpha1 = double_area(p2, p3, p);
+				if (alpha1 < 0)
+					continue;
+
+				float alpha2 = double_area(p3, p1, p);
+				if (alpha2 < 0)
+					continue;
+
+				//std::cout << alpha1 + alpha2 + alpha3 << " " << total_double_area << std::endl;
 				alpha1 /= total_double_area;
 				alpha2 /= total_double_area;
 				alpha3 /= total_double_area;
 
+				assert(total_double_area >= 0);
 				assert(alpha1 >= 0);
 				assert(alpha2 >= 0);
 				assert(alpha3 >= 0);
+				//float total = alpha1 + alpha2 + alpha3;
+				//assert(total >= 0.99 && total <= 1.01);
 
-				float z = alpha1 / (point1.z / point1.w) +
+				/*float z = alpha1 / (point1.z / point1.w) +
 					alpha2 / (point2.z / point2.w) +
 					alpha3 / (point3.z / point3.w);
-				z = 1 / z;
+				z = 1 / z;*/
 
-				if (_zbuffer[ZINDEX(_width, x, y)] < z)
+				float z =  alpha1 * (point1.z / point1.w) +
+						   alpha2 * (point2.z / point2.w) +
+						   alpha3 * (point3.z / point3.w);
+
+				if (_zbuffer[ZINDEX(_width, x, y)] <= z)
 				{
 					continue;
 				}
 
 				// TODO: I think this is correct
 				// This can happen if one point of the triangle is outside of the camera's range... I think
-				if (z < -1 || z > 1)
-					continue;
+				//if (z < -1 || z > 1)
+				//	continue;
 
 				_zbuffer[ZINDEX(_width, x, y)] = z;
 				// try to visualize z-buffer
-				//clamp(z, -1, 1);
+				clamp(z, -1, 1);
 				if (_fill_type == FILL_ZBUFFER)
 					set_color(1-z, 1-z, 1-z);
 				draw_point(x, y);
