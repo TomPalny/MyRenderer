@@ -70,8 +70,8 @@ mat4 Camera::get_projection_matrix()
 		const float top = 2;
 		const float left = -2 * _aspect_ratio;
 		const float right = 2 * _aspect_ratio;
-		const float nearz = 0.1;
-		float farz = 10;
+		const float nearz = 1;
+		float farz = 5;
 		
 		mat4 ortho;
 		ortho[0][0] = 2 / (right - left);
