@@ -438,12 +438,11 @@ void Renderer::assign_rotating_color()
 	return;
 }
 
-
-float Renderer::calculate_color(int channel, float ambient_light, float diffuse_light, float specular_light)
+float Renderer::calculate_color(int channel, MaterialPtr light, float diffuse_modifier, float specular_modifier)
 {
-	float I_a = max(0, _material->_ambient[channel]  * ambient_light);
-	float I_d = max(0, _material->_diffuse[channel]  * diffuse_light);
-	float I_s = max(0, _material->_specular[channel] * specular_light);
+	float I_a = max(0, _material->_ambient[channel] * light->_ambient[channel]);
+	float I_d = max(0, _material->_diffuse[channel] * light->_diffuse[channel] * diffuse_modifier);
+	float I_s = max(0, _material->_specular[channel] * light->_specular[channel] * specular_modifier);
 
 	float result = I_d + I_a + I_s;
 	return max(0, min(1, result));
@@ -473,33 +472,30 @@ vec3 Renderer::get_phong_normal(vec4 point, vec4 normal, const mat4& model, cons
 // TODO: emissive colors
 vec3 Renderer::get_lighting_for_point(vec4 point, const vec3& N, const mat4& model, const mat4& view)
 {
+	vec3 result(0, 0, 0);
+	point = view * model * point;
 
-	if (_lights.size() == 0)
+	for (auto lighto : _lights)
 	{
-		set_color(0, 0, 0);
-		return vec3(0,0,0);
+		vec4 light = view * lighto->get_origin_in_world_coordinates();
+		vec3 L = normalize((light - point).to_vec3());
+		vec3 V = normalize(point.to_vec3());
+		// TODO: this is the negative of what the wikipedia page says, but it defintely is wrong the other way
+		// Is L backwards?
+		vec3 R = normalize(L - 2 * dot(L, N) * N);
+		float alpha = 5;
+		float diffuse_modifier = dot(L, N);
+		float specular_modifier = pow(dot(R, V), alpha);
+
+		result += vec3(calculate_color(0, lighto->_material, diffuse_modifier, specular_modifier),
+			calculate_color(1, lighto->_material, diffuse_modifier, specular_modifier),
+			calculate_color(2, lighto->_material, diffuse_modifier, specular_modifier));
 	}
 
-	point = view * model * point;
-	vec4 light = view * _lights[0]->get_origin_in_world_coordinates();
-	vec3 L = normalize((light - point).to_vec3());
-	vec3 V = normalize(point.to_vec3());
-	// TODO: this is the negative of what the wikipedia page says, but it defintely is wrong the other way
-	// Is L backwards?
-	vec3 R = normalize(L - 2 * dot(L, N) * N);
-
-	float L_a = 0.2; // overall ambient light
-	float L_d = 1.0; // overall diffuse light
-	float L_s = 1.0; // overall shininess?
-	float alpha = 5;
-
-	float ambient = L_a;
-	float diffuse = dot(L, N) * L_d;
-	float specular = pow(dot(R, V), alpha) * L_s;
-
-	return vec3(calculate_color(0, ambient, diffuse, specular),
-		calculate_color(1, ambient, diffuse, specular),
-		calculate_color(2, ambient, diffuse, specular));
+	result.x = min(1, result.x);
+	result.y = min(1, result.y);
+	result.z = min(1, result.z);
+	return result;
 }
 
 void Renderer::setup_flat_lighting(const Face& face, const mat4& model, const mat4& view)

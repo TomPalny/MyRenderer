@@ -5,7 +5,8 @@
 class Light : public Model
 {
 public:
-	Light(int light_id);
+	Light();
 	~Light();
 	ModelType get_type() override { return LIGHT_MODEL; }
+	void set_name(std::string name) override;
 };

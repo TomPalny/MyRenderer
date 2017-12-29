@@ -49,7 +49,7 @@ public:
 
 	void perform_operation(mat4 operation, TransformMode mode);
 	std::string get_name() const;
-	void set_name(std::string name);
+	virtual void set_name(std::string name);
 	void create_bounding_box();
 	std::shared_ptr<std::vector<Face> > get_faces();
 	char get_origin_sign();

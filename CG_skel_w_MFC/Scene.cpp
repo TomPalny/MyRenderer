@@ -46,8 +46,7 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 
 	_active_camera = front;
 
-	auto light1 = new Light(1);
-	light1->set_name("Light1");
+	auto light1 = new Light();
 	light1->perform_operation(Translate(2, 3, 0), WORLD_TRANSFORM);
 	_models.push_back(light1);
 	_bounding_boxes.push_back(false);
@@ -99,8 +98,8 @@ void Scene::add_pyramid_model()
 
 void Scene::add_light()
 {
-	const auto light = new Light(1);
-	load_model_at_center(light, "Light1");
+	const auto light = new Light();
+	load_model_at_center(light, "Doesn't Matter");
 }
 
 void Scene::open_file()

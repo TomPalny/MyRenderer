@@ -15,6 +15,7 @@ public:
 
 	static void load_csv();
 	static MaterialPtr get_default();
+	static MaterialPtr get_default_white_light();
 	static MaterialPtr get_from_csv(std::string name);
 	static void load_csv_if_necessary();
 	static std::vector<std::string> get_csv_material_names();

@@ -65,7 +65,7 @@ public:
 	void draw_letter(char letter, int left, int bottom);
 	void draw_letter(char letter, vec4 point);
 	void assign_rotating_color();
-	float calculate_color(int channel, float ambient_light, float diffuse_light, float specular_light);
+	float calculate_color(int channel, MaterialPtr light, float diffuse_modifier, float specular_modifier);
 	vec3 get_gouraud_lighting_for_point(vec4 point, vec4 normal, const mat4& model, const mat4& view);
 	vec3 get_phong_normal(vec4 point, vec4 normal, const mat4& model, const mat4& view);
 	vec3 get_lighting_for_point(vec4 point, const vec3& N, const mat4& model, const mat4& view);

@@ -54,6 +54,17 @@ MaterialPtr Material::get_default()
 	return std::make_shared<Material>();
 }
 
+MaterialPtr Material::get_default_white_light()
+{
+	//float L_a = 0.2; // overall ambient light
+	//float L_d = 1.0; // overall diffuse light
+	//float L_s = 1.0; // overall shininess?
+	vec3 ambient(0.2, 0.2, 0.2);
+	vec3 diffuse(1, 1, 1);
+	vec3 specular(1, 1, 1);
+	return std::make_shared<Material>("White Light", ambient, diffuse, specular, 1);
+}
+
 void Material::load_csv_if_necessary()
 {
 	if (_csv_materials.size() == 0)
