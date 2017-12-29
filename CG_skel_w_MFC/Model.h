@@ -5,6 +5,7 @@
 #include "RenderParameters.h"
 #include <memory>
 #include <string>
+#include "Material.h"
 
 class Renderer;
 
@@ -54,4 +55,5 @@ public:
 	char get_origin_sign();
 	float _min_x, _min_y, _min_z, _max_x, _max_y, _max_z;
 	Model* _bounding_box;
+	MaterialPtr _material;
 };

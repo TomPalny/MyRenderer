@@ -6,7 +6,9 @@
 #include "GL/glew.h"
 #include "Camera.h"
 #include "Light.h"
+#include "Material.h"
 
+class Material;
 using namespace std;
 
 class Renderer
@@ -14,7 +16,8 @@ class Renderer
 	float *_buffer; // 3*width*height
 	float *_zbuffer; // width*height
 	int _width, _height;
-	float _r, _g, _b;
+	float _r, _g, _b; // TODO: remove this?
+	MaterialPtr _material;
 	int _rotating_color; // used to assigned static colors to faces
 	Camera* _camera;
 	FillType _fill_type;
@@ -54,14 +57,20 @@ public:
 	void swap_buffers();
 	void clear_screen();
 	void set_color(float r, float g, float b);
-	void set_parameters(::Camera* camera, ::FillType fill_type, std::vector<Light*> lights);
+	void set_material(MaterialPtr material);
+	void set_parameters(Camera* camera, FillType fill_type, std::vector<Light*> lights);
 	void set_window_size(int width, int height);
 
 	void draw_string(const char* string, int left, int bottom);
 	void draw_letter(char letter, int left, int bottom);
 	void draw_letter(char letter, vec4 point);
 	void assign_rotating_color();
-	void setup_lighting(const Face& face, const mat4& model, const mat4& view);
+	float calculate_color(int channel, float ambient_light, float diffuse_light, float specular_light);
+	vec3 get_gouraud_lighting_for_point(vec4 point, vec4 normal, const mat4& model, const mat4& view);
+	vec3 get_phong_normal(vec4 point, vec4 normal, const mat4& model, const mat4& view);
+	vec3 get_lighting_for_point(vec4 point, const vec3& N, const mat4& model, const mat4& view);
+	void setup_flat_lighting(const Face& face, const mat4& model, const mat4& view);
+	void setup_gouraud_lighting(const Face& face, const mat4& model, const mat4& view);
 	void draw(Model* model);
 	void draw_model_filled(Model* model);
 	void draw_model_wireframe(Model* model);

@@ -7,12 +7,13 @@
 #include "Camera.h"
 #include "Utils.h"
 #include "Light.h"
+#include "Material.h"
 
 #define INDEX(width,x,y,c) ((x+y*width)*3+c)
 #define ZINDEX(width,x,y) (x+y*width)
 
 Renderer::Renderer(int width, int height) :
-	_buffer(NULL), _width(width), _height(height), _r(1.0), _g(1.0), _b(1.0), _rotating_color(1)
+	_buffer(NULL), _width(width), _height(height), _r(1.0), _g(1.0), _b(1.0), _rotating_color(1), _material(Material::get_default())
 {
 	InitOpenGLRendering();
 	set_window_size(width,height);
@@ -162,9 +163,27 @@ void Renderer::draw_model_filled(Model* model)
 		int min_y = max(0, min3(p1.y, p2.y, p3.y));
 		int max_y = min(_height - 1, max3(p1.y, p2.y, p3.y));
 
+		// for gouraud/phong lighting
+		// the meaning of these change - for gouraud they are colors, for phong they are normal
+		vec3 l1, l2, l3;
 		// we do this now once per face
+		// TODO: use some Shader object...
 		if (_fill_type == FILL_FLAT)
-			setup_lighting(face, modelm, view);
+			setup_flat_lighting(face, modelm, view);
+		else if (_fill_type == FILL_GOURAUD)
+		{
+			// TODO: I don't think we're translating the normal right...
+			// TODO: we get a cool effect but our vectors are definitely messed up
+			l1 = get_gouraud_lighting_for_point(face.point1, face.normal1, modelm, view);
+			l2 = get_gouraud_lighting_for_point(face.point2, face.normal2, modelm, view);
+			l3 = get_gouraud_lighting_for_point(face.point3, face.normal3, modelm, view);	
+		}
+		else if (_fill_type == FILL_PHONG)
+		{
+			l1 = get_phong_normal(face.point1, face.normal1, modelm, view);
+			l2 = get_phong_normal(face.point2, face.normal2, modelm, view);
+			l3 = get_phong_normal(face.point3, face.normal3, modelm, view);
+		}
 
 		float total_double_area = double_area(p1, p2, p3);
 		for (int y = min_y; y <= max_y; ++y)
@@ -203,6 +222,11 @@ void Renderer::draw_model_filled(Model* model)
 					continue;
 				}
 
+				// TODO: gourard shading
+				// we already have the normals as part of the face object
+				// make sure those normals are right! they look correct in orthographic as long as I don't do non-uniform scaling
+
+
 				// TODO: I think this is correct
 				// This can happen if one point of the triangle is outside of the camera's range... I think
 				if (z < -1 || z > 1)
@@ -213,6 +237,18 @@ void Renderer::draw_model_filled(Model* model)
 				z = clamp(z, -1, 1);
 				if (_fill_type == FILL_ZBUFFER)
 					set_color(1-z, 1-z, 1-z);
+				else if (_fill_type == FILL_GOURAUD)
+				{
+					vec3 color = alpha1 * l1 + alpha2 * l2 + alpha3 * l3;
+					set_color(color.x, color.y, color.z);
+				}
+				else if (_fill_type == FILL_PHONG)
+				{
+					vec3 normal = alpha1 * l1 + alpha2 * l2 + alpha3 * l3;
+					vec4 point = alpha1 * face.point1 + alpha2 * face.point2 + alpha3 * face.point3; // TODO: is this right?
+					vec3 color = get_lighting_for_point(point, normal, modelm, view);
+					set_color(color.x, color.y, color.z);
+				}
 				draw_point(x, y);
 			}
 		}
@@ -344,6 +380,11 @@ void Renderer::set_color(float r, float g, float b)
 	_b = b;
 }
 
+void Renderer::set_material(MaterialPtr material)
+{
+	_material = material;
+}
+
 void Renderer::set_parameters(Camera* camera, FillType fill_type, std::vector<Light*> lights)
 {
 	_camera = camera;
@@ -397,42 +438,79 @@ void Renderer::assign_rotating_color()
 	return;
 }
 
+
+float Renderer::calculate_color(int channel, float ambient_light, float diffuse_light, float specular_light)
+{
+	float I_a = max(0, _material->_ambient[channel]  * ambient_light);
+	float I_d = max(0, _material->_diffuse[channel]  * diffuse_light);
+	float I_s = max(0, _material->_specular[channel] * specular_light);
+
+	float result = I_d + I_a + I_s;
+	return max(0, min(1, result));
+}
+
+vec3 Renderer::get_gouraud_lighting_for_point(vec4 model_point, vec4 model_normal, const mat4& model, const mat4& view)
+{
+	auto transformed_start = model * view * model_point;
+	auto transformed_end = model * view * (model_point + model_normal);
+	//auto transformed_normal = normalize((transformed_end - transformed_start).to_vec3());
+	auto transformed_normal = normalize((model * view * model_normal).to_vec3());
+	// TODO: refactor get_lighting_for_point so that we just pass in the point after transformation
+	return get_lighting_for_point(model_point, transformed_normal, model, view);
+}
+
+vec3 Renderer::get_phong_normal(vec4 point, vec4 normal, const mat4& model, const mat4& view)
+{
+	auto transformed_start = model * view * point;
+	auto transformed_end = model * view * (point + normal);
+	//auto transformed_normal = normalize((transformed_end - transformed_start).to_vec3());
+	auto transformed_normal = normalize((model * view * normal).to_vec3());
+	return transformed_normal;
+}
+
 // TODO: we can optimize away a lot of these matrix calculations
 // TODO: add gui for changing light parameters
-// TODO: add gui for changing material parameters
-// TODO: add rgb vector
 // TODO: emissive colors
-void Renderer::setup_lighting(const Face& face, const mat4& model, const mat4& view)
+vec3 Renderer::get_lighting_for_point(vec4 point, const vec3& N, const mat4& model, const mat4& view)
 {
+
 	if (_lights.size() == 0)
 	{
 		set_color(0, 0, 0);
-		return;
+		return vec3(0,0,0);
 	}
 
+	point = view * model * point;
 	vec4 light = view * _lights[0]->get_origin_in_world_coordinates();
-
-	vec4 vector1 = (view * model) * (face.point2 - face.point1);
-	vec4 vector2 = (view * model) * (face.point3 - face.point2);
-	vec4 center_of_triangle =  view * model * ((face.point1 + face.point2 + face.point3) / 3);
-
-	vec3 N = normalize(cross(vector1, vector2));
-	vec3 L = normalize((light - center_of_triangle).to_vec3());
-	vec3 V = normalize(center_of_triangle.to_vec3()); // TODO: is this correct? Should we try to draw it?
-	
-	float k_a = 0.2; // ambient light for this material
-	float k_d = 0.6; // diffuse light for this material
+	vec3 L = normalize((light - point).to_vec3());
+	vec3 V = normalize(point.to_vec3());
+	// TODO: this is the negative of what the wikipedia page says, but it defintely is wrong the other way
+	// Is L backwards?
+	vec3 R = normalize(L - 2 * dot(L, N) * N);
 
 	float L_a = 0.2; // overall ambient light
-	float L_d = 1; // overall diffuse light
+	float L_d = 1.0; // overall diffuse light
+	float L_s = 1.0; // overall shininess?
+	float alpha = 5;
 
-	// TODO: specular
-	float I_a = max(0, k_a * L_a);
-	float I_d = max(0, k_d * (dot(L, N)) * L_d);
+	float ambient = L_a;
+	float diffuse = dot(L, N) * L_d;
+	float specular = pow(dot(R, V), alpha) * L_s;
 
-	float final = I_d + I_a;
-	final = max(0, min(1, final));
-	set_color(final, final, final);
+	return vec3(calculate_color(0, ambient, diffuse, specular),
+		calculate_color(1, ambient, diffuse, specular),
+		calculate_color(2, ambient, diffuse, specular));
+}
+
+void Renderer::setup_flat_lighting(const Face& face, const mat4& model, const mat4& view)
+{
+	vec4 vector1 = (view * model) * (face.point2 - face.point1);
+	vec4 vector2 = (view * model) * (face.point3 - face.point2);
+	vec4 center_of_triangle =  (face.point1 + face.point2 + face.point3) / 3;
+
+	vec3 N = normalize(cross(vector1, vector2));
+	vec3 lighting = get_lighting_for_point(center_of_triangle, N, model, view);
+	set_color(lighting.x, lighting.y, lighting.z);
 }
 
 /////////////////////////////////////////////////////

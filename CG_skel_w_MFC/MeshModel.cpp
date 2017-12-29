@@ -100,7 +100,11 @@ void MeshModel::load_file(string fileName)
 		if (lineType == "v") 
 			vertices.push_back(vec4fFromVec3Stream(issLine));
 		else if (lineType == "vn")
-			normal_vertices.push_back(vec4fFromVec3Stream(issLine));
+		{
+			auto normal = vec4fFromVec3Stream(issLine);
+			normal.w = 0;
+			normal_vertices.push_back(normal);
+		}
 		else if (lineType == "f") 
 			face_ids.push_back(issLine);
 		else if (lineType == "#" || lineType == "")

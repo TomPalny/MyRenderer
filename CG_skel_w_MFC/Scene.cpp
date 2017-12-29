@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include <sstream>
 #include <filesystem>
+#include "MFCMaterialDlg.h"
 
 using namespace std;
 
@@ -22,7 +23,7 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 	auto front = new Camera(1);
 	front->perform_operation(Translate(0, 0, 5), WORLD_TRANSFORM);
 	front->set_name("Camera1 (Front)");
-	front->look_at2(vec3(0, 0, 5), vec3(0, 0, 0));
+	front->look_at(vec3(0, 0, 0));
 	_cameras.push_back(front);
 	_models.push_back(front);
 	_bounding_boxes.push_back(false);
@@ -35,11 +36,19 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 	_models.push_back(left);
 	_bounding_boxes.push_back(false);
 
+	auto top = new Camera(3);
+	top->perform_operation(Translate(1.5, 5, 0), WORLD_TRANSFORM);
+	top->set_name("Camera3 (Top)");
+	top->look_at(vec3(0, 0, 0));
+	_cameras.push_back(top);
+	_models.push_back(top);
+	_bounding_boxes.push_back(false);
+
 	_active_camera = front;
 
 	auto light1 = new Light(1);
 	light1->set_name("Light1");
-	light1->perform_operation(Translate(2, 1.5, 2), WORLD_TRANSFORM);
+	light1->perform_operation(Translate(2, 3, 0), WORLD_TRANSFORM);
 	_models.push_back(light1);
 	_bounding_boxes.push_back(false);
 }
@@ -57,6 +66,18 @@ void Scene::add_objects_to_menu()
 	{
 		glutAddMenuEntry(model->get_name().c_str(), i++);
 	}
+}
+
+void Scene::change_material()
+{
+	if (_active_model == nullptr)
+	{
+		return;
+	}
+
+	MFCMaterialDlg dlg(_active_model->_material);
+	dlg.DoModal();
+	_active_model->_material = dlg.m_material;
 }
 
 void Scene::set_operation_mode(OperationMode mode)
@@ -160,6 +181,14 @@ void Scene::draw_status_string()
 	{
 		ss << "ZBUFFER // ";
 	}
+	else if (_fill_type == FILL_GOURAUD)
+	{
+		ss << "GOURAUD // ";
+	}
+	else if (_fill_type == FILL_PHONG)
+	{
+		ss << "PHONG // ";
+	}
 	else if (_fill_type == FILL_RANDOM_COLORS)
 	{
 		ss << "RANDOM // ";
@@ -182,6 +211,7 @@ void Scene::redraw_necessary()
 
 void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 {
+	_renderer->set_material(model->_material);
 	_renderer->draw(model);
 	if(draw_bounding_box && model->get_type() == REGULAR_MODEL && model->_bounding_box != nullptr) 
 	{
@@ -205,6 +235,7 @@ void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 
 void Scene::draw()
 {
+	// TODO: shininess
 	std::vector<Light*> lights;
 	for(Model* model : _models)
 	{
@@ -237,13 +268,12 @@ void Scene::keyboard(unsigned char key, int x, int y)
 {
 	const auto it = std::find(_models.begin(), _models.end(), _active_model);
 	auto index = std::distance(_models.begin(), it);
+	int direction = 1;
 	if (glutGetModifiers() & GLUT_ACTIVE_SHIFT)
-		index--;
-	else
-		index++;
+		direction = -1;
+	index += direction;
 	index = index % _models.size();
 	
-
 	switch (key) {
 	case 27: // escape
 		exit(EXIT_SUCCESS);
@@ -253,6 +283,7 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		break;
 	case '1':
 	case '2':
+	case '3':
 		switch_camera(key - '1');
 		break;
 	case 'o':
@@ -268,7 +299,11 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		_normal_type = (NormalType) ((_normal_type + 1) % NUMBER_OF_NORMAL_TYPES);
 		break;
 	case 'f':
-		_fill_type = (FillType) ((_fill_type + 1) % NUMBER_OF_FILL_TYPES);
+	case 'F':
+		_fill_type = (FillType) ((_fill_type + direction) % NUMBER_OF_FILL_TYPES);
+		break;
+	case 'm':
+		change_material();
 		break;
 	case 'r':
 		set_operation_mode(ROTATE_MODE);

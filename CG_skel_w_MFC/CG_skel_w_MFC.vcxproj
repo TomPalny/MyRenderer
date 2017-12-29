@@ -102,7 +102,9 @@
     <ClCompile Include="Face.cpp" />
     <ClCompile Include="InitShader.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="MeshModel.cpp" />
+    <ClCompile Include="MFCMaterialDlg.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="PrimitiveModel.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -116,6 +118,8 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="MFCMaterialDlg.h" />
     <ClInclude Include="RenderParameters.h" />
     <ClInclude Include="CG_skel_w_MFC.h" />
     <ClInclude Include="Face.h" />
@@ -127,7 +131,6 @@
     <ClInclude Include="PrimitiveModel.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="resource1.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />

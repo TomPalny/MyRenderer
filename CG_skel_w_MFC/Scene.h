@@ -41,6 +41,7 @@ public:
 	void load_model_at_center(Model* model, const string name);
 	static void redraw_necessary();
 	void add_objects_to_menu();
+	void change_material();
 	void keyboard(unsigned char key, int x, int y);
 	void keyboard_special(int key, int x, int y);
 
