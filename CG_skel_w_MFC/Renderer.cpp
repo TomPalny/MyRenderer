@@ -504,7 +504,7 @@ vec3 Renderer::get_lighting_for_point(vec4 point, const vec3& N, const mat4& mod
 	{
 		// point.z is negative for visible points
 		//result += (point.z + 1) * vec3(0.5, 0.5, 0.5);
-		result /= fabs(point.z) * 2;
+		result /= pow(fabs(point.z), 1.5f);
 	}
 	result.x = max(0, min(1, result.x));
 	result.y = max(0, min(1, result.y));
