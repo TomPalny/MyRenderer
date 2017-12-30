@@ -32,17 +32,47 @@ void Renderer::set_window_size(int width, int height)
 		delete _zbuffer;
 	}
 
-	if (_supersampling)
-	{
-		width *= 2;
-		height *= 2;
-	}
-
 	_width=width;
 	_height=height;	
 	CreateOpenGLBuffer(); //Do not remove this line.
 	_buffer = new float[3 * _width * _height];
 	_zbuffer = new float[_width * _height];
+}
+
+bool Renderer::get_fog()
+{
+	return _fog_enabled;
+}
+
+bool Renderer::get_antialiasing()
+{
+	return _supersampling;
+}
+
+bool Renderer::get_blur()
+{
+	return _blur;
+}
+
+void Renderer::update_settings(bool fog, bool antialising, bool blur)
+{
+	_fog_enabled = fog;
+	_blur = blur;
+
+	if (_supersampling)
+	{
+		_width /= 2;
+		_height /= 2;
+	}
+
+	_supersampling = antialising;
+	if (_supersampling)
+	{
+		_width *= 2;
+		_height *= 2;
+	}
+
+	set_window_size(_width, _height);
 }
 
 bool Renderer::point_in_range(int x, int y)

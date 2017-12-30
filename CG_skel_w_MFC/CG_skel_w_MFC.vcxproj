@@ -105,6 +105,7 @@
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="MeshModel.cpp" />
     <ClCompile Include="MFCMaterialDlg.cpp" />
+    <ClCompile Include="MFCSettingsDlg.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="PrimitiveModel.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -120,6 +121,7 @@
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MFCMaterialDlg.h" />
+    <ClInclude Include="MFCSettingsDlg.h" />
     <ClInclude Include="RenderParameters.h" />
     <ClInclude Include="CG_skel_w_MFC.h" />
     <ClInclude Include="Face.h" />

@@ -42,6 +42,7 @@ public:
 	static void redraw_necessary();
 	void add_objects_to_menu();
 	void change_material();
+	void show_settings_window();
 	void keyboard(unsigned char key, int x, int y);
 	void keyboard_special(int key, int x, int y);
 

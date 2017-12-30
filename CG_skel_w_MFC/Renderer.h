@@ -21,6 +21,9 @@ class Renderer
 	Camera* _camera;
 	FillType _fill_type;
 	vector<Light*> _lights;
+	bool _fog_enabled;
+	bool _supersampling, _blur;
+	int _width, _height;
 
 	void draw_line_implementation(vec2 point1, vec2 point2, bool inverted);
 	vec2 viewport_to_screen_coordinates(vec2 point);
@@ -60,6 +63,10 @@ public:
 	void set_material(MaterialPtr material);
 	void set_parameters(Camera* camera, FillType fill_type, std::vector<Light*> lights);
 	void set_window_size(int width, int height);
+	bool get_fog();
+	bool get_antialiasing();
+	bool get_blur();
+	void update_settings(bool fog, bool antialising, bool blur);
 
 	void draw_line(vec4 point1, vec4 point2);
 	void draw_string(const char* string, int left, int bottom);
@@ -77,8 +84,4 @@ public:
 	void draw_model_wireframe(Model* model);
 	void draw_face_normals(Model* model);
 	float get_aspect_ratio();
-
-	bool _fog_enabled;
-	bool _supersampling, _blur;
-	int _width, _height;
 };

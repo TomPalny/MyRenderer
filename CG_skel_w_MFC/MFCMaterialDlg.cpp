@@ -9,8 +9,8 @@
 #define new DEBUG_NEW
 #endif
 
-MFCMaterialDlg::MFCMaterialDlg(MaterialPtr material)
-	: CDialogEx(IDD_MATERIALS, NULL), m_material(material)
+MFCMaterialDlg::MFCMaterialDlg(MaterialPtr material, bool is_light)
+	: CDialogEx(IDD_MATERIALS, NULL), m_material(material), m_is_light(is_light)
 {
 }
 
@@ -22,6 +22,7 @@ void MFCMaterialDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_DIFFUSE, m_diffuse);
 	DDX_Control(pDX, IDC_SPECULAR, m_specular);
 	DDX_Control(pDX, IDC_EMISSIVE, m_emissive);
+	DDX_Control(pDX, IDC_NONUNIFORM, m_nonuniform);
 }
 
 BEGIN_MESSAGE_MAP(MFCMaterialDlg, CDialogEx)
@@ -34,6 +35,7 @@ BEGIN_MESSAGE_MAP(MFCMaterialDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_DIFFUSE, &MFCMaterialDlg::OnBnClickedDiffuse)
 	ON_BN_CLICKED(IDC_SPECULAR, &MFCMaterialDlg::OnBnClickedSpecular)
 	ON_BN_CLICKED(IDC_EMISSIVE, &MFCMaterialDlg::OnBnClickedEmissive)
+	ON_BN_CLICKED(IDC_NONUNIFORM, &MFCMaterialDlg::OnBnClickedNonuniform)
 END_MESSAGE_MAP()
 
 
@@ -44,6 +46,12 @@ BOOL MFCMaterialDlg::OnInitDialog()
 	for (auto str : Material::get_csv_material_names())
 	{
 		m_listbox.AddString(str.c_str());
+	}
+
+	if (m_is_light)
+	{
+		m_nonuniform.EnableWindow(FALSE);
+		m_emissive.EnableWindow(FALSE);
 	}
 
 	update_colors();
@@ -80,6 +88,7 @@ void MFCMaterialDlg::update_colors()
 	m_diffuse.SetColor(RGB(d.x * 255, d.y * 255, d.z * 255));
 	m_specular.SetColor(RGB(s.x * 255, s.y * 255, s.z * 255));
 	m_emissive.SetColor(RGB(e.x * 255, e.y * 255, e.z * 255));
+	m_nonuniform.SetCheck(m_material->_special);
 }
 
 void MFCMaterialDlg::OnColorChosenFromList()
@@ -116,6 +125,8 @@ void MFCMaterialDlg::UpdateMaterialAccordingToGui()
 	m_material->_emissive.x = GetRValue(e) / 255.0f;
 	m_material->_emissive.y = GetGValue(e) / 255.0f;
 	m_material->_emissive.z = GetBValue(e) / 255.0f;
+
+	m_material->_special = m_nonuniform.GetCheck();
 }
 
 void MFCMaterialDlg::OnBnClickedAmbient()
@@ -135,6 +146,12 @@ void MFCMaterialDlg::OnBnClickedSpecular()
 
 
 void MFCMaterialDlg::OnBnClickedEmissive()
+{
+	UpdateMaterialAccordingToGui();
+}
+
+
+void MFCMaterialDlg::OnBnClickedNonuniform()
 {
 	UpdateMaterialAccordingToGui();
 }

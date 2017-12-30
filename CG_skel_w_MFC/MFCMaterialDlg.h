@@ -10,7 +10,7 @@
 class MFCMaterialDlg : public CDialogEx
 {
 public:
-	MFCMaterialDlg(MaterialPtr material);
+	MFCMaterialDlg(MaterialPtr material, bool is_light);
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_MATERIALS };
 #endif
@@ -25,6 +25,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
+	bool m_is_light;
 	MaterialPtr m_material;
 	afx_msg void OnBnClickedOk();
 	CListBox m_listbox;
@@ -39,4 +40,6 @@ public:
 	void OnBnClickedDiffuse();
 	afx_msg void OnBnClickedSpecular();
 	afx_msg void OnBnClickedEmissive();
+	CButton m_nonuniform;
+	afx_msg void OnBnClickedNonuniform();
 };
