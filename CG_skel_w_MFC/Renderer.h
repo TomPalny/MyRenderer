@@ -31,7 +31,6 @@ class Renderer
 
 	void draw_point(int x, int y);
 	void draw_line(vec2 point1, vec2 point2);
-	void draw_line(vec4 point1, vec4 point2);
 
 	//////////////////////////////
 	// openGL stuff. Don't touch.
@@ -61,6 +60,7 @@ public:
 	void set_parameters(Camera* camera, FillType fill_type, std::vector<Light*> lights);
 	void set_window_size(int width, int height);
 
+	void draw_line(vec4 point1, vec4 point2);
 	void draw_string(const char* string, int left, int bottom);
 	void draw_letter(char letter, int left, int bottom);
 	void draw_letter(char letter, vec4 point);

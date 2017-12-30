@@ -4,6 +4,8 @@
 
 Light::Light()
 {
+	light_type = POINT_LIGHT;
+
 	static int light_count = 0;
 	light_count++;
 
@@ -13,6 +15,12 @@ Light::Light()
 	char light_str[2] = { light_char, '\0' };
 	std::string name = std::string("Light ") + std::string(light_str);
 	Model::set_name(name);
+
+	// TODO: the size is wrong on this
+	/*const vec4 point1(0.1, 0.1, 0.1, 1);
+	const vec4 point2(-0.1, -0.1, 0.1, 1);
+	const vec4 point3(-0.1, 0.1, -0.1, 1);
+	_faces->push_back(Face(point3, point2, point1));*/
 }
 
 

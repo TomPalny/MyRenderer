@@ -478,7 +478,12 @@ vec3 Renderer::get_lighting_for_point(vec4 point, const vec3& N, const mat4& mod
 	for (auto lighto : _lights)
 	{
 		vec4 light = view * lighto->get_origin_in_world_coordinates();
-		vec3 L = normalize((light - point).to_vec3());
+		vec3 L;
+		if (lighto->light_type == POINT_LIGHT)
+			L = normalize((light - point).to_vec3());
+		else
+			L = normalize(view * lighto->get_transforms() * vec4(1, 1, 1, 0)).to_vec3();
+
 		vec3 V = normalize(point.to_vec3());
 		// TODO: this is the negative of what the wikipedia page says, but it defintely is wrong the other way
 		// Is L backwards?

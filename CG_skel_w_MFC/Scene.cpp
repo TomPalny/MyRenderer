@@ -221,6 +221,13 @@ void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 	_renderer->set_color(1, 0, 0);
 	_renderer->draw_letter(model->get_origin_sign(), origin);
 
+	Light* light = dynamic_cast<Light*>(model);
+	if (light != nullptr && light->light_type == DIRECTIONAL_LIGHT)
+	{
+		vec4 direction = _active_camera->get_projection_matrix() * _active_camera->get_view_matrix() * light->get_transforms() * vec4(1, 1, 1, 0) * 0.2f;
+		vec4 end = origin - direction;
+		_renderer->draw_line(origin, end);
+	}
 	/*
 	if (_normal_type == VERTEX_NORMALS)
 	{
@@ -284,6 +291,12 @@ void Scene::keyboard(unsigned char key, int x, int y)
 	case '2':
 	case '3':
 		switch_camera(key - '1');
+		break;
+	case 'd':
+		if (dynamic_cast<Light*>(_active_model) != nullptr)
+		{
+			dynamic_cast<Light*>(_active_model)->light_type = (LightType)((dynamic_cast<Light*>(_active_model)->light_type + 1) % NUM_LIGHT_TYPES);
+		}
 		break;
 	case 'o':
 		open_file();
