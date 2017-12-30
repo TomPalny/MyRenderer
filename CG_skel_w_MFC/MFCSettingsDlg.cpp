@@ -27,6 +27,7 @@ void MFCSettingsDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BLUR, check_blur);
 	DDX_Control(pDX, IDC_ANTIALIASING, check_antialiasing);
 	DDX_Control(pDX, IDC_FOG, check_fog);
+	DDX_Control(pDX, IDC_BLOOM, check_bloom);
 }
 
 BOOL MFCSettingsDlg::OnInitDialog()
@@ -35,6 +36,7 @@ BOOL MFCSettingsDlg::OnInitDialog()
 	check_fog.SetCheck(fog);
 	check_antialiasing.SetCheck(antialiasing);
 	check_blur.SetCheck(blur);
+	check_bloom.SetCheck(bloom);
 	return TRUE;
 }
 
@@ -43,6 +45,7 @@ BEGIN_MESSAGE_MAP(MFCSettingsDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BLUR, &MFCSettingsDlg::OnBnClickedBlur)
 	ON_BN_CLICKED(IDC_ANTIALIASING, &MFCSettingsDlg::OnBnClickedAntialiasing)
 	ON_BN_CLICKED(IDC_FOG, &MFCSettingsDlg::OnBnClickedFog)
+	ON_BN_CLICKED(IDC_BLOOM, &MFCSettingsDlg::OnBnClickedBloom)
 END_MESSAGE_MAP()
 
 
@@ -64,4 +67,10 @@ void MFCSettingsDlg::OnBnClickedAntialiasing()
 void MFCSettingsDlg::OnBnClickedFog()
 {
 	fog = check_fog.GetCheck();
+}
+
+
+void MFCSettingsDlg::OnBnClickedBloom()
+{
+	bloom = check_bloom.GetCheck();
 }

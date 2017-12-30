@@ -30,7 +30,10 @@ public:
 	bool blur;
 	bool antialiasing;
 	bool fog;
+	bool bloom;
 	CButton check_blur;
 	CButton check_antialiasing;
 	CButton check_fog;
+	CButton check_bloom;
+	afx_msg void OnBnClickedBloom();
 };

@@ -21,8 +21,7 @@ class Renderer
 	Camera* _camera;
 	FillType _fill_type;
 	vector<Light*> _lights;
-	bool _fog_enabled;
-	bool _supersampling, _blur;
+	bool _supersampling, _blur, _bloom, _fog;
 	int _width, _height;
 
 	void draw_line_implementation(vec2 point1, vec2 point2, bool inverted);
@@ -57,6 +56,7 @@ public:
 	void ClearColorBuffer();
 	void ClearDepthBuffer();*/
 
+	static void apply_bloom(float* buffer, int width, int height);
 	void swap_buffers();
 	void clear_screen();
 	void set_color(float r, float g, float b);
@@ -66,7 +66,8 @@ public:
 	bool get_fog();
 	bool get_antialiasing();
 	bool get_blur();
-	void update_settings(bool fog, bool antialising, bool blur);
+	bool get_bloom();
+	void update_settings(bool fog, bool antialising, bool blur, bool bloom);
 
 	void draw_line(vec4 point1, vec4 point2);
 	void draw_string(const char* string, int left, int bottom);

@@ -14,7 +14,7 @@
 
 Renderer::Renderer(int width, int height) :
 	_buffer(NULL), _width(width), _height(height), _r(1.0), _g(1.0), _b(1.0), _rotating_color(1), 
-	_material(Material::get_default()), _fog_enabled(false), _supersampling(false), _blur(false)
+	_material(Material::get_default()), _fog(false), _supersampling(false), _blur(false), _bloom(false)
 {
 	InitOpenGLRendering();
 	set_window_size(width,height);
@@ -41,7 +41,7 @@ void Renderer::set_window_size(int width, int height)
 
 bool Renderer::get_fog()
 {
-	return _fog_enabled;
+	return _fog;
 }
 
 bool Renderer::get_antialiasing()
@@ -54,10 +54,16 @@ bool Renderer::get_blur()
 	return _blur;
 }
 
-void Renderer::update_settings(bool fog, bool antialising, bool blur)
+bool Renderer::get_bloom()
 {
-	_fog_enabled = fog;
+	return _bloom;
+}
+
+void Renderer::update_settings(bool fog, bool antialising, bool blur, bool bloom)
+{
+	_fog = fog;
 	_blur = blur;
+	_bloom = bloom;
 
 	if (_supersampling)
 	{
@@ -536,7 +542,7 @@ vec3 Renderer::get_lighting_for_point(vec4 point, const vec3& N, const mat4& mod
 	}
 
 	result += _material->_emissive;
-	if (_fog_enabled)
+	if (_fog)
 	{
 		// point.z is negative for visible points
 		//result += (point.z + 1) * vec3(0.5, 0.5, 0.5);
@@ -672,6 +678,50 @@ void Renderer::blur(float* buffer, int width, int height)
 		}
 	}
 }
+
+void Renderer::apply_bloom(float* buffer, int width, int height)
+{
+	float* bloom_buffer = new float[width*height*3];
+
+	for (int x = 0; x < width; x++)
+	{
+		for (int y = 0; y < height; y++)
+		{
+			for (int c = 0; c < 3; c++)
+			{
+				int idx = INDEX(width, x, y, c);
+				if (buffer[idx] >= 0.5)
+				{
+					bloom_buffer[idx] = buffer[idx];
+				}
+				else
+				{
+					bloom_buffer[idx] = 0.0f;
+				}
+			}
+		}
+	}
+
+	blur(bloom_buffer, width, height);
+	blur(bloom_buffer, width, height);
+	blur(bloom_buffer, width, height);
+	blur(bloom_buffer, width, height);
+
+	for (int x = 0; x < width; x++)
+	{
+		for (int y = 0; y < height; y++)
+		{
+			for (int c = 0; c < 3; c++)
+			{
+				int idx = INDEX(width, x, y, c);
+				buffer[idx] = min(1, buffer[idx] + bloom_buffer[idx]);
+			}
+		}
+	}
+
+	delete[] bloom_buffer;
+}
+
 void Renderer::swap_buffers()
 {
 	float* buffer;
@@ -689,8 +739,16 @@ void Renderer::swap_buffers()
 		height = _height;
 	}
 
+	if (_bloom)
+	{
+		apply_bloom(buffer, width, height);
+	}
+
 	if (_blur)
 	{
+		blur(buffer, width, height);
+		blur(buffer, width, height);
+		blur(buffer, width, height);
 		blur(buffer, width, height);
 	}
 

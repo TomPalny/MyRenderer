@@ -86,8 +86,9 @@ void Scene::show_settings_window()
 	dlg.blur = _renderer->get_blur();
 	dlg.antialiasing = _renderer->get_antialiasing();
 	dlg.fog = _renderer->get_fog();
+	dlg.bloom = _renderer->get_bloom();
 	dlg.DoModal();
-	_renderer->update_settings(dlg.fog, dlg.antialiasing, dlg.blur);
+	_renderer->update_settings(dlg.fog, dlg.antialiasing, dlg.blur, dlg.bloom);
 }
 
 void Scene::set_operation_mode(OperationMode mode)
