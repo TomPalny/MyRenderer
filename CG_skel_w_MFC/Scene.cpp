@@ -326,6 +326,9 @@ void Scene::keyboard(unsigned char key, int x, int y)
 	case 'z':
 		_active_model->_material->_special = !_active_model->_material->_special;
 		break;
+	case 'x':
+		_renderer->_fog_enabled = !_renderer->_fog_enabled;
+		break;
 	case 't':
 		set_operation_mode(TRANSLATE_MODE);
 		break;

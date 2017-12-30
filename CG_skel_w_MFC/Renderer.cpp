@@ -13,7 +13,8 @@
 #define ZINDEX(width,x,y) (x+y*width)
 
 Renderer::Renderer(int width, int height) :
-	_buffer(NULL), _width(width), _height(height), _r(1.0), _g(1.0), _b(1.0), _rotating_color(1), _material(Material::get_default())
+	_buffer(NULL), _width(width), _height(height), _r(1.0), _g(1.0), _b(1.0), _rotating_color(1), 
+	_material(Material::get_default()), _fog_enabled(false)
 {
 	InitOpenGLRendering();
 	set_window_size(width,height);
@@ -499,9 +500,16 @@ vec3 Renderer::get_lighting_for_point(vec4 point, const vec3& N, const mat4& mod
 	}
 
 	result += _material->_emissive;
-	result.x = min(1, result.x);
-	result.y = min(1, result.y);
-	result.z = min(1, result.z);
+	if (_fog_enabled)
+	{
+		// point.z is negative for visible points
+		//result += (point.z + 1) * vec3(0.5, 0.5, 0.5);
+		result /= fabs(point.z) * 2;
+	}
+	result.x = max(0, min(1, result.x));
+	result.y = max(0, min(1, result.y));
+	result.z = max(0, min(1, result.z));
+
 	return result;
 }
 
