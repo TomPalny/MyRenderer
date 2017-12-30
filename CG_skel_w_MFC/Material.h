@@ -13,7 +13,9 @@ public:
 	Material(std::string name, vec3 ambient, vec3 diffuse, vec3 specular, float shininess);
 	~Material();
 
+	void update_if_special(vec4 location);
 	static void load_csv();
+	MaterialPtr get_special();
 	static MaterialPtr get_default();
 	static MaterialPtr get_default_white_light();
 	static MaterialPtr get_from_csv(std::string name);
@@ -26,6 +28,7 @@ public:
 	vec3 _specular;
 	vec3 _emissive;
 	float _shininess;
+	bool _special;
 
 private:
 	static std::unordered_map<std::string, MaterialPtr> _csv_materials;

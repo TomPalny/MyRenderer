@@ -323,6 +323,9 @@ void Scene::keyboard(unsigned char key, int x, int y)
 	case 's':
 		set_operation_mode(SCALE_MODE);
 		break;
+	case 'z':
+		_active_model->_material->_special = !_active_model->_material->_special;
+		break;
 	case 't':
 		set_operation_mode(TRANSLATE_MODE);
 		break;

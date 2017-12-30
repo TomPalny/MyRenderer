@@ -7,17 +7,29 @@
 
 std::unordered_map<std::string, MaterialPtr> Material::_csv_materials;
 
-Material::Material() : _name("Default"), _ambient(0.5, 0.5, 0.5), _diffuse(1.0, 1.0, 1.0), _specular(0.1, 0.1, 0.1), _emissive(0, 0, 0), _shininess(5)
+Material::Material() : _name("Default"), _ambient(0.5, 0.5, 0.5), _diffuse(1.0, 1.0, 1.0), 
+_specular(0.1, 0.1, 0.1), _emissive(0, 0, 0), _shininess(5), _special(false)
 {	
 }
 
 Material::Material(std::string name, vec3 ambient, vec3 diffuse, vec3 specular, float shininess) :
-	_name(name), _ambient(ambient), _diffuse(diffuse), _specular(specular), _emissive(0,0,0), _shininess(shininess)
+	_name(name), _ambient(ambient), _diffuse(diffuse), _specular(specular), _emissive(0,0,0), _shininess(shininess), _special(false)
 {
 }
 
 Material::~Material()
 {
+}
+
+void Material::update_if_special(vec4 location)
+{
+	if (!_special)
+		return;
+
+	_diffuse = location.to_vec3_divide_by_w();
+	_ambient = _diffuse * 0.2f;
+	_specular = _diffuse;
+	_emissive = vec3(0, 0, 0);
 }
 
 void Material::load_csv()
@@ -46,6 +58,13 @@ void Material::load_csv()
 			vec3(specular_r, specular_g, specular_b),
 			shininess);
 	}
+}
+
+MaterialPtr Material::get_special()
+{
+	MaterialPtr special = get_default();
+	special->_special = true;
+	return special;
 }
 
 MaterialPtr Material::get_default()

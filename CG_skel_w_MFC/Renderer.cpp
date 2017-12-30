@@ -474,6 +474,7 @@ vec3 Renderer::get_lighting_for_point(vec4 point, const vec3& N, const mat4& mod
 {
 	vec3 result(0, 0, 0);
 	point = view * model * point;
+	_material->update_if_special(point);
 
 	for (auto lighto : _lights)
 	{
@@ -509,7 +510,7 @@ void Renderer::setup_flat_lighting(const Face& face, const mat4& model, const ma
 	vec4 vector1 = (view * model) * (face.point2 - face.point1);
 	vec4 vector2 = (view * model) * (face.point3 - face.point2);
 	vec4 center_of_triangle =  (face.point1 + face.point2 + face.point3) / 3;
-
+	_material->update_if_special(center_of_triangle);
 	vec3 N = normalize(cross(vector1, vector2));
 	vec3 lighting = get_lighting_for_point(center_of_triangle, N, model, view);
 	set_color(lighting.x, lighting.y, lighting.z);
