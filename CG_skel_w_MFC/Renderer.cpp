@@ -14,7 +14,7 @@
 
 Renderer::Renderer(int width, int height) :
 	_buffer(NULL), _width(width), _height(height), _r(1.0), _g(1.0), _b(1.0), _rotating_color(1), 
-	_material(Material::get_default()), _fog_enabled(false), _supersampling(false)
+	_material(Material::get_default()), _fog_enabled(false), _supersampling(false), _blur(false)
 {
 	InitOpenGLRendering();
 	set_window_size(width,height);
@@ -595,35 +595,73 @@ void Renderer::CreateOpenGLBuffer()
 	}
 }
 
+float* Renderer::supersampling()
+{
+	float* buffer = new float[3 * _width * _height / 4];
+
+	for (int x = 0; x<_width / 2; x++)
+	{
+		for (int y = 0; y<_height / 2; y++)
+		{
+			for (int c = 0; c<3; c++)
+			{
+				buffer[INDEX((_width / 2), x, y, c)] = (_buffer[INDEX(_width, x * 2, y * 2, c)] +
+					_buffer[INDEX(_width, x * 2 + 1, y * 2, c)] +
+					_buffer[INDEX(_width, x * 2 + 1, y * 2 + 1, c)] +
+					_buffer[INDEX(_width, x * 2, y * 2 + 1, c)]) / 4.0f;
+			}
+		}
+	}
+
+	return buffer;
+}
+
+void Renderer::blur(float* buffer, int width, int height)
+{
+	for (int x = 1; x < width - 1; x++)
+	{
+		for (int y = 1; y < height - 1; y++)
+		{
+			for (int c = 0; c<3; c++)
+			{
+				buffer[INDEX((width), x, y, c)] = (
+					// first column
+					buffer[INDEX(width, x - 1, y - 1, c)] +
+					buffer[INDEX(width, x - 1, y - 0, c)] + 
+					buffer[INDEX(width, x - 1, y + 1, c)] + 
+					// second column
+					buffer[INDEX(width, x - 0, y - 1, c)] +
+					buffer[INDEX(width, x - 0, y - 0, c)] +
+					buffer[INDEX(width, x - 0, y + 1, c)] +
+					// third column
+					buffer[INDEX(width, x + 1, y - 1, c)] +
+					buffer[INDEX(width, x + 1, y - 0, c)] +
+					buffer[INDEX(width, x + 1, y + 1, c)]
+					) / 9.0f;
+			}
+		}
+	}
+}
 void Renderer::swap_buffers()
 {
 	float* buffer;
 	int width, height;
 	if (_supersampling)
 	{
-		buffer = new float[3 * _width * _height / 4];
+		buffer = supersampling();
 		width = _width / 2;
 		height = _height / 2;
-		for (int x=0; x<_width / 2; x++)
-		{
-			for(int y=0; y<_height / 2; y++)
-			{
-				for (int c=0; c<3; c++)
-				{
-					// TODO: why do we divide by 2.0f and not 4.0f?
-					buffer[INDEX((_width / 2), x, y, c)] = (_buffer[INDEX(_width, x*2, y*2, c)] + 
-														    _buffer[INDEX(_width, x*2 + 1, y*2, c)] + 
-														    _buffer[INDEX(_width, x*2 + 1, y*2 + 1, c)] + 
-														    _buffer[INDEX(_width, x*2, y*2 + 1, c)]) / 4.0f;
-				}
-			}
-		}
 	}
 	else
 	{
 		buffer = _buffer;
 		width = _width;
 		height = _height;
+	}
+
+	if (_blur)
+	{
+		blur(buffer, width, height);
 	}
 
 	int a = glGetError();

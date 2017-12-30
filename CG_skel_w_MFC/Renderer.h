@@ -36,6 +36,8 @@ class Renderer
 	GLuint gScreenTex;
 	GLuint gScreenVtc;
 	void CreateOpenGLBuffer();
+	float* supersampling();
+	static void blur(float* buffer, int width, int height);
 	void InitOpenGLRendering();
 	//////////////////////////////
 
@@ -77,6 +79,6 @@ public:
 	float get_aspect_ratio();
 
 	bool _fog_enabled;
-	bool _supersampling;
+	bool _supersampling, _blur;
 	int _width, _height;
 };

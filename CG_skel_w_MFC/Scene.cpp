@@ -339,6 +339,9 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		_renderer->_supersampling = !_renderer->_supersampling;
 		_renderer->set_window_size(_renderer->_width, _renderer->_height);
 		break;
+	case 'a':
+		_renderer->_blur = !_renderer->_blur;
+		break;
 
 	case 't':
 		set_operation_mode(TRANSLATE_MODE);
