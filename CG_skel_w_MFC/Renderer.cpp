@@ -497,6 +497,7 @@ vec3 Renderer::get_lighting_for_point(vec4 point, const vec3& N, const mat4& mod
 			calculate_color(2, lighto->_material, diffuse_modifier, specular_modifier));
 	}
 
+	result += _material->_emissive;
 	result.x = min(1, result.x);
 	result.y = min(1, result.y);
 	result.z = min(1, result.z);

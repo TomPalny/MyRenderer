@@ -7,12 +7,12 @@
 
 std::unordered_map<std::string, MaterialPtr> Material::_csv_materials;
 
-Material::Material() : _name("Default"), _ambient(0.5, 0.5, 0.5), _diffuse(1.0, 1.0, 1.0), _specular(0.1, 0.1, 0.1), _shininess(5)
+Material::Material() : _name("Default"), _ambient(0.5, 0.5, 0.5), _diffuse(1.0, 1.0, 1.0), _specular(0.1, 0.1, 0.1), _emissive(0, 0, 0), _shininess(5)
 {	
 }
 
 Material::Material(std::string name, vec3 ambient, vec3 diffuse, vec3 specular, float shininess) :
-	_name(name), _ambient(ambient), _diffuse(diffuse), _specular(specular), _shininess(shininess)
+	_name(name), _ambient(ambient), _diffuse(diffuse), _specular(specular), _emissive(0,0,0), _shininess(shininess)
 {
 }
 

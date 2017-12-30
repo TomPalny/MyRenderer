@@ -33,6 +33,7 @@ BEGIN_MESSAGE_MAP(MFCMaterialDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_AMBIENT, &MFCMaterialDlg::OnBnClickedAmbient)
 	ON_BN_CLICKED(IDC_DIFFUSE, &MFCMaterialDlg::OnBnClickedDiffuse)
 	ON_BN_CLICKED(IDC_SPECULAR, &MFCMaterialDlg::OnBnClickedSpecular)
+	ON_BN_CLICKED(IDC_EMISSIVE, &MFCMaterialDlg::OnBnClickedEmissive)
 END_MESSAGE_MAP()
 
 
@@ -74,9 +75,11 @@ void MFCMaterialDlg::update_colors()
 	auto a = m_material->_ambient;
 	auto d = m_material->_diffuse;
 	auto s = m_material->_specular;
+	auto e = m_material->_emissive;
 	m_ambient.SetColor(RGB(a.x * 255, a.y * 255, a.z * 255));
 	m_diffuse.SetColor(RGB(d.x * 255, d.y * 255, d.z * 255));
 	m_specular.SetColor(RGB(s.x * 255, s.y * 255, s.z * 255));
+	m_emissive.SetColor(RGB(e.x * 255, e.y * 255, e.z * 255));
 }
 
 void MFCMaterialDlg::OnColorChosenFromList()
@@ -109,7 +112,10 @@ void MFCMaterialDlg::UpdateMaterialAccordingToGui()
 	m_material->_specular.y = GetGValue(s) / 255.0f;
 	m_material->_specular.z = GetBValue(s) / 255.0f;
 
-	// TODO: emissive
+	COLORREF e = m_emissive.GetColor();
+	m_material->_emissive.x = GetRValue(e) / 255.0f;
+	m_material->_emissive.y = GetGValue(e) / 255.0f;
+	m_material->_emissive.z = GetBValue(e) / 255.0f;
 }
 
 void MFCMaterialDlg::OnBnClickedAmbient()
@@ -123,6 +129,12 @@ void MFCMaterialDlg::OnBnClickedDiffuse()
 }
 
 void MFCMaterialDlg::OnBnClickedSpecular()
+{
+	UpdateMaterialAccordingToGui();
+}
+
+
+void MFCMaterialDlg::OnBnClickedEmissive()
 {
 	UpdateMaterialAccordingToGui();
 }

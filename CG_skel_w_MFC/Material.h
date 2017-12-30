@@ -24,6 +24,7 @@ public:
 	vec3 _ambient;
 	vec3 _diffuse;
 	vec3 _specular;
+	vec3 _emissive;
 	float _shininess;
 
 private:

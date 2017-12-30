@@ -38,4 +38,5 @@ public:
 	afx_msg void UpdateMaterialAccordingToGui();
 	void OnBnClickedDiffuse();
 	afx_msg void OnBnClickedSpecular();
+	afx_msg void OnBnClickedEmissive();
 };
