@@ -9,12 +9,12 @@
 #include "Light.h"
 #include "Material.h"
 
-#define INDEX(width,x,y,c) ((x+y*width)*3+c)
-#define ZINDEX(width,x,y) (x+y*width)
+#define INDEX(width,x,y,c) (((x)+(y)*(width))*3+(c))
+#define ZINDEX(width,x,y) ((x)+(y)*(width))
 
 Renderer::Renderer(int width, int height) :
 	_buffer(NULL), _width(width), _height(height), _r(1.0), _g(1.0), _b(1.0), _rotating_color(1), 
-	_material(Material::get_default()), _fog_enabled(false)
+	_material(Material::get_default()), _fog_enabled(false), _supersampling(false)
 {
 	InitOpenGLRendering();
 	set_window_size(width,height);
@@ -30,6 +30,12 @@ void Renderer::set_window_size(int width, int height)
 	{
 		delete _buffer;
 		delete _zbuffer;
+	}
+
+	if (_supersampling)
+	{
+		width *= 2;
+		height *= 2;
 	}
 
 	_width=width;
@@ -577,18 +583,55 @@ void Renderer::CreateOpenGLBuffer()
 {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gScreenTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, _width, _height, 0, GL_RGB, GL_FLOAT, NULL);
-	glViewport(0, 0, _width, _height);
+	if (_supersampling)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, _width / 2, _height / 2, 0, GL_RGB, GL_FLOAT, NULL);
+		glViewport(0, 0, _width / 2, _height / 2);
+	}
+	else
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, _width, _height, 0, GL_RGB, GL_FLOAT, NULL);
+		glViewport(0, 0, _width, _height);
+	}
 }
 
 void Renderer::swap_buffers()
 {
+	float* buffer;
+	int width, height;
+	if (_supersampling)
+	{
+		buffer = new float[3 * _width * _height / 4];
+		width = _width / 2;
+		height = _height / 2;
+		for (int x=0; x<_width / 2; x++)
+		{
+			for(int y=0; y<_height / 2; y++)
+			{
+				for (int c=0; c<3; c++)
+				{
+					// TODO: why do we divide by 2.0f and not 4.0f?
+					buffer[INDEX((_width / 2), x, y, c)] = (_buffer[INDEX(_width, x*2, y*2, c)] + 
+														    _buffer[INDEX(_width, x*2 + 1, y*2, c)] + 
+														    _buffer[INDEX(_width, x*2 + 1, y*2 + 1, c)] + 
+														    _buffer[INDEX(_width, x*2, y*2 + 1, c)]) / 4.0f;
+				}
+			}
+		}
+	}
+	else
+	{
+		buffer = _buffer;
+		width = _width;
+		height = _height;
+	}
+
 	int a = glGetError();
 	glActiveTexture(GL_TEXTURE0);
 	a = glGetError();
 	glBindTexture(GL_TEXTURE_2D, gScreenTex);
 	a = glGetError();
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_RGB, GL_FLOAT, _buffer);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_FLOAT, buffer);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	a = glGetError();
 
@@ -598,4 +641,9 @@ void Renderer::swap_buffers()
 	a = glGetError();
 	glutSwapBuffers();
 	a = glGetError();
+
+	if (_supersampling)
+	{
+		delete buffer;
+	}
 }

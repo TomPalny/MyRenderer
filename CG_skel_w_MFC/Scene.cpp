@@ -323,12 +323,23 @@ void Scene::keyboard(unsigned char key, int x, int y)
 	case 's':
 		set_operation_mode(SCALE_MODE);
 		break;
+	// needs better shortcuts
 	case 'z':
 		_active_model->_material->_special = !_active_model->_material->_special;
 		break;
 	case 'x':
 		_renderer->_fog_enabled = !_renderer->_fog_enabled;
 		break;
+	case 'c':
+		if (_renderer->_supersampling)
+		{
+			_renderer->_width /= 2;
+			_renderer->_height /= 2;
+		}
+		_renderer->_supersampling = !_renderer->_supersampling;
+		_renderer->set_window_size(_renderer->_width, _renderer->_height);
+		break;
+
 	case 't':
 		set_operation_mode(TRANSLATE_MODE);
 		break;

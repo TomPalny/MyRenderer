@@ -15,7 +15,6 @@ class Renderer
 {
 	float *_buffer; // 3*width*height
 	float *_zbuffer; // width*height
-	int _width, _height;
 	float _r, _g, _b; // TODO: remove this?
 	MaterialPtr _material;
 	int _rotating_color; // used to assigned static colors to faces
@@ -78,4 +77,6 @@ public:
 	float get_aspect_ratio();
 
 	bool _fog_enabled;
+	bool _supersampling;
+	int _width, _height;
 };
