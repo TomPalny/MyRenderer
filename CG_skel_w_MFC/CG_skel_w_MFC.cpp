@@ -4,23 +4,12 @@
 #include "stdafx.h"
 #include "CG_skel_w_MFC.h"
 
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-
-// The one and only application object
-
-#include "GL/glew.h"
-#include "GL/freeglut.h"
-#include "GL/freeglut_ext.h"
-#include "vec.h"
-#include "mat.h"
-#include "InitShader.h"
 #include "Scene.h"
 #include "Renderer.h"
-#include <string>
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
@@ -155,16 +144,14 @@ void init_menu()
 
 int my_main( int argc, char **argv )
 {
-	//----------------------------------------------------------------------------
-	// Initialize window
+	// TODO: handle this in the renderer
 	glutInit( &argc, argv );
-	glutInitDisplayMode( GLUT_RGBA| GLUT_DOUBLE);
+	glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize( 512, 512 );
 	glutInitContextVersion( 3, 2 );
 	glutInitContextProfile( GLUT_CORE_PROFILE );
 	glutCreateWindow( "CG" );
 	glewExperimental = GL_TRUE;
-	glewInit();
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
 	{
@@ -173,7 +160,6 @@ int my_main( int argc, char **argv )
 		/*		...*/
 	}
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
-	
 	renderer = new Renderer(512,512);
 	scene = new Scene(renderer);
 	//----------------------------------------------------------------------------

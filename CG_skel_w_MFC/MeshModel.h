@@ -10,10 +10,8 @@ using namespace std;
 
 class MeshModel : public Model
 {
-protected :
-	MeshModel() {}
-	
-	void load_file(string filename);
+public:
+	static std::vector<Face> load_faces(string filename);
 
 public:
 	MeshModel(string filename);

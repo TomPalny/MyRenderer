@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "MeshVAO.h"
+#include "LinesVAO.h"
 
 using namespace std;
 
@@ -68,75 +70,60 @@ vec2 vec2fFromStream(std::istream & aStream)
 	return vec2(x, y);
 }
 
-MeshModel::MeshModel(const string filename)
+MeshModel::MeshModel(const string filename) : Model()
 {
-	load_file(filename);
+	auto faces = load_faces(filename);
+	_vaos[VAO_MESH] = std::make_shared<MeshVAO>(faces, ShaderProgram::get_default_program());
+	if (faces.size() > 0)
+	{
+		_vaos[VAO_BOUNDING_BOX] = LinesVAO::create_bounding_box_vao(faces);
+	}
 }
 
 MeshModel::~MeshModel(void)
 {
 }
 
-void MeshModel::load_file(string fileName)
+std::vector<Face> MeshModel::load_faces(string fileName)
 {
 	ifstream ifile(fileName.c_str());
 	vector<FaceIdcs> face_ids;
 	vector<vec4> vertices;
 	vector<vec4> normal_vertices;
-	// while not end of file
-	while (!ifile.eof())
+
+
+	while (!ifile.eof() && !ifile.fail())
 	{
-		// get line
-		string curLine;
-		getline(ifile, curLine);
+		string cur_line;
+		getline(ifile, cur_line);
 
 		// read type of the line
-		istringstream issLine(curLine);
-		string lineType;
-
-		issLine >> std::ws >> lineType;
+		istringstream line_parser(cur_line);
+		string line_type;
+		line_parser >> std::ws >> line_type;
 
 		// based on the type parse data
-		if (lineType == "v") 
-			vertices.push_back(vec4fFromVec3Stream(issLine));
-		else if (lineType == "vn")
+		if (line_type == "v") 
+			vertices.push_back(vec4fFromVec3Stream(line_parser));
+		else if (line_type == "vn")
 		{
-			auto normal = vec4fFromVec3Stream(issLine);
+			auto normal = vec4fFromVec3Stream(line_parser);
 			normal.w = 0;
 			normal_vertices.push_back(normal);
 		}
-		else if (lineType == "f") 
-			face_ids.push_back(issLine);
-		else if (lineType == "#" || lineType == "")
+		else if (line_type == "f") 
+			face_ids.push_back(line_parser);
+		else if (line_type == "#" || line_type == "")
 		{
 			// comment / empty line / vn
 		}
 		else
 		{
-			cout<< "Found unknown line Type \"" << lineType << "\"";
+			cout << "Found unknown line Type \"" << line_type << "\"";
 		}
 	}
-	//Vertex_positions is an array of vec3. Every three elements define a triangle in 3D.
-	//If the face part of the obj is
-	//f 1 2 3
-	//f 1 3 4
-	//Then vertex_positions should contain:
-	//vertex_positions={v1,v2,v3,v1,v3,v4}
 
-	_max_x = _max_y = _max_z = _min_x = _min_y = _min_z = vertices[0].x;
-	// find the max and min values of x,y,z for use later with drawing of the bounding box;
-	for (const auto vertice : vertices)
-	{
-		if (vertice.x > _max_x) _max_x = vertice.x;
-		if (vertice.y > _max_y) _max_y = vertice.y;
-		if (vertice.z > _max_z) _max_z = vertice.z;
-		if (vertice.x < _min_x) _min_x = vertice.x;
-		if (vertice.y < _min_y) _min_y = vertice.y;
-		if (vertice.z < _min_z) _min_z = vertice.z;
-	}
-
-	create_bounding_box();
-	_faces->clear();
+	std::vector<Face> faces;
 	// iterate through all stored faces and create triangles
 	for (const auto face : face_ids)
 	{
@@ -147,14 +134,15 @@ void MeshModel::load_file(string fileName)
 		// if some of the vertices don't have a normal than disable normals for this face
 		if (face.vn[0] == 0 || face.vn[1] == 0 || face.vn[2] == 0)
 		{
-			_faces->push_back(Face(point1, point2, point3));
+			faces.push_back(Face(point1, point2, point3));
 		}
 		else
 		{
 			const auto normal1 = normal_vertices[face.vn[0] - 1];
 			const auto normal2 = normal_vertices[face.vn[1] - 1];
 			const auto normal3 = normal_vertices[face.vn[2] - 1];
-			_faces->push_back(Face(point1, point2, point3, normal1, normal2, normal3));
+			faces.push_back(Face(point1, point2, point3, normal1, normal2, normal3));
 		}
 	}
+	return faces;
 }

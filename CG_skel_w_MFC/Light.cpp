@@ -1,9 +1,12 @@
 #include "stdafx.h"
 #include "Light.h"
 #include "Scene.h"
+#include "LinesVAO.h"
 
-Light::Light()
+Light::Light() : Model()
 {
+	_vaos[VAO_MESH] = LinesVAO::create_star_vao();
+
 	light_type = POINT_LIGHT;
 
 	static int light_count = 0;

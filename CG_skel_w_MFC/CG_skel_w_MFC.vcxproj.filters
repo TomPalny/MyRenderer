@@ -21,9 +21,6 @@
     <ClCompile Include="CG_skel_w_MFC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InitShader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MeshModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -63,12 +60,24 @@
     <ClCompile Include="MFCSettingsDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ShaderProgram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VAO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshVAO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LinesVAO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CG_skel_w_MFC.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InitShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="mat.h">
@@ -126,6 +135,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MFCSettingsDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderProgram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VAO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshVAO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LinesVAO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

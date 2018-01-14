@@ -82,13 +82,6 @@ void Scene::change_material()
 
 void Scene::show_settings_window()
 {
-	MFCSettingsDlg dlg;
-	dlg.blur = _renderer->get_blur();
-	dlg.antialiasing = _renderer->get_antialiasing();
-	dlg.fog = _renderer->get_fog();
-	dlg.bloom = _renderer->get_bloom();
-	dlg.DoModal();
-	_renderer->update_settings(dlg.fog, dlg.antialiasing, dlg.blur, dlg.bloom);
 }
 
 void Scene::set_operation_mode(OperationMode mode)
@@ -132,6 +125,7 @@ void Scene::open_file()
 void Scene::load_model_at_center(Model* model, const string name)
 {
 	model->set_name(name);
+	//model->perform_operation(Scale(0.1, 0.1, 0.1), MODEL_TRANSFORM);
 	if (model->_bounding_box != nullptr)
 	{
 		model->_bounding_box->set_name(name);
@@ -211,7 +205,6 @@ void Scene::draw_status_string()
 	
 	ss << "FOVY=" << (int) _fovy;
 
-	_renderer->set_color(0, 1, 0);
 	_renderer->draw_string(ss.str().c_str(), 15, 15);
 }
 
@@ -226,11 +219,11 @@ void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 	_renderer->draw(model);
 	if(draw_bounding_box && model->get_type() == REGULAR_MODEL && model->_bounding_box != nullptr) 
 	{
-		_renderer->draw_model_wireframe(model->_bounding_box);
+		// TODO:
+		//_renderer->draw_model_wireframe(model->_bounding_box);
 	}
 
 	vec4 origin = _active_camera->get_projection_matrix() * _active_camera->get_view_matrix() * model->get_origin_in_world_coordinates();
-	_renderer->set_color(1, 0, 0);
 	_renderer->draw_letter(model->get_origin_sign(), origin);
 
 	Light* light = dynamic_cast<Light*>(model);
@@ -238,7 +231,8 @@ void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 	{
 		vec4 direction = _active_camera->get_projection_matrix() * _active_camera->get_view_matrix() * light->get_transforms() * vec4(1, 1, 1, 0) * 0.2f;
 		vec4 end = origin - direction;
-		_renderer->draw_line(origin, end);
+		// TODO: draw line in direction of light
+
 	}
 	/*
 	if (_normal_type == VERTEX_NORMALS)
@@ -247,7 +241,7 @@ void Scene::draw_one_model(Model* model, bool draw_bounding_box)
 	}*/
 	if (_normal_type == FACE_NORMALS)
 	{
-		_renderer->draw_face_normals(model);
+		// TODO:
 	}
 }
 
@@ -369,11 +363,11 @@ void Scene::keyboard(unsigned char key, int x, int y)
 
 mat4 Scene::get_operation_for_keyboard(int key, int x, int y)
 {
-	static const float LARGER_SCALE_FACTOR = 1.4;
-	static const float SMALLER_SCALE_FACTOR = 0.6;
-	static const float NO_SCALE = 1;
+	static const float LARGER_SCALE_FACTOR = 1.4f;
+	static const float SMALLER_SCALE_FACTOR = 0.6f;
+	static const float NO_SCALE = 1.0f;
 	float move_distance = 0.3f;
-	float theta = 0.1;
+	float theta = 0.1f;
 
 	// use "larger" transforms when shift is held
 	if (glutGetModifiers() & GLUT_ACTIVE_SHIFT)

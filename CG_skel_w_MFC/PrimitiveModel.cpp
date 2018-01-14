@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "PrimitiveModel.h"
 
-
-PrimitiveModel::PrimitiveModel()
+// TODO: just implement this by loading it from disk
+PrimitiveModel::PrimitiveModel(std::vector<Face> faces)
 {
 	_bounding_box = nullptr;
 }
@@ -28,8 +28,9 @@ PrimitiveModel* PrimitiveModel::create_pyramid(float center_x, float center_y, f
 	const vec4 point1(0.0, 0.6, 0.3, 1);
 	const vec4 point2(-0.3, -0.3, -0.15, 1);
 	const vec4 point3(0.3, -0.3,  -0.15, 1);
+	std::vector<Face> faces;
+	faces.push_back(Face(point1, point2, point3));
 
-	PrimitiveModel* model = new PrimitiveModel();
-	model->_faces->push_back(Face(point1, point2, point3));
+	PrimitiveModel* model = new PrimitiveModel(faces);
 	return model;
 }

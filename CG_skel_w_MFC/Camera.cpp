@@ -2,10 +2,17 @@
 #include "Camera.h"
 #include "Renderer.h"
 #include "RenderParameters.h"
+#include "MeshModel.h"
+#include "LinesVAO.h"
+#include "MeshVAO.h"
 
 Camera::Camera(int camera_id)
 {
 	_origin_sign = '0' + camera_id;
+	//auto faces = MeshModel::load_faces("c:\\Projects\\technion\\graphics\\code\\models\\pyramid.obj");
+	//_vaos[VAO_MESH] = std::make_shared<MeshVAO>(faces, ShaderProgram::get_lines_program());
+	_vaos[VAO_MESH] = LinesVAO::create_frustum_vao();
+	perform_operation(Scale(0.3f, 0.3f, 0.3f), MODEL_TRANSFORM);
 }
 
 

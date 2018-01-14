@@ -26,8 +26,10 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
 #include <iostream>
+#include <string>
 #include <afxcontrolbars.h>
 
-
-
-// TODO: reference additional headers your program requires here
+#include "GL/glew.h"
+#include "GL/freeglut.h"
+#include "GL/freeglut_ext.h"
+#include "vec.h"
