@@ -125,7 +125,6 @@ void Scene::open_file()
 void Scene::load_model_at_center(Model* model, const string name)
 {
 	model->set_name(name);
-	//model->perform_operation(Scale(0.1, 0.1, 0.1), MODEL_TRANSFORM);
 	if (model->_bounding_box != nullptr)
 	{
 		model->_bounding_box->set_name(name);
@@ -206,6 +205,7 @@ void Scene::draw_status_string()
 	ss << "FOVY=" << (int) _fovy;
 
 	_renderer->draw_string(ss.str().c_str(), 15, 15);
+	glutSetWindowTitle(ss.str().c_str());
 }
 
 void Scene::redraw_necessary()
