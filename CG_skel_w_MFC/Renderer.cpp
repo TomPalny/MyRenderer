@@ -34,13 +34,25 @@ void Renderer::set_window_size(int width, int height)
 
 void Renderer::draw(Model* model)
 {
-	auto total_transform = _camera->get_projection_matrix() * _camera->get_view_matrix() * model->get_transforms();
+	auto modelm = model->get_transforms();
+	auto view = _camera->get_view_matrix();
+	auto projection = _camera->get_projection_matrix();
 
 	for (auto kv : model->get_vaos())
 	{
 		auto vao = kv.second;
 		auto shader = vao->get_shader_program();
-		shader->set_uniform_attribute("modelView", total_transform);
+		shader->set_uniform_attribute("modelView", view * modelm);
+		shader->set_uniform_attribute("projection", projection);
+		shader->set_uniform_attribute("light.position", view * _lights[0]->get_origin_in_world_coordinates());
+		shader->set_uniform_attribute("light.ambient", vec4(_lights[0]->_material->_ambient));
+		shader->set_uniform_attribute("light.diffuse", vec4(_lights[0]->_material->_diffuse));
+		shader->set_uniform_attribute("light.specular", vec4(_lights[0]->_material->_specular));
+
+		shader->set_uniform_attribute("material.ambient", model->_material->_ambient);
+		shader->set_uniform_attribute("material.diffuse", model->_material->_diffuse);
+		shader->set_uniform_attribute("material.specular", model->_material->_specular);
+		shader->set_uniform_attribute("material.emissive", model->_material->_emissive);
 		vao->draw();
 	}
 }

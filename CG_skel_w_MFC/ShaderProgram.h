@@ -12,8 +12,9 @@ public:
 	~ShaderProgram();
 	void activate();
 
-	void set_uniform_attribute(std::string attribute_name, const mat4& mat4);
 	void set_vertex_attribute(std::string attribute_name, GLsizei stride, GLvoid* offset);
+	void set_uniform_attribute(std::string attribute_name, const vec4& vec);
+	void set_uniform_attribute(std::string attribute_name, const mat4& mat4);
 	static ShaderProgramPtr get_lines_program();
 	static ShaderProgramPtr get_default_program();
 

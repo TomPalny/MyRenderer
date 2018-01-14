@@ -1,6 +1,6 @@
 #version 150
 
-in vec4 fNormal;
+in vec3 fNormal;
 out vec4 fColor;
 
 void main()

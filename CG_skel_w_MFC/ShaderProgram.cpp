@@ -61,6 +61,23 @@ void ShaderProgram::set_vertex_attribute(std::string attribute_name, GLsizei str
 	glVertexAttribPointer(loc, FOUR_COMPONENTS, GL_FLOAT, DONT_NORMALIZE, stride, offset);
 }
 
+void ShaderProgram::set_uniform_attribute(std::string attribute_name, const vec4& vec)
+{
+	// I'm not sure why this is necessary but it is
+	activate();
+
+	GLuint loc = glGetUniformLocation(_program_id, attribute_name.c_str());
+	if (loc == -1)
+	{
+		//std::cout << "WARNING: No such uniform attribute: " << attribute_name << std::endl;
+		return;
+	}
+
+	static const GLsizei ONE_MATRIX = 1;
+	static const GLboolean TRANSPOSE_TRUE = GL_TRUE;
+	glUniform4f(loc, vec.x, vec.y, vec.z, vec.w);
+}
+
 void ShaderProgram::set_uniform_attribute(std::string attribute_name, const mat4& mat4)
 {
 	// I'm not sure why this is necessary but it is
@@ -69,8 +86,8 @@ void ShaderProgram::set_uniform_attribute(std::string attribute_name, const mat4
 	GLuint loc = glGetUniformLocation(_program_id, attribute_name.c_str());
 	if (loc == -1)
 	{
-		std::cout << "Error: Bad uniform attribute name '" << attribute_name << "'" << std::endl;
-		throw std::exception("Bad OpenGL uniform attribute");
+		//std::cout << "WARNING: No such uniform attribute: " << attribute_name << std::endl;
+		return;
 	}
 
 	GLfloat data[16] = { 0 };
