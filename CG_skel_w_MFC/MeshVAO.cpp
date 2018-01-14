@@ -36,7 +36,7 @@ MeshVAO::MeshVAO(std::vector<Face>& faces, ShaderProgramPtr shader) : VAO(shader
 
 	static const int ZERO_OFFSET = 0;
 	_shader->set_vertex_attribute("vPosition", BYTES_BETWEEN_ATTRIBUTES, (GLvoid*)ZERO_OFFSET);
-	_shader->set_vertex_attribute("vNormal", BYTES_BETWEEN_ATTRIBUTES, (GLvoid*)BYTES_BETWEEN_ATTRIBUTES);
+	_shader->set_vertex_attribute("vNormal", BYTES_BETWEEN_ATTRIBUTES, (GLvoid*)(BYTES_BETWEEN_ATTRIBUTES / 2));
 }
 
 void MeshVAO::draw()
