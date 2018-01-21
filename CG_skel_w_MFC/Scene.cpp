@@ -3,22 +3,27 @@
 #include "MeshModel.h"
 #include <string>
 #include "GL/freeglut.h"
-#include "PrimitiveModel.h"
 #include "Camera.h"
 #include <sstream>
 #include <filesystem>
 #include "MFCMaterialDlg.h"
 #include "MFCSettingsDlg.h"
+#include "MFCModelDlg.h"
+#include "MFCCameraDlg.h"
 
 using namespace std;
 
 // defined in CG_skel_w_MFC.cpp
 void init_menu();
 
-Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
-                                   _normal_type(NO_NORMALS), _operation_mode(TRANSLATE_MODE),
-                                   _transform_mode(WORLD_TRANSFORM), _projection_type(PERSPECTIVE_PROJECTION),
-                                   _fill_type((FillType)0)
+void timer_callback(int param)
+{
+	glutPostRedisplay();
+	glutTimerFunc(10, timer_callback, 0);
+}
+
+Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer), _operation_mode(TRANSLATE_MODE),
+                                   _transform_mode(WORLD_TRANSFORM), _projection_type(PERSPECTIVE_PROJECTION)
 {
 	// default view is from the front
 	auto front = new Camera(1);
@@ -27,7 +32,6 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 	front->look_at(vec3(0, 0, 0));
 	_cameras.push_back(front);
 	_models.push_back(front);
-	_bounding_boxes.push_back(false);
 
 	auto left = new Camera(2);
 	left->perform_operation(Translate(8, 1, 0), WORLD_TRANSFORM);
@@ -35,7 +39,6 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 	left->look_at(vec3(0, 0, 0));
 	_cameras.push_back(left);
 	_models.push_back(left);
-	_bounding_boxes.push_back(false);
 
 	auto top = new Camera(3);
 	top->perform_operation(Translate(1.5, 5, 0), WORLD_TRANSFORM);
@@ -43,20 +46,14 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer),
 	top->look_at(vec3(0, 0, 0));
 	_cameras.push_back(top);
 	_models.push_back(top);
-	_bounding_boxes.push_back(false);
 
 	_active_camera = front;
 
 	auto light1 = new Light();
 	light1->perform_operation(Translate(2, 3, 0), WORLD_TRANSFORM);
 	_models.push_back(light1);
-	_bounding_boxes.push_back(false);
-}
 
-void Scene::set_normals_type(NormalType normal_type)
-{
-	_normal_type = normal_type;
-	redraw_necessary();
+	glutTimerFunc(3000, timer_callback, 0);
 }
 
 void Scene::add_objects_to_menu()
@@ -68,7 +65,7 @@ void Scene::add_objects_to_menu()
 	}
 }
 
-void Scene::change_material()
+void Scene::show_materials_dialog()
 {
 	if (_active_model == nullptr)
 	{
@@ -80,8 +77,20 @@ void Scene::change_material()
 	_active_model->_material = dlg.m_material;
 }
 
-void Scene::show_settings_window()
+void Scene::show_settings_dialog()
 {
+}
+
+void Scene::show_model_dialog()
+{
+	MFCModelDlg dlg(_active_model);
+	dlg.DoModal();
+}
+
+void Scene::show_camera_dialog()
+{
+	MFCCameraDlg dlg(_active_camera);
+	dlg.DoModal();
 }
 
 void Scene::set_operation_mode(OperationMode mode)
@@ -97,7 +106,7 @@ void Scene::switch_camera(unsigned int number)
 
 void Scene::add_pyramid_model()
 {
-	const auto model = PrimitiveModel::create_pyramid(0.0f, 0.0f, 0.0f);
+	const auto model = MeshModel::create_pyramid_model();
 	load_model_at_center(model, "Pyramid");
 }
 
@@ -105,11 +114,13 @@ void Scene::add_light()
 {
 	const auto light = new Light();
 	load_model_at_center(light, "Doesn't Matter");
+	// TODO: don't we need to add this to _lights?
 }
 
 void Scene::open_file()
 {
 	CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
+	dlg.m_ofn.lpstrInitialDir = "c:\\Projects\\technion\\graphics\\code\\examples\\";
 	if (dlg.DoModal() == IDOK)
 	{
 		std::string path(static_cast<LPCTSTR>(dlg.GetPathName()));
@@ -125,13 +136,8 @@ void Scene::open_file()
 void Scene::load_model_at_center(Model* model, const string name)
 {
 	model->set_name(name);
-	if (model->_bounding_box != nullptr)
-	{
-		model->_bounding_box->set_name(name);
-	}
 	_active_model = model;
 	_models.push_back(_active_model);
-	_bounding_boxes.push_back(false);
 	
 	init_menu();
 	redraw_necessary();
@@ -177,72 +183,12 @@ void Scene::draw_status_string()
 		ss << "ORTHOGRAPHIC // ";
 	}
 
-	if (_fill_type == FILL_WIREFRAME)
-	{
-		ss << "WIREFRAME // ";
-	}
-	else if (_fill_type == FILL_ZBUFFER)
-	{
-		ss << "ZBUFFER // ";
-	}
-	else if (_fill_type == FILL_GOURAUD)
-	{
-		ss << "GOURAUD // ";
-	}
-	else if (_fill_type == FILL_PHONG)
-	{
-		ss << "PHONG // ";
-	}
-	else if (_fill_type == FILL_RANDOM_COLORS)
-	{
-		ss << "RANDOM // ";
-	}
-	else if (_fill_type == FILL_FLAT)
-	{
-		ss << "FLAT // ";
-	}
-	
-	ss << "FOVY=" << (int) _fovy;
-
-	_renderer->draw_string(ss.str().c_str(), 15, 15);
 	glutSetWindowTitle(ss.str().c_str());
 }
 
 void Scene::redraw_necessary()
 {
 	glutPostRedisplay();
-}
-
-void Scene::draw_one_model(Model* model, bool draw_bounding_box)
-{
-	_renderer->set_material(model->_material);
-	_renderer->draw(model);
-	if(draw_bounding_box && model->get_type() == REGULAR_MODEL && model->_bounding_box != nullptr) 
-	{
-		// TODO:
-		//_renderer->draw_model_wireframe(model->_bounding_box);
-	}
-
-	vec4 origin = _active_camera->get_projection_matrix() * _active_camera->get_view_matrix() * model->get_origin_in_world_coordinates();
-	_renderer->draw_letter(model->get_origin_sign(), origin);
-
-	Light* light = dynamic_cast<Light*>(model);
-	if (light != nullptr && light->light_type == DIRECTIONAL_LIGHT)
-	{
-		vec4 direction = _active_camera->get_projection_matrix() * _active_camera->get_view_matrix() * light->get_transforms() * vec4(1, 1, 1, 0) * 0.2f;
-		vec4 end = origin - direction;
-		// TODO: draw line in direction of light
-
-	}
-	/*
-	if (_normal_type == VERTEX_NORMALS)
-	{
-		model->draw_vertex_normals(_camera_mode);
-	}*/
-	if (_normal_type == FACE_NORMALS)
-	{
-		// TODO:
-	}
 }
 
 void Scene::draw()
@@ -257,14 +203,15 @@ void Scene::draw()
 		}
 	}
 	
-	_active_camera->set_camera_parameters(_projection_type, _renderer->get_aspect_ratio(), _fovy);
+	_active_camera->set_projection_type(_projection_type);
+	_active_camera->set_aspect_ratio(_renderer->get_aspect_ratio());
 	_renderer->clear_screen();
-	_renderer->set_parameters(_active_camera, _fill_type, lights); // TODO: should we pass references here?
+	_renderer->set_parameters(_active_camera, lights); // TODO: should we pass references here?
 
 	int i = 0;
 	for(auto model : _models )
 	{
-		draw_one_model(model, _bounding_boxes[i++]);
+		_renderer->draw(model);
 	}
 
 	draw_status_string();
@@ -313,49 +260,44 @@ void Scene::keyboard(unsigned char key, int x, int y)
 	case '+':
 		add_light();
 		break;
-	case 'v':
-		_normal_type = (NormalType) ((_normal_type + 1) % NUMBER_OF_NORMAL_TYPES);
-		break;
-	case 'f':
-	case 'F':
-		_fill_type = (FillType) ((_fill_type + direction) % NUMBER_OF_FILL_TYPES);
-		break;
-	case 'm':
-		change_material();
-		break;
 	case 'r':
 		set_operation_mode(ROTATE_MODE);
 		break;
 	case 's':
 		set_operation_mode(SCALE_MODE);
 		break;
-
-	case 'z':
-		show_settings_window();
-		break;
-
 	case 't':
 		set_operation_mode(TRANSLATE_MODE);
 		break;
-	case '=':
-		_fovy += 3;
-		break;
-	case '-':
-		_fovy -= 3;
-		break;
+
 	case '\t':
 		// switch between models
 		_active_model = _models[index];
-		break;
-	case 'b':
-		_bounding_box_index = index;
-		_bounding_boxes[_bounding_box_index] = !_bounding_boxes[_bounding_box_index];
 		break;
 	case '`':
 		_projection_type = (ProjectionType)((_projection_type + 1) % NUMBER_OF_PROJECTION_TYPES);
 		break;
 	case 'l':
 		_active_camera->look_at(_active_model->get_origin_in_world_coordinates().to_vec3_divide_by_w());
+		break;
+	case 'q':
+		for(auto kv : _active_model->get_vaos())
+		{
+			auto vao = kv.second;
+			vao->reload_shader();
+		}
+		break;
+	case 'c':
+		show_camera_dialog();
+		break;
+	case 'm':
+		show_materials_dialog();
+		break;
+	case 'z':
+		show_settings_dialog();
+		break;
+	case 'x':
+		show_model_dialog();
 		break;
 	}
 	redraw_necessary();
@@ -475,11 +417,6 @@ void Scene::keyboard_special(int key, int x, int y)
 			inverse_operation = move * inverse_operation * move_back;
 		}
 		camera->apply_view_transformation(inverse_operation);
-	}
-	// for models that aren't the camera, apply the transform to their bounding box
-	else if (_active_model->_bounding_box != nullptr)
-	{
-		_active_model->_bounding_box->perform_operation(operation, _transform_mode);
 	}
 	redraw_necessary();
 }

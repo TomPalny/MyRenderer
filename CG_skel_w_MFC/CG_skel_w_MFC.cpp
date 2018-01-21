@@ -111,11 +111,6 @@ void objects_menu_callback(const int id)
 	scene->switch_active_model(id);
 }
 
-void normals_menu_callback(const int normal_type)
-{
-	scene->set_normals_type((NormalType)normal_type);
-}
-
 void init_menu()
 {
 	// TODO: do we leak the old menu every time that this is called?
@@ -126,15 +121,9 @@ void init_menu()
 	const int objects_menu = glutCreateMenu(objects_menu_callback);
 	scene->add_objects_to_menu();
 
-	const int normals_menu = glutCreateMenu(normals_menu_callback);
-	glutAddMenuEntry("None", NO_NORMALS);
-	glutAddMenuEntry("Vertex", VERTEX_NORMALS);
-	glutAddMenuEntry("Face", FACE_NORMALS);
-
 	glutCreateMenu(menu_callback);
 	glutAddSubMenu("File",file_menu);
 	glutAddSubMenu("Object To Control", objects_menu);
-	glutAddSubMenu("Normals", normals_menu);
 	glutAddMenuEntry("Translate", TRANSLATE_MODEL);
 	glutAddMenuEntry("Scale", SCALE_MODEL);
 	glutAddMenuEntry("Rotate", ROTATE_MODEL);
@@ -146,7 +135,7 @@ int my_main( int argc, char **argv )
 {
 	// TODO: handle this in the renderer
 	glutInit( &argc, argv );
-	glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+	glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
 	glutInitWindowSize( 512, 512 );
 	glutInitContextVersion( 3, 2 );
 	glutInitContextProfile( GLUT_CORE_PROFILE );

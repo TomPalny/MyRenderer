@@ -10,10 +10,13 @@ class Shader
 public:
 	Shader(const std::string& filename, GLenum type);
 	~Shader();
-	GLuint get_shader_id();
+	GLuint get_id() const;
+	std::string get_name() const;
+	static const std::string SHADER_PATH;
 
 private:
 	GLuint _id;
+	std::string _name;
 	static std::string read_shader_source(const std::string& filename);
 
 	Shader(const Shader& other) = delete;

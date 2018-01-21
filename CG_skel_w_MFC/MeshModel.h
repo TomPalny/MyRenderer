@@ -12,6 +12,7 @@ class MeshModel : public Model
 {
 public:
 	static std::vector<Face> load_faces(string filename);
+	static Model* create_pyramid_model();
 
 public:
 	MeshModel(string filename);

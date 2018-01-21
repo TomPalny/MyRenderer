@@ -7,18 +7,18 @@
 #include "Camera.h"
 #include "Light.h"
 #include "Material.h"
+#include "Texture.h"
 
 class Material;
 using namespace std;
 
 class Renderer
 {
-	MaterialPtr _material;
 	Camera* _camera;
-	FillType _fill_type;
 	vector<Light*> _lights;
 	int _width, _height;
 	GLuint _shader_program;
+	float _animation_param;
 
 public:
 	Renderer(int width, int height);
@@ -26,12 +26,9 @@ public:
 
 	void swap_buffers();
 	void clear_screen();
-	void set_material(MaterialPtr material);
-	void set_parameters(Camera* camera, FillType fill_type, std::vector<Light*> lights);
+	void set_parameters(Camera* camera, std::vector<Light*> lights);
 	void set_window_size(int width, int height);
-	void draw_string(const char* string, int left, int bottom);
-	void draw_letter(char letter, int left, int bottom);
-	void draw_letter(char letter, vec4 point);
 	void draw(Model* model);
+	void draw_vao(Model* model, VAOType type, const shared_ptr<VAO>& vao);
 	float get_aspect_ratio();
 };

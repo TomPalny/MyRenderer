@@ -3,40 +3,61 @@
 #include <vector>
 #include "Face.h"
 
+static const int FLOATS_FOR_POSITION = 4;
+static const int FLOATS_FOR_NORMAL = 4;
+static const int FLOATS_FOR_UV = 2;
+static const int TOTAL_NUM_FLOATS = FLOATS_FOR_POSITION + FLOATS_FOR_NORMAL + FLOATS_FOR_UV;
+static const int BYTES_BETWEEN_ATTRIBUTES = sizeof(float) * TOTAL_NUM_FLOATS;
 
 MeshVAO::MeshVAO(std::vector<Face>& faces, ShaderProgramPtr shader) : VAO(shader)
 {
 	std::vector<GLfloat> data;
-	auto add_point = [&](auto point)
+	auto add_vec4 = [&](auto point)
 	{
 		data.push_back(point.x);
 		data.push_back(point.y);
 		data.push_back(point.z);
 		data.push_back(point.w);
 	};
-
+	auto add_vec2 = [&](auto point)
+	{
+		data.push_back(point.x);
+		data.push_back(point.y);
+	};
 	for (auto& face : faces)
 	{
-		add_point(face.point1);
-		add_point(face.normal1);
-		add_point(face.point2);
-		add_point(face.normal2);
-		add_point(face.point3);
-		add_point(face.normal3);
+		add_vec4(face.point1);
+		add_vec4(face.normal1);
+		add_vec2(face.uv1);
+		add_vec4(face.point2);
+		add_vec4(face.normal2);
+		add_vec2(face.uv2);
+		add_vec4(face.point3);
+		add_vec4(face.normal3);
+		add_vec2(face.uv3);
 	}
 
-	static const int DIMENSIONS_PER_ATTRIBUTE = 4;
-	static const int ATTRIBUTES_PER_VERTEX = 2;
-	static const int BYTES_BETWEEN_ATTRIBUTES = sizeof(float) * DIMENSIONS_PER_ATTRIBUTE * ATTRIBUTES_PER_VERTEX;
-	_num_vertices = data.size() / (DIMENSIONS_PER_ATTRIBUTE * ATTRIBUTES_PER_VERTEX);
+	_num_vertices = data.size() / TOTAL_NUM_FLOATS;
+	std::cout << "_num_vertices: " << _num_vertices << std::endl;
 
 	glBindVertexArray(_vao_id);
 	glBindBuffer(GL_ARRAY_BUFFER, _buffer_id);
 	glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
 
+	MeshVAO::setup_for_shader();
+}
+
+void MeshVAO::setup_for_shader()
+{
+	glBindVertexArray(_vao_id);
+	glBindBuffer(GL_ARRAY_BUFFER, _buffer_id);
+
 	static const int ZERO_OFFSET = 0;
-	_shader->set_vertex_attribute("vPosition", BYTES_BETWEEN_ATTRIBUTES, (GLvoid*)ZERO_OFFSET);
-	_shader->set_vertex_attribute("vNormal", BYTES_BETWEEN_ATTRIBUTES, (GLvoid*)(BYTES_BETWEEN_ATTRIBUTES / 2));
+	static const int FOUR_COMPONENTS = 4;
+	static const int TWO_COMPONENTS = 2;
+	_shader->set_vertex_attribute("vPosition", FOUR_COMPONENTS, BYTES_BETWEEN_ATTRIBUTES, (GLvoid*)ZERO_OFFSET);
+	_shader->set_vertex_attribute("vNormal", FOUR_COMPONENTS, BYTES_BETWEEN_ATTRIBUTES, (GLvoid*)(FLOATS_FOR_POSITION * sizeof(float)));
+	_shader->set_vertex_attribute("vUV", TWO_COMPONENTS, BYTES_BETWEEN_ATTRIBUTES, (GLvoid*)((FLOATS_FOR_POSITION + FLOATS_FOR_NORMAL) * sizeof(float)));
 }
 
 void MeshVAO::draw()
@@ -48,4 +69,19 @@ void MeshVAO::draw()
 
 MeshVAO::~MeshVAO()
 {
+}
+
+VAOPtr MeshVAO::create_mesh_vao(std::vector<Face>& faces)
+{
+	return VAOPtr(new MeshVAO(faces, ShaderProgram::get_default_program()));
+}
+
+VAOPtr MeshVAO::create_vertex_normals_vao(std::vector<Face>& faces)
+{
+	return VAOPtr(new MeshVAO(faces, ShaderProgram::get_vertex_normals_program()));
+}
+
+VAOPtr MeshVAO::create_face_normals_vao(std::vector<Face>& faces)
+{
+	return VAOPtr(new MeshVAO(faces, ShaderProgram::get_face_normals_program()));
 }

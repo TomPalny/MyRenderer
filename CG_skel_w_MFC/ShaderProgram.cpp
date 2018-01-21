@@ -23,10 +23,25 @@ void ShaderProgram::activate()
 	glUseProgram(_program_id);
 }
 
-void ShaderProgram::attach_shaders(ShaderPtr vertex_shader, ShaderPtr fragment_shader)
+void ShaderProgram::attach_shaders(ShaderPtr vertex_shader, ShaderPtr geometry_shader, ShaderPtr fragment_shader)
 {
-	glAttachShader(_program_id, vertex_shader->get_shader_id());
-	glAttachShader(_program_id, fragment_shader->get_shader_id());
+	_vertex_path = vertex_shader->get_name();
+	_fragment_path = fragment_shader->get_name();
+	if (geometry_shader == nullptr)
+	{
+		_geometry_path = "";
+	}
+	else
+	{
+		_geometry_path = geometry_shader->get_name();
+	}
+
+	glAttachShader(_program_id, vertex_shader->get_id());
+	if (geometry_shader != nullptr)
+	{
+		glAttachShader(_program_id, geometry_shader->get_id());
+	}
+	glAttachShader(_program_id, fragment_shader->get_id());
 
 	GLint linked;
 	glLinkProgram(_program_id);
@@ -44,12 +59,9 @@ void ShaderProgram::attach_shaders(ShaderPtr vertex_shader, ShaderPtr fragment_s
 }
 
 // this assumes that the VAO and buffer are already bound
-void ShaderProgram::set_vertex_attribute(std::string attribute_name, GLsizei stride, GLvoid* offset)
+void ShaderProgram::set_vertex_attribute(std::string attribute_name, int components, GLsizei stride, GLvoid* offset)
 {
-	// I'm not sure why this is necessary but it is
 	activate();
-
-	static const int FOUR_COMPONENTS = 4;
 	static const GLboolean DONT_NORMALIZE = GL_FALSE;
 	GLuint loc = glGetAttribLocation(_program_id, attribute_name.c_str());
 	if (loc == -1)
@@ -58,12 +70,39 @@ void ShaderProgram::set_vertex_attribute(std::string attribute_name, GLsizei str
 		return;
 	}
 	glEnableVertexAttribArray(loc);
-	glVertexAttribPointer(loc, FOUR_COMPONENTS, GL_FLOAT, DONT_NORMALIZE, stride, offset);
+	glVertexAttribPointer(loc, components, GL_FLOAT, DONT_NORMALIZE, stride, offset);
+}
+
+void ShaderProgram::set_uniform_attributef(std::string attribute_name, const float value)
+{
+	activate();
+
+	GLuint loc = glGetUniformLocation(_program_id, attribute_name.c_str());
+	if (loc == -1)
+	{
+		//std::cout << "WARNING: No such uniform attribute: " << attribute_name << std::endl;
+		return;
+	}
+
+	glUniform1f(loc, value);
+}
+
+void ShaderProgram::set_uniform_attributei(std::string attribute_name, const int value)
+{
+	activate();
+
+	GLuint loc = glGetUniformLocation(_program_id, attribute_name.c_str());
+	if (loc == -1)
+	{
+		//std::cout << "WARNING: No such uniform attribute: " << attribute_name << std::endl;
+		return;
+	}
+
+	glUniform1i(loc, value);
 }
 
 void ShaderProgram::set_uniform_attribute(std::string attribute_name, const vec4& vec)
 {
-	// I'm not sure why this is necessary but it is
 	activate();
 
 	GLuint loc = glGetUniformLocation(_program_id, attribute_name.c_str());
@@ -80,7 +119,6 @@ void ShaderProgram::set_uniform_attribute(std::string attribute_name, const vec4
 
 void ShaderProgram::set_uniform_attribute(std::string attribute_name, const mat4& mat4)
 {
-	// I'm not sure why this is necessary but it is
 	activate();
 
 	GLuint loc = glGetUniformLocation(_program_id, attribute_name.c_str());
@@ -104,19 +142,48 @@ void ShaderProgram::set_uniform_attribute(std::string attribute_name, const mat4
 	glUniformMatrix4fv(loc, ONE_MATRIX, TRANSPOSE_TRUE, data);
 }
 
+std::string ShaderProgram::get_vertex_shader_path()
+{
+	return _vertex_path;
+}
+
+std::string ShaderProgram::get_fragment_shader_path()
+{
+	return _fragment_path;
+}
+
+// reloading one of the default shaders only reloads it for a specific object
+// future objects will still be created using the old version returned by e.g. get_default_program
+// TODO: fix that
+ShaderProgramPtr ShaderProgram::reload_shader()
+{
+	return create(_vertex_path, _geometry_path, _fragment_path);
+}
+
+ShaderProgramPtr ShaderProgram::create(std::string vertex_shader_path, std::string geometry_shader_path, std::string fragment_shader_path)
+{
+	ShaderPtr vertex_shader = std::make_shared<Shader>(vertex_shader_path, GL_VERTEX_SHADER);
+	ShaderPtr fragment_shader = std::make_shared<Shader>(fragment_shader_path, GL_FRAGMENT_SHADER);
+	ShaderPtr geometry_shader = nullptr;
+	if (geometry_shader_path != "")
+	{
+		geometry_shader = std::make_shared<Shader>(geometry_shader_path, GL_GEOMETRY_SHADER);
+	}
+	auto program = ShaderProgramPtr(new ShaderProgram());
+	program->attach_shaders(vertex_shader, geometry_shader, fragment_shader);
+	return program;
+}
+
 ShaderProgramPtr ShaderProgram::get_default_program()
 {
-	static ShaderProgramPtr default_program(NULL);
-	if (default_program != nullptr)
+	static ShaderProgramPtr program(NULL);
+	if (program != nullptr)
 	{
-		return default_program;
+		return program;
 	}
 
-	auto vertex_shader = std::make_shared<Shader>("minimal_vshader.glsl", GL_VERTEX_SHADER);
-	auto fragment_shader = std::make_shared<Shader>("minimal_fshader.glsl", GL_FRAGMENT_SHADER);
-	default_program = ShaderProgramPtr(new ShaderProgram());
-	default_program->attach_shaders(vertex_shader, fragment_shader);
-	return default_program;
+	program = create("vshader_standard.glsl", "", "fshader_standard.glsl");
+	return program;
 };
 
 ShaderProgramPtr ShaderProgram::get_lines_program()
@@ -127,9 +194,30 @@ ShaderProgramPtr ShaderProgram::get_lines_program()
 		return program;
 	}
 
-	auto vertex_shader = std::make_shared<Shader>("minimal_vshader.glsl", GL_VERTEX_SHADER);
-	auto fragment_shader = std::make_shared<Shader>("lines_fshader.glsl", GL_FRAGMENT_SHADER);
-	program = ShaderProgramPtr(new ShaderProgram());
-	program->attach_shaders(vertex_shader, fragment_shader);
+	program = create("vshader_standard.glsl", "", "fshader_white.glsl");
+	return program;
+}
+
+ShaderProgramPtr ShaderProgram::get_vertex_normals_program()
+{
+	static ShaderProgramPtr program(NULL);
+	if (program != nullptr)
+	{
+		return program;
+	}
+
+	program = create("vshader_standard.glsl", "gshader_vertex_normals.glsl", "fshader_white.glsl");
+	return program;
+}
+
+ShaderProgramPtr ShaderProgram::get_face_normals_program()
+{
+	static ShaderProgramPtr program(NULL);
+	if (program != nullptr)
+	{
+		return program;
+	}
+
+	program = create("vshader_standard.glsl", "gshader_face_normals.glsl", "fshader_white.glsl");
 	return program;
 }

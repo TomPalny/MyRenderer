@@ -8,19 +8,31 @@ class Camera : public Model
 	ProjectionType _projection_type;
 	float _fovy;
 	float _aspect_ratio;
+	float _nearz;
+	float _farz;
 
 public:
-	ModelType get_type() override { return CAMERA_MODEL; }
-
 	Camera(int camera_id);
 	~Camera();
+
+	float get_aspect_ratio() const;
+	void set_aspect_ratio(float aspect_ratio);
+	ProjectionType get_projection_type() const;
+	void set_projection_type(ProjectionType projection_type);
+	float get_fovy() const;
+	void set_fovy(float fovy);
+	float get_nearz() const;
+	void set_nearz(float nearz);
+	float get_farz() const;
+	void set_farz(float farz);
+	ModelType get_type() override { return CAMERA_MODEL; }
+
 
 	mat4 get_view_matrix();
 	mat4 get_projection_matrix();
 
 	void look_at(vec3 at);
 	void look_at2(vec3 eye, vec3 at);
-	void set_camera_parameters(ProjectionType projection_type, float aspect_ratio, float fovy);
 	void apply_view_transformation(const mat4& inverse_operation);
 
 	/*

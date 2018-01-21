@@ -21,14 +21,22 @@ LinesVAO::LinesVAO(std::vector<vec4> points) : VAO(ShaderProgram::get_lines_prog
 	static const int DIMENSIONS_PER_ATTRIBUTE = 4;
 	_num_vertices = data.size() / DIMENSIONS_PER_ATTRIBUTE;
 
-	glBindVertexArray(_vao_id);
+	glBindVertexArray(_vao_id); // TODO: unecessary?
 	glBindBuffer(GL_ARRAY_BUFFER, _buffer_id);
 	glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
 
+	LinesVAO::setup_for_shader();
+}
+
+void LinesVAO::setup_for_shader()
+{
+	_shader->activate();
+	glBindVertexArray(_vao_id);
+	glBindBuffer(GL_ARRAY_BUFFER, _buffer_id);
 	static const int ZERO_STRIDE = 0;
 	static GLvoid* ZERO_OFFSET = nullptr;
-	_shader->set_vertex_attribute("vPosition", ZERO_STRIDE, ZERO_OFFSET);
-	// TODO: ok we don't have vertex normals...
+	static const int FOUR_COMPONENTS = 4;
+	_shader->set_vertex_attribute("vPosition", FOUR_COMPONENTS, ZERO_STRIDE, ZERO_OFFSET);
 }
 
 VAOPtr LinesVAO::create_bounding_box_vao(std::vector<Face>& faces)
@@ -78,6 +86,41 @@ VAOPtr LinesVAO::create_bounding_box_vao(std::vector<Face>& faces)
 	add_line(vec4(max_x, min_y, min_z, 1), vec4(max_x, min_y, max_z, 1));
 	add_line(vec4(max_x, max_y, min_z, 1), vec4(max_x, max_y, max_z, 1));
 
+	return VAOPtr(new LinesVAO(points));
+}
+
+VAOPtr LinesVAO::create_vertex_normals_vao(std::vector<Face>& faces)
+{
+	// flatten faces to vector of points
+	std::vector<vec4> points;
+	auto add_normal = [&](auto point, auto normal)
+	{
+		points.push_back(point);
+		points.push_back(point+normal*0.3f);
+	};
+	for (auto& face : faces)
+	{
+		add_normal(face.point1, face.normal1);
+		add_normal(face.point2, face.normal2);
+		add_normal(face.point3, face.normal3);
+	}
+	return VAOPtr(new LinesVAO(points));
+}
+
+VAOPtr LinesVAO::create_face_normals_vao(std::vector<Face>& faces)
+{
+	// flatten faces to vector of points
+	std::vector<vec4> points;
+	auto add_normal = [&](auto point, auto normal)
+	{
+		points.push_back(point);
+		points.push_back(point + normal * 0.3f);
+	};
+	for (auto& face : faces)
+	{
+		auto center = (face.point1 + face.point2 + face.point3) / 3.0f;
+		add_normal(center, face.face_normal);
+	}
 	return VAOPtr(new LinesVAO(points));
 }
 
@@ -134,7 +177,6 @@ VAOPtr LinesVAO::create_star_vao()
 	add_line(vec4(LINE_LENGTH, LINE_LENGTH, LINE_LENGTH, 1));
 	return VAOPtr(new LinesVAO(points));
 }
-
 
 LinesVAO::~LinesVAO()
 {

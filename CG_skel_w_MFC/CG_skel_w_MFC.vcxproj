@@ -102,13 +102,15 @@
     <ClCompile Include="CG_skel_w_MFC.cpp" />
     <ClCompile Include="Face.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="MeshModel.cpp" />
     <ClCompile Include="MeshVAO.cpp" />
+    <ClCompile Include="MFCCameraDlg.cpp" />
     <ClCompile Include="MFCMaterialDlg.cpp" />
+    <ClCompile Include="MFCModelDlg.cpp" />
     <ClCompile Include="MFCSettingsDlg.cpp" />
     <ClCompile Include="Model.cpp" />
-    <ClCompile Include="PrimitiveModel.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -117,6 +119,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="VAO.cpp" />
   </ItemGroup>
@@ -124,9 +127,12 @@
     <ClInclude Include="LinesVAO.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="lodepng.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MeshVAO.h" />
+    <ClInclude Include="MFCCameraDlg.h" />
     <ClInclude Include="MFCMaterialDlg.h" />
+    <ClInclude Include="MFCModelDlg.h" />
     <ClInclude Include="MFCSettingsDlg.h" />
     <ClInclude Include="RenderParameters.h" />
     <ClInclude Include="CG_skel_w_MFC.h" />
@@ -135,14 +141,15 @@
     <ClInclude Include="mat.h" />
     <ClInclude Include="MeshModel.h" />
     <ClInclude Include="Model.h" />
-    <ClInclude Include="PrimitiveModel.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="Serialization.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="VAO.h" />
     <ClInclude Include="vec.h" />

@@ -1,29 +1,26 @@
 #include "stdafx.h"
 #include "Face.h"
 
-Face Face::copy_with_x_offset(const float offset) const
+Face::Face(vec4 p1, vec4 p2, vec4 p3): point1(p1), point2(p2), point3(p3), has_vertex_normals(false), has_uv_coordinates(false)
 {
-	Face copy = *this;
-	copy.point1.x += offset;
-	copy.point2.x += offset;
-	copy.point3.x += offset;
-	return copy;
+	auto vector1 = (p2 - p1).to_vec3();
+	auto vector2 = (p3 - p2).to_vec3();
+	face_normal = vec4(normalize(cross(vector1, vector2)), 0);
+	normal1 = normal2 = normal3 = face_normal;
 }
 
-Face Face::copy_with_y_offset(const float offset) const
+Face::Face(vec4 p1, vec4 p2, vec4 p3, vec4 n1, vec4 n2, vec4 n3): Face(p1, p2, p3)
 {
-	Face copy = *this;
-	copy.point1.y += offset;
-	copy.point2.y += offset;
-	copy.point3.y += offset;
-	return copy;
+	normal1 = n1;
+	normal2 = n2;
+	normal3 = n3;
+	has_vertex_normals = true;
 }
 
-Face Face::copy_with_z_offset(const float offset) const
+void Face::set_uv(vec2 p1, vec2 p2, vec2 p3)
 {
-	Face copy = *this;
-	copy.point1.z += offset;
-	copy.point2.z += offset;
-	copy.point3.z += offset;
-	return copy;
+	uv1 = p1;
+	uv2 = p2;
+	uv3 = p3;
+	has_uv_coordinates = true;
 }
