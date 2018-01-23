@@ -1,8 +1,6 @@
 uniform mat4 modelView;
 uniform mat4 modelViewProjection;
-uniform float animationParam;
-uniform int positionAnimationType;
-uniform int colorAnimationType;
+uniform mat4 projection;
 
 in vec4 vPosition;
 in vec4 vNormal;
@@ -36,4 +34,9 @@ void main()
 	
 	calculateLighting(fPosition, fNormal, flatColor);
 	calculateLighting(fPosition, fNormal, gouraudColor);
+	
+	if (toonShadingStage2)
+	{
+		gl_Position = projection * (vec4(fPosition, 1) + vec4(fNormal, 0) * 0.02);
+	}
 }

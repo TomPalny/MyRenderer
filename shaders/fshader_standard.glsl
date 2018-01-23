@@ -11,6 +11,12 @@ out vec4 fColor;
 
 void main() 
 {
+	if (toonShadingStage2)
+	{
+		fColor = vec4(0,0,0,1);
+		return;
+	}
+	
 	if (fillType == FILL_FLAT)
 	{
 		fColor = flatColor;

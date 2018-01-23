@@ -14,6 +14,11 @@
 uniform int numLights;
 uniform int fillType;
 uniform int uvType;
+uniform float animationParam;
+uniform int positionAnimationType;
+uniform int colorAnimationType;
+uniform bool toonShading;
+uniform bool toonShadingStage2;
 
 uniform struct {
 	vec4 position;
@@ -32,6 +37,35 @@ uniform struct {
 
 uniform sampler2D myTexture;
 uniform bool hasTexture;
+
+vec4 applyColorAnimation(vec4 color)
+{
+	if (colorAnimationType == 0)
+	{
+		return color;
+	}
+	else if (colorAnimationType == 1)
+	{
+		float param = animationParam / 2.0f + 0.5;
+		return color * abs(sin(param * 4 * PI / 2));
+	}
+	else
+	{
+		vec4 result = color;
+		float param = animationParam / 2.0f + 0.5;
+		result.g *= abs(sin(param * 4 * PI / 2));
+		return result;
+	}
+}
+
+vec4 applyToonShading(vec4 intensities, vec4 color)
+{
+	if (!toonShading)
+	{
+		return intensities * color;
+	}
+	return round(intensities * 3) / 3 * color;
+}
 
 void calculateLighting(in vec3 position, in vec3 normal, out vec4 color)
 {
@@ -59,13 +93,11 @@ void calculateLighting(in vec3 position, in vec3 normal, out vec4 color)
 			// no specular when the light is on the wrong side of the face
 			specular_modifier = 0;
 		}
-			
-		// TODO: clamp each one individually
-		// TODO: take into account the material
-		color += lights[i].ambient * material.ambient;
-		color += lights[i].diffuse * material.diffuse * diffuse_modifier;
-		color += lights[i].specular * material.specular * specular_modifier;
-		color += material.emissive;
+		
+		color += applyToonShading(lights[i].ambient, applyColorAnimation(material.ambient));
+		color += applyToonShading(lights[i].diffuse * diffuse_modifier, applyColorAnimation(material.diffuse));
+		color += applyToonShading(lights[i].specular * specular_modifier, applyColorAnimation(material.specular));
+		color += applyColorAnimation(material.emissive); // no toon shading for this...
 	}
 	
 	color = clamp(color, vec4(0,0,0,0), vec4(1,1,1,1));

@@ -19,6 +19,7 @@
 #define IDC_BLUR                        1015
 #define IDC_EMISSIVE                    1016
 #define IDC_ANTIALIASING                1016
+#define IDC_CHECK2                      1016
 #define IDC_DIFFUSE                     1017
 #define IDC_FOG                         1017
 #define IDC_BLOOM                       1018

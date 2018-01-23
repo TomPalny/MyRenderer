@@ -63,7 +63,7 @@ enum PositionAnimation
 static const std::unordered_map<PositionAnimation, std::string> POSITION_ANIMATION_MAP
 {
 	{ POSITION_ANIMATION_DISABLED, "DISABLED" },
-	{ POSITION_ANIMATION1, "ANIMATION1" },
+	{ POSITION_ANIMATION1, "SQUISH_Y" },
 	{ POSITION_ANIMATION2, "ANIMATION2" }
 };
 
@@ -77,8 +77,8 @@ enum ColorAnimation
 static const std::unordered_map<ColorAnimation, std::string> COLOR_ANIMATION_MAP
 {
 	{ COLOR_ANIMATION_DISABLED, "DISABLED" },
-	{ COLOR_ANIMATION1, "ANIMATION1" },
-	{ COLOR_ANIMATION2, "ANIMATION2" }
+	{ COLOR_ANIMATION1, "DIM" },
+	{ COLOR_ANIMATION2, "DIM_GREEN" }
 };
 
 enum OperationMode

@@ -49,12 +49,15 @@ protected:
 	TexturePtr _texture;
 	NormalType _normal_type;
 	bool _bounding_box;
+	bool _toon_shading;
 	FillType _fill_type;
 	UVType _uv_type;
 	PositionAnimation _position_animation;
 	ColorAnimation _color_animation;
 
 public:
+	bool is_toon_shading_enabled() const;
+	void set_toon_shading(bool toon_shading);
 	PositionAnimation get_position_animation() const;
 	void set_position_animation(PositionAnimation position_animation);
 	ColorAnimation get_color_animation() const;

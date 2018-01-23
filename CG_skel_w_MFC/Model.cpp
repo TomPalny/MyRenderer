@@ -7,7 +7,8 @@
 
 Model::Model() : _origin_sign('+'), _material(Material::get_default()),
 	_normal_type(NO_NORMALS), _fill_type(FILL_PHONG), _bounding_box(false), _uv_type(UV_BOX),
-	_position_animation(POSITION_ANIMATION_DISABLED),_color_animation(COLOR_ANIMATION_DISABLED)
+	_position_animation(POSITION_ANIMATION_DISABLED),_color_animation(COLOR_ANIMATION_DISABLED),
+	_toon_shading(false)
 {
 }
 
@@ -39,6 +40,16 @@ char Model::get_origin_sign()
 VAOMap& Model::get_vaos()
 {
 	return _vaos;
+}
+
+bool Model::is_toon_shading_enabled() const
+{
+	return _toon_shading;
+}
+
+void Model::set_toon_shading(bool toon_shading)
+{
+	_toon_shading = toon_shading;
 }
 
 PositionAnimation Model::get_position_animation() const

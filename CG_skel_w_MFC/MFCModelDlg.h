@@ -42,4 +42,5 @@ public:
 
 	template<typename T>
 	void initialize_combo(CComboBox & combo, std::unordered_map<T, std::string> map, T current);
+	CButton m_toon_shading;
 };

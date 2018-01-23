@@ -17,7 +17,7 @@
 Renderer::Renderer(int width, int height) : _width(width), _height(height), _animation_param(1)
 {
 	glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 	//glDisable(GL_CULL_FACE);
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_TEXTURE_2D);
@@ -136,7 +136,19 @@ void Renderer::draw_vao(Model* model, VAOType type, const shared_ptr<VAO>& vao)
 	shader->set_uniform_attribute("material.diffuse", model->_material->_diffuse);
 	shader->set_uniform_attribute("material.specular", model->_material->_specular);
 	shader->set_uniform_attribute("material.emissive", model->_material->_emissive);
+
+	// render and deal with toon shading
+	shader->set_uniform_attributei("toonShading", model->is_toon_shading_enabled());
+	shader->set_uniform_attributei("toonShadingStage2", 0);
+	glCullFace(GL_BACK);
 	vao->draw();
+
+	if (model->is_toon_shading_enabled())
+	{
+		shader->set_uniform_attributei("toonShadingStage2", 1);
+		glCullFace(GL_FRONT);
+		vao->draw();
+	}
 }
 
 void Renderer::swap_buffers()

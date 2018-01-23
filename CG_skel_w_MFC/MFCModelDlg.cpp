@@ -34,6 +34,7 @@ void MFCModelDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHECK1, m_bounding_box);
 	DDX_Control(pDX, IDC_COMBO7, m_animate_position_combo);
 	DDX_Control(pDX, IDC_COMBO8, m_animate_color_combo);
+	DDX_Control(pDX, IDC_CHECK2, m_toon_shading);
 }
 
 
@@ -83,6 +84,7 @@ BOOL MFCModelDlg::OnInitDialog()
 	m_fragment_shader_combo.SelectString(SEARCH_ALL_OPTIONS, fshader_filename.c_str());
 	
 	m_bounding_box.SetCheck(_model->is_bounding_box_enabled());
+	m_toon_shading.SetCheck(_model->is_toon_shading_enabled());
 	initialize_combo(m_normals_combo, NORMAL_TYPE_MAP, _model->get_normal_type());
 	initialize_combo(m_shading_combo, FILL_TYPE_MAP, _model->get_fill_type());
 	initialize_combo(m_uv_combo, UV_TYPE_MAP, _model->get_uv_type());
@@ -162,4 +164,5 @@ void MFCModelDlg::OnApplyClicked()
 	_model->set_position_animation(get_enum_from_combobox(m_animate_position_combo, POSITION_ANIMATION_MAP));
 	_model->set_color_animation(get_enum_from_combobox(m_animate_color_combo, COLOR_ANIMATION_MAP));
 	_model->set_bounding_box(m_bounding_box.GetCheck());
+	_model->set_toon_shading(m_toon_shading.GetCheck());
 }
