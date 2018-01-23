@@ -19,6 +19,7 @@ class Renderer
 	int _width, _height;
 	GLuint _shader_program;
 	float _animation_param;
+	TexturePtr _turbulence_texture;
 
 public:
 	Renderer(int width, int height);

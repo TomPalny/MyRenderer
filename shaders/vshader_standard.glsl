@@ -6,8 +6,8 @@ in vec4 vPosition;
 in vec4 vNormal;
 in vec2 vUV;
 
-out vec3 fNormal;
-out vec3 fPosition; // unlike gl_Position this is in camera space!
+out vec4 fNormal;
+out vec4 fPosition; // unlike gl_Position this is in camera space!
 out vec3 passthroughPosition; // this is in unmodified object space 
 out vec3 passthroughNormal;   // this is in unmodified object space 
 out vec2 passthroughUV; // TODO: do we need to transform this? e.g. how should stretching impact this?
@@ -26,17 +26,17 @@ void main()
 	gl_Position = modelViewProjection * position;
 	screenPosition = gl_Position.xy / gl_Position.w;
 	
-	fPosition = (modelView * position).xyz;
-	fNormal = normalize((transpose(inverse(modelView)) * vNormal).xyz);
+	fPosition = modelView * position;
+	fNormal = transpose(inverse(modelView)) * vNormal;
 	passthroughPosition = vPosition.xyz;
 	passthroughNormal = vNormal.xyz;
 	passthroughUV = vUV;
 	
-	calculateLighting(fPosition, fNormal, flatColor);
-	calculateLighting(fPosition, fNormal, gouraudColor);
+	calculateLighting(fPosition.xyz, fNormal.xyz, flatColor);
+	calculateLighting(fPosition.xyz, fNormal.xyz, gouraudColor);
 	
 	if (toonShadingStage2)
 	{
-		gl_Position = projection * (vec4(fPosition, 1) + vec4(fNormal, 0) * 0.02);
+		gl_Position = projection * (fPosition + fNormal * 0.02);
 	}
 }

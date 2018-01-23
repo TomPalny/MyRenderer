@@ -1,4 +1,3 @@
-in vec3 fNormal;
 out vec4 fColor;
 
 void main()

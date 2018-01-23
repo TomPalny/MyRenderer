@@ -30,6 +30,7 @@ Renderer::Renderer(int width, int height) : _width(width), _height(height), _ani
     glGetIntegerv(GL_SAMPLES, &num_samples);
 	std::cout << "GL_SAMPLE_BUFFERS=" << multisample << "; GL_SAMPLES=" << num_samples << std::endl;
 	
+	_turbulence_texture = TexturePtr(new Texture("c:\\Projects\\technion\\graphics\\code\\textures\\turbulence.png", TURBULENCE_TEXTURE_UNIT));
 	set_window_size(width,height);
 }
 
@@ -102,6 +103,9 @@ void Renderer::draw_vao(Model* model, VAOType type, const shared_ptr<VAO>& vao)
 	{
 		shader->set_uniform_attributei("hasTexture", 0);
 	}
+	_turbulence_texture->activate();
+	shader->set_uniform_attributei("myTexture", NORMAL_TEXTURE_UNIT);
+	shader->set_uniform_attributei("turbulenceTexture", TURBULENCE_TEXTURE_UNIT);
 
 	shader->set_uniform_attributei("uvType", (int) model->get_uv_type());
 	shader->set_uniform_attributei("fillType", (int) model->get_fill_type()); // TODO: rename to shadingType?

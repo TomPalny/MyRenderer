@@ -36,6 +36,7 @@ uniform struct {
 } material;
 
 uniform sampler2D myTexture;
+uniform sampler2D turbulenceTexture;
 uniform bool hasTexture;
 
 vec4 applyColorAnimation(vec4 color)
@@ -72,7 +73,7 @@ void calculateLighting(in vec3 position, in vec3 normal, out vec4 color)
 	color = vec4(0,0,0,0);
 	for (int i=0; i<numLights; i++)
 	{
-		vec3 N = normal;
+		vec3 N = normalize(normal);
 		vec3 L = normalize(lights[i].position.xyz - position);
 		if (lights[i].directional)
 		{
@@ -83,7 +84,7 @@ void calculateLighting(in vec3 position, in vec3 normal, out vec4 color)
 		float alpha = 5;
 		float diffuse_modifier = clamp(dot(L, N), 0.0, 1.0);
 		
-		float specular_modifier;
+		float specular_modifier=0;
 		if (dot(R,V) > 0)
 		{
 			specular_modifier = clamp(pow(dot(R,V), alpha), 0.0, 1.0);
@@ -102,4 +103,10 @@ void calculateLighting(in vec3 position, in vec3 normal, out vec4 color)
 	
 	color = clamp(color, vec4(0,0,0,0), vec4(1,1,1,1));
 	color = vec4(color.xyz, 1);
+}
+
+vec4 marble(vec4 color1, vec4 color2, float x)
+{
+	float frac = (sin(x) + 1) / 2.0;
+	return frac * color1 + (1-frac) * color2;
 }

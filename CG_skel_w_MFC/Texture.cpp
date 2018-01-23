@@ -3,7 +3,8 @@
 #include "lodepng.h"
 
 
-Texture::Texture(const std::string& filename)
+Texture::Texture(const std::string& filename, int texture_unit) :
+	_texture_unit(texture_unit)
 {
 	glGenTextures(1, &_texture_id);
 
@@ -28,8 +29,8 @@ Texture::Texture(const std::string& filename)
 
 void Texture::activate()
 {
+	glActiveTexture(GL_TEXTURE0 + _texture_unit);
 	glBindTexture(GL_TEXTURE_2D, _texture_id);
-	glActiveTexture(GL_TEXTURE0);
 }
 
 Texture::~Texture()
