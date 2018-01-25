@@ -48,4 +48,5 @@ public:
 	afx_msg void OnLoadBumpTextureClicked();
 	afx_msg void OnClearBumpTextureClicked();
 	CButton m_environment_mapping;
+	CButton m_wireframe;
 };

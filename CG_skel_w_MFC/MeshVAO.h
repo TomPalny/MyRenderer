@@ -13,6 +13,7 @@ public:
 	static VAOPtr create_mesh_vao(std::vector<Face>& faces);
 	static VAOPtr create_vertex_normals_vao(std::vector<Face>& faces);
 	static VAOPtr create_face_normals_vao(std::vector<Face>& faces);
+	static VAOPtr create_wireframe_vao(std::vector<Face>& faces);
 
 
 protected:

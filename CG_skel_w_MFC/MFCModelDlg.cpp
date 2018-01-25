@@ -37,6 +37,7 @@ void MFCModelDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHECK2, m_toon_shading);
 	DDX_Control(pDX, IDC_CHECK3, m_marble_texture);
 	DDX_Control(pDX, IDC_CHECK4, m_environment_mapping);
+	DDX_Control(pDX, IDC_CHECK5, m_wireframe);
 }
 
 
@@ -91,6 +92,7 @@ BOOL MFCModelDlg::OnInitDialog()
 	m_toon_shading.SetCheck(_model->is_toon_shading_enabled());
 	m_marble_texture.SetCheck(_model->is_marble_texture_enabled());
 	m_environment_mapping.SetCheck(_model->is_environment_mapping());
+	m_wireframe.SetCheck(_model->is_wireframe_enabled());
 	initialize_combo(m_normals_combo, NORMAL_TYPE_MAP, _model->get_normal_type());
 	initialize_combo(m_shading_combo, FILL_TYPE_MAP, _model->get_fill_type());
 	initialize_combo(m_uv_combo, UV_TYPE_MAP, _model->get_uv_type());
@@ -195,4 +197,5 @@ void MFCModelDlg::OnApplyClicked()
 	_model->set_toon_shading(m_toon_shading.GetCheck());
 	_model->set_marble_texture(m_marble_texture.GetCheck());
 	_model->set_environment_mapping(m_environment_mapping.GetCheck());
+	_model->set_wireframe_enabled((m_wireframe.GetCheck()));
 }

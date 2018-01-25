@@ -8,7 +8,7 @@
 Model::Model() : _origin_sign('+'), _material(Material::get_default()),
 	_normal_type(NO_NORMALS), _fill_type(FILL_PHONG), _bounding_box(false), _uv_type(UV_BOX),
 	_position_animation(POSITION_ANIMATION_DISABLED),_color_animation(COLOR_ANIMATION_DISABLED),
-	_toon_shading(false), _marble_texture(false), _skybox(false), _environment_mapping(false)
+	_toon_shading(false), _marble_texture(false), _skybox(false), _environment_mapping(false), _wireframe(false)
 {
 }
 
@@ -40,6 +40,16 @@ char Model::get_origin_sign()
 VAOMap& Model::get_vaos()
 {
 	return _vaos;
+}
+
+bool Model::is_wireframe_enabled() const
+{
+	return _wireframe;
+}
+
+void Model::set_wireframe_enabled(bool wireframe)
+{
+	_wireframe = wireframe;
 }
 
 bool Model::is_environment_mapping() const

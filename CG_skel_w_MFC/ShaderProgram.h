@@ -24,6 +24,7 @@ public:
 	static ShaderProgramPtr get_lines_program();
 	static ShaderProgramPtr get_vertex_normals_program();
 	static ShaderProgramPtr get_face_normals_program();
+	static ShaderProgramPtr get_wireframe_program();
 	static ShaderProgramPtr get_default_program();
 	static ShaderProgramPtr create(std::string vertex_shader_path, std::string geometry_path, std::string fragment_shader_path);
 

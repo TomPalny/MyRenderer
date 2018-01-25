@@ -31,6 +31,7 @@ enum VAOType
 	VAO_BOUNDING_BOX,
 	VAO_VERTEX_NORMALS,
 	VAO_FACE_NORMALS,
+	VAO_WIREFRAME,
 	VAO_TEST
 };
 
@@ -54,12 +55,15 @@ protected:
 	bool _marble_texture;
 	bool _skybox;
 	bool _environment_mapping;
+	bool _wireframe;
 	FillType _fill_type;
 	UVType _uv_type;
 	PositionAnimation _position_animation;
 	ColorAnimation _color_animation;
 
 public:
+	bool is_wireframe_enabled() const;
+	void set_wireframe_enabled(bool wireframe);
 	bool is_environment_mapping() const;
 	void set_environment_mapping(bool environment_mapping);
 	bool is_skybox() const;

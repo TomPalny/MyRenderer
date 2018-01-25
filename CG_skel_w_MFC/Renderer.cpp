@@ -75,6 +75,14 @@ void Renderer::draw(Model* model)
 		{
 			continue;
 		}
+		else if (type == VAO_WIREFRAME && !model->is_wireframe_enabled())
+		{
+			continue;
+		}
+		else if (type == VAO_MESH && model->is_wireframe_enabled())
+		{
+			continue;
+		}
 		draw_vao(model, type, vao);
 	}
 }

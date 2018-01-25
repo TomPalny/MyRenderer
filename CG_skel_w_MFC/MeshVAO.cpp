@@ -116,3 +116,8 @@ VAOPtr MeshVAO::create_face_normals_vao(std::vector<Face>& faces)
 {
 	return VAOPtr(new MeshVAO(faces, ShaderProgram::get_face_normals_program()));
 }
+
+VAOPtr MeshVAO::create_wireframe_vao(std::vector<Face>& faces)
+{
+	return VAOPtr(new MeshVAO(faces, ShaderProgram::get_wireframe_program()));
+}

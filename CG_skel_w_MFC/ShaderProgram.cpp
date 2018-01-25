@@ -221,3 +221,15 @@ ShaderProgramPtr ShaderProgram::get_face_normals_program()
 	program = create("vshader_standard.glsl", "gshader_face_normals.glsl", "fshader_white.glsl");
 	return program;
 }
+
+ShaderProgramPtr ShaderProgram::get_wireframe_program()
+{
+	static ShaderProgramPtr program(NULL);
+	if (program != nullptr)
+	{
+		return program;
+	}
+
+	program = create("vshader_standard.glsl", "gshader_wireframe.glsl", "fshader_white.glsl");
+	return program;
+}

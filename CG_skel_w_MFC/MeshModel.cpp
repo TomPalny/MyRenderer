@@ -18,6 +18,7 @@ MeshModel::MeshModel(const string filename) : Model()
 	_vaos[VAO_MESH] = MeshVAO::create_mesh_vao(faces);
 	_vaos[VAO_BOUNDING_BOX] = LinesVAO::create_bounding_box_vao(faces, approximate_scale);
 	_vaos[VAO_FACE_NORMALS] = MeshVAO::create_face_normals_vao(faces);
+	_vaos[VAO_WIREFRAME] = MeshVAO::create_wireframe_vao(faces);
 	if (faces[0].has_vertex_normals)
 	{
 		_vaos[VAO_VERTEX_NORMALS] = MeshVAO::create_vertex_normals_vao(faces);
