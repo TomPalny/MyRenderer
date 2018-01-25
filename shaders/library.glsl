@@ -90,6 +90,10 @@ void calculateLighting(in vec3 position, in vec3 normal, in vec3 tangent, in vec
 			//mat3 TBN = transpose(mat3(normalize(tangent), normalize(bitangent), normalize(normal)));
 			mat3 TBN = transpose(mat3(tangent, bitangent, normal));
 			L = normalize(TBN * lights[i].position.xyz - position);
+			if (lights[i].directional)
+			{
+				L = normalize(TBN * lights[i].position.xyz);
+			}
 			V = TBN * normalize(-position);
 			N = normalize(texture(bumpTexture, uv).rgb * 2.0 - 1.0);
 			test = TBN * -position;
