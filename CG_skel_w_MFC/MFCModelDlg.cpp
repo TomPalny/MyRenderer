@@ -90,7 +90,7 @@ BOOL MFCModelDlg::OnInitDialog()
 	m_bounding_box.SetCheck(_model->is_bounding_box_enabled());
 	m_toon_shading.SetCheck(_model->is_toon_shading_enabled());
 	m_marble_texture.SetCheck(_model->is_marble_texture_enabled());
-	m_environment_mapping.SetCheck(_model->get_texture() != nullptr && _model->get_texture()->is_cubemap());
+	m_environment_mapping.SetCheck(_model->is_environment_mapping());
 	initialize_combo(m_normals_combo, NORMAL_TYPE_MAP, _model->get_normal_type());
 	initialize_combo(m_shading_combo, FILL_TYPE_MAP, _model->get_fill_type());
 	initialize_combo(m_uv_combo, UV_TYPE_MAP, _model->get_uv_type());

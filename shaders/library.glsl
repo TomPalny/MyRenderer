@@ -83,13 +83,14 @@ void calculateLighting(in vec3 position, in vec3 normal, in vec3 tangent, in vec
 		vec3 test;
 		if (hasBumpTexture)
 		{
-			mat3 TBN = transpose(mat3(normalize(tangent), normalize(bitangent), normalize(normal)));
-			vec3 I = TBN * lights[i].position.xyz;
-			vec3 eye = TBN * (-position);
 			// TODO: deal with directional light
-			// TODO: TBN is wrong when using UV_PREDEFINED and fucks up V
-			vec3 L = normalize(I - eye);
-			V = normalize(TBN * -position);
+			// TODO: for UV_PREDEFINED these should be normalized!
+			// for UV_BOX these shouldn't be normalized
+			// I've dealt with that outside of this function...
+			//mat3 TBN = transpose(mat3(normalize(tangent), normalize(bitangent), normalize(normal)));
+			mat3 TBN = transpose(mat3(tangent, bitangent, normal));
+			L = normalize(TBN * lights[i].position.xyz - position);
+			V = TBN * normalize(-position);
 			N = normalize(texture(bumpTexture, uv).rgb * 2.0 - 1.0);
 			test = TBN * -position;
 		}
@@ -99,7 +100,7 @@ void calculateLighting(in vec3 position, in vec3 normal, in vec3 tangent, in vec
 		float diffuse_modifier = max(dot(L, N), 0.0);
 		
 		float specular_modifier=0;
-		if (dot(R,V) > 0) // according to wikipedia: add && diffuse_modifier > 0
+		if (dot(R,V) > 0 && diffuse_modifier > 0)
 		{
 			specular_modifier = clamp(pow(dot(R,V), alpha), 0.0, 1.0);
 		}
@@ -113,7 +114,8 @@ void calculateLighting(in vec3 position, in vec3 normal, in vec3 tangent, in vec
 		color += applyToonShading(lights[i].diffuse * diffuse_modifier, applyColorAnimation(material.diffuse));
 		color += applyToonShading(lights[i].specular * specular_modifier, applyColorAnimation(material.specular));
 		color += applyColorAnimation(material.emissive); // no toon shading for this...
-		color = vec4(N, 1);
+		//color = vec4(N, 1);
+		//color = vec4(tangent, 1) * 5;
 		//color = vec4(test, 1);
 	}
 	

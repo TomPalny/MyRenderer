@@ -31,7 +31,8 @@ Renderer::Renderer(int width, int height) : _width(width), _height(height), _ani
 	std::cout << "GL_SAMPLE_BUFFERS=" << multisample << "; GL_SAMPLES=" << num_samples << std::endl;
 	
 	_turbulence_texture = Texture::load_noise();
-	_skybox_texture = Texture::load_cubemap("c:\\Projects\\technion\\graphics\\code\\skyboxes\\arrakisday\\arrakisday");
+	_skybox_texture = Texture::load_cubemap("c:\\Projects\\technion\\graphics\\code\\skyboxes\\ame_oasis\\oasisnight");
+	//_skybox_texture = Texture::load_cubemap("c:\\Projects\\technion\\graphics\\code\\skyboxes\\arrakisday\\arrakisday");
 	//_skybox_texture = Texture::load_cubemap("c:\\Projects\\technion\\graphics\\code\\skyboxes\\storforsen\\");
 	set_window_size(width,height);
 }
@@ -153,6 +154,7 @@ void Renderer::draw_vao(Model* model, VAOType type, const shared_ptr<VAO>& vao)
 	shader->set_uniform_attributei("positionAnimationType", (int) model->get_position_animation());
 	shader->set_uniform_attributei("colorAnimationType", (int) model->get_color_animation());
 	shader->set_uniform_attribute("modelView", view * modelm);
+	shader->set_uniform_attribute("view", view);
 	shader->set_uniform_attribute("modelViewProjection", projection * view * modelm);
 	shader->set_uniform_attribute("projection", projection);
 	shader->set_uniform_attributei("numLights", _lights.size());

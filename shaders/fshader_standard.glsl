@@ -14,6 +14,7 @@ out vec4 fColor;
 uniform sampler2D myTexture;
 uniform sampler2D turbulenceTexture;
 uniform mat4 modelView;
+uniform mat4 view;
 
 #define TEXTURE_NONE 0 
 #define TEXTURE_MARBLE 1
@@ -73,7 +74,7 @@ void doShading()
 		
 		else
 		{
-			calculateLighting(fPosition.xyz, fNormal.xyz, fTangent, fBitangent, uv, fColor);
+			calculateLighting(fPosition.xyz, normalize(fNormal.xyz), normalize(fTangent), normalize(fBitangent), uv, fColor);
 		}
 		// TODO: spherical
 	}
@@ -99,7 +100,7 @@ void doTexture()
 	else if (textureType == TEXTURE_ENVIRONMENT)
 	{
 		vec3 coords = -reflect(-fPosition.xyz, fNormal.xyz);
-		fColor *= textureCube(cubemapTexture, coords);
+		fColor *= textureCube(cubemapTexture, (inverse(view) * vec4(coords,0)).xyz);
 	}
 	else // marble
 	{
