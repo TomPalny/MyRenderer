@@ -1,2 +1,3 @@
 ## Custom rules
 *.glsl binary
+*.glsl set diff
