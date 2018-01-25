@@ -28,4 +28,5 @@ public:
 	CEdit m_far;
 	CEdit m_fovy;
 	afx_msg void OnBnClickedOk();
+	CButton m_skybox_checkbox;
 };

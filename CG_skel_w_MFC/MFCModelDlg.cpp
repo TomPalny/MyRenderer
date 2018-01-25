@@ -15,7 +15,7 @@
 
 IMPLEMENT_DYNAMIC(MFCModelDlg, CDialogEx)
 
-MFCModelDlg::MFCModelDlg(Model* model) : CDialogEx(IDD_MODEL, NULL), _model(model)
+MFCModelDlg::MFCModelDlg(Model* model, Renderer* renderer) : CDialogEx(IDD_MODEL, NULL), _model(model), _renderer(renderer)
 {
 }
 
@@ -35,6 +35,8 @@ void MFCModelDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO7, m_animate_position_combo);
 	DDX_Control(pDX, IDC_COMBO8, m_animate_color_combo);
 	DDX_Control(pDX, IDC_CHECK2, m_toon_shading);
+	DDX_Control(pDX, IDC_CHECK3, m_marble_texture);
+	DDX_Control(pDX, IDC_CHECK4, m_environment_mapping);
 }
 
 
@@ -43,6 +45,8 @@ BEGIN_MESSAGE_MAP(MFCModelDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON2, &MFCModelDlg::OnClearTextureClicked)
 	ON_BN_CLICKED(IDOK, &MFCModelDlg::OnBnClickedOk)
 	ON_BN_CLICKED(IDC_BUTTON3, &MFCModelDlg::OnApplyClicked)
+	ON_BN_CLICKED(IDC_BUTTON4, &MFCModelDlg::OnLoadBumpTextureClicked)
+	ON_BN_CLICKED(IDC_BUTTON5, &MFCModelDlg::OnClearBumpTextureClicked)
 END_MESSAGE_MAP()
 
 template <typename T>
@@ -85,6 +89,8 @@ BOOL MFCModelDlg::OnInitDialog()
 	
 	m_bounding_box.SetCheck(_model->is_bounding_box_enabled());
 	m_toon_shading.SetCheck(_model->is_toon_shading_enabled());
+	m_marble_texture.SetCheck(_model->is_marble_texture_enabled());
+	m_environment_mapping.SetCheck(_model->get_texture() != nullptr && _model->get_texture()->is_cubemap());
 	initialize_combo(m_normals_combo, NORMAL_TYPE_MAP, _model->get_normal_type());
 	initialize_combo(m_shading_combo, FILL_TYPE_MAP, _model->get_fill_type());
 	initialize_combo(m_uv_combo, UV_TYPE_MAP, _model->get_uv_type());
@@ -131,8 +137,23 @@ void MFCModelDlg::OnLoadTextureClicked()
 		if (!experimental::filesystem::exists(path))
 			return;
 
-		TexturePtr texture(new Texture(path));
+		TexturePtr texture = Texture::load_texture(path);
 		_model->set_texture(texture);
+	}
+}
+
+
+void MFCModelDlg::OnLoadBumpTextureClicked()
+{
+	CFileDialog dlg(TRUE, _T(".png"), NULL, NULL, _T("*.png|*.*"));
+	dlg.m_ofn.lpstrInitialDir = "c:\\Projects\\technion\\graphics\\code\\textures\\";
+	if (dlg.DoModal() == IDOK)
+	{
+		std::string path(static_cast<LPCTSTR>(dlg.GetPathName()));
+		if (!experimental::filesystem::exists(path))
+			return;
+
+		_model->set_bump_texture(Texture::load_bumpmap(path));
 	}
 }
 
@@ -141,6 +162,13 @@ void MFCModelDlg::OnClearTextureClicked()
 {
 	TexturePtr no_texture(nullptr);
 	_model->set_texture(no_texture);
+}
+
+
+void MFCModelDlg::OnClearBumpTextureClicked()
+{
+	TexturePtr no_texture(nullptr);
+	_model->set_bump_texture(no_texture);
 }
 
 
@@ -165,4 +193,6 @@ void MFCModelDlg::OnApplyClicked()
 	_model->set_color_animation(get_enum_from_combobox(m_animate_color_combo, COLOR_ANIMATION_MAP));
 	_model->set_bounding_box(m_bounding_box.GetCheck());
 	_model->set_toon_shading(m_toon_shading.GetCheck());
+	_model->set_marble_texture(m_marble_texture.GetCheck());
+	_model->set_environment_mapping(m_environment_mapping.GetCheck());
 }

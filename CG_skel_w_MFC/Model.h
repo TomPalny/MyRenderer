@@ -47,15 +47,27 @@ protected:
 	std::string _name;
 	VAOMap _vaos;
 	TexturePtr _texture;
+	TexturePtr _bump_texture;
 	NormalType _normal_type;
 	bool _bounding_box;
 	bool _toon_shading;
+	bool _marble_texture;
+	bool _skybox;
+	bool _environment_mapping;
 	FillType _fill_type;
 	UVType _uv_type;
 	PositionAnimation _position_animation;
 	ColorAnimation _color_animation;
 
 public:
+	bool is_environment_mapping() const;
+	void set_environment_mapping(bool environment_mapping);
+	bool is_skybox() const;
+	void set_skybox(bool skybox);
+	TexturePtr get_bump_texture() const;
+	void set_bump_texture(const TexturePtr& bump_texture);
+	bool is_marble_texture_enabled() const;
+	void set_marble_texture(bool marble_texture);
 	bool is_toon_shading_enabled() const;
 	void set_toon_shading(bool toon_shading);
 	PositionAnimation get_position_animation() const;

@@ -30,7 +30,9 @@ Renderer::Renderer(int width, int height) : _width(width), _height(height), _ani
     glGetIntegerv(GL_SAMPLES, &num_samples);
 	std::cout << "GL_SAMPLE_BUFFERS=" << multisample << "; GL_SAMPLES=" << num_samples << std::endl;
 	
-	_turbulence_texture = TexturePtr(new Texture("c:\\Projects\\technion\\graphics\\code\\textures\\turbulence.png", TURBULENCE_TEXTURE_UNIT));
+	_turbulence_texture = Texture::load_noise();
+	_skybox_texture = Texture::load_cubemap("c:\\Projects\\technion\\graphics\\code\\skyboxes\\arrakisday\\arrakisday");
+	//_skybox_texture = Texture::load_cubemap("c:\\Projects\\technion\\graphics\\code\\skyboxes\\storforsen\\");
 	set_window_size(width,height);
 }
 
@@ -38,6 +40,15 @@ Renderer::~Renderer(void)
 {
 }
 
+TexturePtr Renderer::get_skybox_texture() const
+{
+	return _skybox_texture;
+}
+
+void Renderer::set_skybox_texture(const TexturePtr& skybox_texture)
+{
+	_skybox_texture = skybox_texture;
+}
 void Renderer::set_window_size(int width, int height)
 {
 	_width=width;
@@ -89,26 +100,56 @@ void Renderer::set_parameters(Camera* camera, std::vector<Light*> lights)
 void Renderer::draw_vao(Model* model, VAOType type, const shared_ptr<VAO>& vao)
 {
 	auto texture = model->get_texture();
+	auto bump_texture = model->get_bump_texture();
 	auto modelm = model->get_transforms();
 	auto view = _camera->get_view_matrix();
 	auto projection = _camera->get_projection_matrix();
 	auto shader = vao->get_shader_program();
 
-	if (texture != nullptr)
+	if (model->is_environment_mapping())
+	{
+		_skybox_texture->activate();
+		shader->set_uniform_attributei("cubemapTexture", PRIMARY_TEXTURE_UNIT);
+		shader->set_uniform_attributei("textureType", (int)TEXTURE_ENVIRONMENT);
+	}
+	else if (model->is_marble_texture_enabled())
+	{
+		_turbulence_texture->activate();
+		shader->set_uniform_attributei("turbulenceTexture", PRIMARY_TEXTURE_UNIT);
+		shader->set_uniform_attributei("textureType", (int) TEXTURE_MARBLE);
+
+	}
+	else if (texture == nullptr)
+	{
+		shader->set_uniform_attributei("textureType", (int)TEXTURE_NONE);
+	}
+	else if (texture->is_cubemap())
 	{
 		texture->activate();
-		shader->set_uniform_attributei("hasTexture", 1);
+		shader->set_uniform_attributei("cubemapTexture", PRIMARY_TEXTURE_UNIT);
+		shader->set_uniform_attributei("textureType", (int)TEXTURE_CUBEMAP);
 	}
 	else
 	{
-		shader->set_uniform_attributei("hasTexture", 0);
+		texture->activate();
+		shader->set_uniform_attributei("myTexture", PRIMARY_TEXTURE_UNIT);
+		shader->set_uniform_attributei("textureType", (int)TEXTURE_FILE);		
 	}
-	_turbulence_texture->activate();
-	shader->set_uniform_attributei("myTexture", NORMAL_TEXTURE_UNIT);
-	shader->set_uniform_attributei("turbulenceTexture", TURBULENCE_TEXTURE_UNIT);
+
+	// bump
+	if (bump_texture != nullptr)
+	{
+		bump_texture->activate();
+		shader->set_uniform_attributei("bumpTexture", BUMP_MAPPING_TEXTURE_UNIT);
+		shader->set_uniform_attributei("hasBumpTexture", 1);
+	}
+	else
+	{
+		shader->set_uniform_attributei("hasBumpTexture", 0);
+	}
 
 	shader->set_uniform_attributei("uvType", (int) model->get_uv_type());
-	shader->set_uniform_attributei("fillType", (int) model->get_fill_type()); // TODO: rename to shadingType?
+	shader->set_uniform_attributei("fillType", (int) model->get_fill_type());
 	shader->set_uniform_attributei("positionAnimationType", (int) model->get_position_animation());
 	shader->set_uniform_attributei("colorAnimationType", (int) model->get_color_animation());
 	shader->set_uniform_attribute("modelView", view * modelm);
@@ -144,7 +185,14 @@ void Renderer::draw_vao(Model* model, VAOType type, const shared_ptr<VAO>& vao)
 	// render and deal with toon shading
 	shader->set_uniform_attributei("toonShading", model->is_toon_shading_enabled());
 	shader->set_uniform_attributei("toonShadingStage2", 0);
-	glCullFace(GL_BACK);
+	if (model->is_skybox()) // skyboxes are drawn inside out
+	{
+		glCullFace(GL_FRONT);
+	}
+	else
+	{
+		glCullFace(GL_BACK);
+	}
 	vao->draw();
 
 	if (model->is_toon_shading_enabled())

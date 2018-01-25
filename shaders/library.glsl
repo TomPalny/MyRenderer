@@ -19,6 +19,9 @@ uniform int positionAnimationType;
 uniform int colorAnimationType;
 uniform bool toonShading;
 uniform bool toonShadingStage2;
+uniform bool hasBumpTexture;
+uniform sampler2D bumpTexture;
+uniform samplerCube cubemapTexture;
 
 uniform struct {
 	vec4 position;
@@ -34,10 +37,6 @@ uniform struct {
 	vec4 specular;
 	vec4 emissive;
 } material;
-
-uniform sampler2D myTexture;
-uniform sampler2D turbulenceTexture;
-uniform bool hasTexture;
 
 vec4 applyColorAnimation(vec4 color)
 {
@@ -63,12 +62,13 @@ vec4 applyToonShading(vec4 intensities, vec4 color)
 {
 	if (!toonShading)
 	{
-		return intensities * color;
+		// clamping probably unnecessary
+		return clamp(intensities * color, 0.0, 1.0);
 	}
 	return round(intensities * 3) / 3 * color;
 }
 
-void calculateLighting(in vec3 position, in vec3 normal, out vec4 color)
+void calculateLighting(in vec3 position, in vec3 normal, in vec3 tangent, in vec3 bitangent, in vec2 uv, out vec4 color)
 {
 	color = vec4(0,0,0,0);
 	for (int i=0; i<numLights; i++)
@@ -80,12 +80,26 @@ void calculateLighting(in vec3 position, in vec3 normal, out vec4 color)
 			L = normalize(lights[i].position.xyz);
 		}
 		vec3 V = normalize(-position);
+		vec3 test;
+		if (hasBumpTexture)
+		{
+			mat3 TBN = transpose(mat3(normalize(tangent), normalize(bitangent), normalize(normal)));
+			vec3 I = TBN * lights[i].position.xyz;
+			vec3 eye = TBN * (-position);
+			// TODO: deal with directional light
+			// TODO: TBN is wrong when using UV_PREDEFINED and fucks up V
+			vec3 L = normalize(I - eye);
+			V = normalize(TBN * -position);
+			N = normalize(texture(bumpTexture, uv).rgb * 2.0 - 1.0);
+			test = TBN * -position;
+		}
+		
 		vec3 R = normalize(2 * dot(L, N) * N - L);
 		float alpha = 5;
-		float diffuse_modifier = clamp(dot(L, N), 0.0, 1.0);
+		float diffuse_modifier = max(dot(L, N), 0.0);
 		
 		float specular_modifier=0;
-		if (dot(R,V) > 0)
+		if (dot(R,V) > 0) // according to wikipedia: add && diffuse_modifier > 0
 		{
 			specular_modifier = clamp(pow(dot(R,V), alpha), 0.0, 1.0);
 		}
@@ -99,14 +113,10 @@ void calculateLighting(in vec3 position, in vec3 normal, out vec4 color)
 		color += applyToonShading(lights[i].diffuse * diffuse_modifier, applyColorAnimation(material.diffuse));
 		color += applyToonShading(lights[i].specular * specular_modifier, applyColorAnimation(material.specular));
 		color += applyColorAnimation(material.emissive); // no toon shading for this...
+		color = vec4(N, 1);
+		//color = vec4(test, 1);
 	}
 	
 	color = clamp(color, vec4(0,0,0,0), vec4(1,1,1,1));
 	color = vec4(color.xyz, 1);
-}
-
-vec4 marble(vec4 color1, vec4 color2, float x)
-{
-	float frac = (sin(x) + 1) / 2.0;
-	return frac * color1 + (1-frac) * color2;
 }

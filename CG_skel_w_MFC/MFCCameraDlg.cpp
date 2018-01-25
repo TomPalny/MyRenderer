@@ -28,6 +28,7 @@ void MFCCameraDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT1, m_near);
 	DDX_Control(pDX, IDC_EDIT2, m_far);
 	DDX_Control(pDX, IDC_EDIT3, m_fovy);
+	DDX_Control(pDX, IDC_CHECK1, m_skybox_checkbox);
 }
 
 
@@ -41,6 +42,7 @@ BOOL MFCCameraDlg::OnInitDialog()
 	m_near.SetWindowText(std::to_string(_camera->get_nearz()).c_str());
 	m_far.SetWindowText(std::to_string(_camera->get_farz()).c_str());
 	m_fovy.SetWindowText(std::to_string(_camera->get_fovy()).c_str());
+	m_skybox_checkbox.SetCheck(_camera->should_show_skybox());
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 // MFCCameraDlg message handlers
@@ -55,5 +57,6 @@ void MFCCameraDlg::OnBnClickedOk()
 	_camera->set_farz(atof(buff));
 	m_fovy.GetWindowText(buff, sizeof(buff));
 	_camera->set_fovy(atof(buff));
+	_camera->set_show_skybox(m_skybox_checkbox.GetCheck());
 	CDialogEx::OnOK();
 }

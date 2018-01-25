@@ -10,7 +10,7 @@ public:
 	~LinesVAO();
 	void draw() override;
 
-	static VAOPtr create_bounding_box_vao(std::vector<Face>& faces);
+	static VAOPtr create_bounding_box_vao(std::vector<Face>& faces, float& approximate_scale);
 	static VAOPtr create_frustum_vao();
 	static VAOPtr create_star_vao();
 

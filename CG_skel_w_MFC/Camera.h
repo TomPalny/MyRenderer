@@ -10,8 +10,11 @@ class Camera : public Model
 	float _aspect_ratio;
 	float _nearz;
 	float _farz;
+	bool _show_skybox;
 
 public:
+	bool should_show_skybox() const;
+	void set_show_skybox(bool show_skybox);
 	Camera(int camera_id);
 	~Camera();
 

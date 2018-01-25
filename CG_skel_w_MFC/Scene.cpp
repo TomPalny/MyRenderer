@@ -50,9 +50,13 @@ Scene::Scene(Renderer* renderer) : _active_model(nullptr), _renderer(renderer), 
 	_active_camera = front;
 
 	auto light1 = new Light();
-	light1->perform_operation(Translate(2, 3, 0), WORLD_TRANSFORM);
+	light1->perform_operation(Translate(0, 3, 2), WORLD_TRANSFORM);
 	_models.push_back(light1);
 
+	_skybox_cube = new MeshModel("c:\\Projects\\technion\\graphics\\code\\models\\textured_cube.obj");
+	_skybox_cube->set_name("Skybox");
+	_skybox_cube->set_skybox(true);
+	_skybox_cube->perform_operation(Scale(100, 100, 100), MODEL_TRANSFORM);
 	glutTimerFunc(3000, timer_callback, 0);
 }
 
@@ -83,7 +87,7 @@ void Scene::show_settings_dialog()
 
 void Scene::show_model_dialog()
 {
-	MFCModelDlg dlg(_active_model);
+	MFCModelDlg dlg(_active_model, _renderer);
 	dlg.DoModal();
 }
 
@@ -127,9 +131,10 @@ void Scene::open_file()
 		if (!experimental::filesystem::exists(path))
 			return;
 
-		Model* model = new MeshModel(path); 
+		MeshModel* model = new MeshModel(path); 
+		model->perform_operation(Scale(4.0 / model->approximate_scale, 4.0 / model->approximate_scale, 4.0 / model->approximate_scale), MODEL_TRANSFORM);
 		load_model_at_center(model, static_cast<LPCTSTR>(dlg.GetFileTitle()));
-		
+		init_menu();
 	}
 }
 
@@ -138,8 +143,6 @@ void Scene::load_model_at_center(Model* model, const string name)
 	model->set_name(name);
 	_active_model = model;
 	_models.push_back(_active_model);
-	
-	init_menu();
 	redraw_necessary();
 }
 
@@ -214,6 +217,13 @@ void Scene::draw()
 		_renderer->draw(model);
 	}
 
+	if (_active_camera->should_show_skybox())
+	{
+		TexturePtr skybox_texture = _renderer->get_skybox_texture();
+		_skybox_cube->set_texture(skybox_texture);
+		_renderer->draw(_skybox_cube);
+
+	}
 	draw_status_string();
 	_renderer->swap_buffers();
 }
@@ -231,14 +241,24 @@ void Scene::keyboard(unsigned char key, int x, int y)
 	if (glutGetModifiers() & GLUT_ACTIVE_SHIFT)
 		direction = -1;
 	index += direction;
-	index = index % _models.size();
-	
+	if (index >= 0)
+	{
+		index = index % _models.size();
+	}	
+	else
+	{
+		index = index + _models.size();
+	}
 	switch (key) {
 	case 27: // escape
 		exit(EXIT_SUCCESS);
 		break;
 	case 32: // spacebar
 		_transform_mode = (TransformMode)((_transform_mode + 1) % NUMBER_OF_TRANSFORM_MODES);
+		break;
+	case '\t':
+		// switch between models
+		_active_model = _models[index];
 		break;
 	case '1':
 	case '2':
@@ -268,11 +288,6 @@ void Scene::keyboard(unsigned char key, int x, int y)
 		break;
 	case 't':
 		set_operation_mode(TRANSLATE_MODE);
-		break;
-
-	case '\t':
-		// switch between models
-		_active_model = _models[index];
 		break;
 	case '`':
 		_projection_type = (ProjectionType)((_projection_type + 1) % NUMBER_OF_PROJECTION_TYPES);

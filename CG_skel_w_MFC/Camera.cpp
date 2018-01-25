@@ -6,7 +6,7 @@
 #include "LinesVAO.h"
 #include "MeshVAO.h"
 
-Camera::Camera(int camera_id) : _nearz(0.9), _farz(40), _fovy(35)
+Camera::Camera(int camera_id) : _nearz(0.9), _farz(200), _fovy(35), _show_skybox(false)
 {
 	_origin_sign = '0' + camera_id;
 	_vaos[VAO_MESH] = LinesVAO::create_frustum_vao();
@@ -15,6 +15,16 @@ Camera::Camera(int camera_id) : _nearz(0.9), _farz(40), _fovy(35)
 
 Camera::~Camera()
 {
+}
+
+bool Camera::should_show_skybox() const
+{
+	return _show_skybox;
+}
+
+void Camera::set_show_skybox(bool show_skybox)
+{
+	_show_skybox = show_skybox;
 }
 
 float Camera::get_aspect_ratio() const

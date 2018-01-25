@@ -39,7 +39,7 @@ void LinesVAO::setup_for_shader()
 	_shader->set_vertex_attribute("vPosition", FOUR_COMPONENTS, ZERO_STRIDE, ZERO_OFFSET);
 }
 
-VAOPtr LinesVAO::create_bounding_box_vao(std::vector<Face>& faces)
+VAOPtr LinesVAO::create_bounding_box_vao(std::vector<Face>& faces, float& approximate_scale)
 {
 	// flatten faces to vector of points
 	std::vector<vec4> points;
@@ -86,6 +86,7 @@ VAOPtr LinesVAO::create_bounding_box_vao(std::vector<Face>& faces)
 	add_line(vec4(max_x, min_y, min_z, 1), vec4(max_x, min_y, max_z, 1));
 	add_line(vec4(max_x, max_y, min_z, 1), vec4(max_x, max_y, max_z, 1));
 
+	approximate_scale = max(max(max_x - min_x, max_y - min_y), max_z - min_z);
 	return VAOPtr(new LinesVAO(points));
 }
 

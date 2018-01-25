@@ -17,4 +17,5 @@ public:
 public:
 	MeshModel(string filename);
 	~MeshModel(void);
+	float approximate_scale;
 };

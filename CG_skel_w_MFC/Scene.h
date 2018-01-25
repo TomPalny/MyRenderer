@@ -23,6 +23,7 @@ class Scene {
 	OperationMode _operation_mode;
 	TransformMode _transform_mode;
 	ProjectionType _projection_type;
+	Model* _skybox_cube;
 
 	mat4 get_operation_for_keyboard(int key, int x, int y);
 	static int get_reverse_key(int key);

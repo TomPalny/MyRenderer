@@ -20,8 +20,11 @@ class Renderer
 	GLuint _shader_program;
 	float _animation_param;
 	TexturePtr _turbulence_texture;
+	TexturePtr _skybox_texture;
 
 public:
+	TexturePtr get_skybox_texture() const;
+	void set_skybox_texture(const TexturePtr& skybox_texture);
 	Renderer(int width, int height);
 	~Renderer(void);
 

@@ -10,7 +10,7 @@ class MFCModelDlg : public CDialogEx
 	DECLARE_DYNAMIC(MFCModelDlg)
 
 public:
-	MFCModelDlg(Model* model);   // standard constructor
+	MFCModelDlg(Model* model, Renderer* renderer);   // standard constructor
 	virtual ~MFCModelDlg();
 
 // Dialog Data
@@ -26,6 +26,7 @@ public:
 	afx_msg void OnLoadTextureClicked();
 	BOOL OnInitDialog() override;
 	Model* _model;
+	Renderer* _renderer;
 	CComboBox m_uv_combo;
 	CComboBox m_normals_combo;
 	CComboBox m_shading_combo;
@@ -43,4 +44,8 @@ public:
 	template<typename T>
 	void initialize_combo(CComboBox & combo, std::unordered_map<T, std::string> map, T current);
 	CButton m_toon_shading;
+	CButton m_marble_texture;
+	afx_msg void OnLoadBumpTextureClicked();
+	afx_msg void OnClearBumpTextureClicked();
+	CButton m_environment_mapping;
 };

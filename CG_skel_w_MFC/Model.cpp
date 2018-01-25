@@ -8,7 +8,7 @@
 Model::Model() : _origin_sign('+'), _material(Material::get_default()),
 	_normal_type(NO_NORMALS), _fill_type(FILL_PHONG), _bounding_box(false), _uv_type(UV_BOX),
 	_position_animation(POSITION_ANIMATION_DISABLED),_color_animation(COLOR_ANIMATION_DISABLED),
-	_toon_shading(false)
+	_toon_shading(false), _marble_texture(false), _skybox(false), _environment_mapping(false)
 {
 }
 
@@ -40,6 +40,46 @@ char Model::get_origin_sign()
 VAOMap& Model::get_vaos()
 {
 	return _vaos;
+}
+
+bool Model::is_environment_mapping() const
+{
+	return _environment_mapping;
+}
+
+void Model::set_environment_mapping(bool environment_mapping)
+{
+	_environment_mapping = environment_mapping;
+}
+
+bool Model::is_skybox() const
+{
+	return _skybox;
+}
+
+void Model::set_skybox(bool skybox)
+{
+	_skybox = skybox;
+}
+
+TexturePtr Model::get_bump_texture() const
+{
+	return _bump_texture;
+}
+
+void Model::set_bump_texture(const TexturePtr& bump_texture)
+{
+	_bump_texture = bump_texture;
+}
+
+bool Model::is_marble_texture_enabled() const
+{
+	return _marble_texture;
+}
+
+void Model::set_marble_texture(bool marble_texture)
+{
+	_marble_texture = marble_texture;
 }
 
 bool Model::is_toon_shading_enabled() const
